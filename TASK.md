@@ -47,7 +47,7 @@
   Critério de pronto: `supabase init` rodado; `supabase/migrations` e
   `supabase/seed.sql` existem (vazios); `supabase start` sobe localmente.
 
-- [ ] **0.7 — Definir e documentar paleta e tipografia**
+- [x] **0.7 — Definir e documentar paleta e tipografia**
   Critério de pronto: `tailwind.config` com tokens da paleta Tatame Red;
   fonte definida (Inter para texto + Outfit ou Space Grotesk para títulos)
   configurada via `next/font`; tema escuro como padrão com toggle

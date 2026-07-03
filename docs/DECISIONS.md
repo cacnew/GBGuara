@@ -54,6 +54,26 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
 - `project_id` em `supabase/config.toml` ajustado de `Gracie_Barra`
   (default a partir do nome da pasta) para `nexusdojo`.
 
+## Paleta, tipografia e tema (Fase 0.7)
+
+- Tokens de cor da paleta Tatame Red aplicados via CSS custom properties em
+  `app/globals.css` (Tailwind v4 é CSS-first, sem `tailwind.config.js`).
+  Convenção do shadcn/ui mantida: `:root` = tema claro, `.dark` = tema
+  escuro; o `<html>` já nasce com a classe `dark` (tema escuro é o padrão
+  do produto).
+- Toggle de tema em `components/layout/theme-toggle.tsx`: alterna a classe
+  `dark` no `<html>` e persiste a preferência em `localStorage`
+  (`nexusdojo-theme`). Um script inline no `<head>` (`app/layout.tsx`) lê
+  essa preferência antes da hidratação para evitar flash de tema errado.
+- Sem dependência nova para o toggle (não usamos `next-themes`) — a lógica
+  é simples o suficiente para não justificar mais uma lib nesta fase.
+- Tipografia: `Inter` (texto, `--font-sans`) e `Outfit` (títulos,
+  `--font-heading`), carregadas via `next/font/google`, substituindo as
+  fontes Geist do template padrão do `create-next-app`.
+- `app/page.tsx` e os SVGs de boilerplate do `create-next-app` foram
+  substituídos por uma página inicial mínima da marca (usada aqui também
+  para validar visualmente paleta/tipografia/toggle).
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
