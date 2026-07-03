@@ -15,9 +15,23 @@ export default async function AdminDashboardPage() {
           Olá, {profile?.name}. Conteúdo completo chega na Fase 7.
         </p>
       </div>
-      <Link href="/teachers/new" className={buttonVariants({ className: "w-fit" })}>
-        Cadastrar professor
-      </Link>
+      <div className="flex flex-wrap gap-3">
+        <Link href="/teachers/new" className={buttonVariants({ className: "w-fit" })}>
+          Cadastrar professor
+        </Link>
+        <Link
+          href="/modalities"
+          className={buttonVariants({ variant: "outline", className: "w-fit" })}
+        >
+          Modalidades
+        </Link>
+        <Link
+          href="/belts"
+          className={buttonVariants({ variant: "outline", className: "w-fit" })}
+        >
+          Faixas
+        </Link>
+      </div>
     </div>
   );
 }

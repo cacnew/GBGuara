@@ -205,6 +205,34 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   `/dashboard` (bounce), e o `school_id` gravado bate com o do admin que
   criou o login.
 
+## Modalidades e faixas (Fases 2.1 e 2.2)
+
+- Modalidades e faixas são configuráveis por escola (não enum), com seed
+  automático via trigger `AFTER INSERT ON schools` — mesmo padrão da
+  unidade default (Fase 1.2): toda escola nova já nasce com as 7
+  modalidades e as faixas de jiu-jitsu adulto/kids da seção 10 do
+  documento mestre.
+- **Trigger consolidado em vez de dois triggers dependentes**: o seed de
+  faixas depende do id da modalidade `jiu_jitsu` já existir. Como o
+  Postgres dispara múltiplos triggers `AFTER INSERT` na mesma tabela em
+  ordem alfabética pelo nome (não pela ordem de criação), dois triggers
+  separados (`..._create_default_modalities` e `..._create_default_belts`)
+  arriscariam disparar na ordem errada dependendo do nome escolhido. A
+  migration da Fase 2.2 substitui o trigger da Fase 2.1
+  (`drop trigger ... ; create or replace function ...`) por um único
+  trigger/função que cria modalidades e depois faixas, na ordem certa,
+  na mesma transação. Isso evita editar a migration antiga (imutável,
+  já commitada) e ainda resolve a dependência de forma robusta.
+- CRUD de modalidades faz "inativar" reaproveitando o próprio formulário
+  de edição (campo `status`), em vez de uma ação separada — evita uma
+  segunda tela só para isso.
+- Testado localmente via Docker ponta a ponta: seed automático confirmado
+  (7 modalidades, 2 sistemas de faixa com 7 e 5 faixas) e CRUD completo
+  exercitado com sessão real de admin (criar modalidade, editar e
+  inativar, criar sistema de faixa, criar faixa) — todas as páginas
+  retornando 200 para admin autenticado e redirecionando para `/login`
+  quando não autenticado.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

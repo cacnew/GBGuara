@@ -112,11 +112,11 @@
 > executadas via subagentes Ruflo em paralelo dentro de uma sessão, desde
 > que cada uma toque apenas seus próprios arquivos em `modules/<entidade>`.
 
-- [ ] **2.1 — Migration + CRUD de `modalities` (com seed default)**
+- [x] **2.1 — Migration + CRUD de `modalities` (com seed default)**
   Critério de pronto: CRUD completo (listar/criar/editar/inativar) em
   `(admin)`; seed com as 7 modalidades padrão da seção 10.8 aplicado.
 
-- [ ] **2.2 — Migration + CRUD de `belt_systems` e `belts` (com seeds jiu-jitsu adulto/kids)**
+- [x] **2.2 — Migration + CRUD de `belt_systems` e `belts` (com seeds jiu-jitsu adulto/kids)**
   Critério de pronto: CRUD de sistemas de faixa e faixas individuais;
   seeds de jiu-jitsu adulto e kids aplicados conforme seção 10.10.
 
