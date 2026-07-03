@@ -87,7 +87,7 @@
   `user` admin + `unit` default em uma transação; após sucesso, redireciona
   para login.
 
-- [ ] **1.6 — Tela de login e proteção de rotas `(admin)`/`(teacher)`**
+- [x] **1.6 — Tela de login e proteção de rotas `(admin)`/`(teacher)`**
   Critério de pronto: middleware/layout redireciona usuários não
   autenticados para login; usuário autenticado só acessa rotas do seu
   `role` (`admin` ou `teacher`).

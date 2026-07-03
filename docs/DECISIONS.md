@@ -140,6 +140,33 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   Fase 1.6 — até lá, o redirect aponta para uma rota que ainda não existe
   (esperado, será resolvido na próxima subtarefa).
 
+## Login e proteção de rotas por role (Fase 1.6)
+
+- **Proteção por layout, não por `proxy.ts`**: `app/(admin)` e
+  `app/(teacher)` são route groups — invisíveis na URL. O `proxy.ts` não
+  tem como saber, só pelo `pathname`, a qual grupo uma rota pertence.
+  Então a checagem de "está autenticado" + "tem o role certo" vive nos
+  Server Components `app/(admin)/layout.tsx` e `app/(teacher)/layout.tsx`,
+  via `modules/users/queries.ts#getCurrentUserProfile()`. O `proxy.ts`
+  continua só renovando a sessão (Fase 1.4).
+- Não autenticado → redirect para `/login`. Autenticado mas com o role
+  errado para aquele grupo → bounce para a área correta (`/dashboard`
+  ↔ `/professor`), em vez de deslogar ou mostrar erro.
+- **Nomes de rota escolhidos para não colidir**: como route groups são
+  transparentes na URL, `(admin)/dashboard` e `(teacher)/professor` não
+  podem ter o mesmo nome de pasta interna (ex: os dois se chamando
+  `dashboard`) — o Next.js rejeitaria por rota duplicada. Escolhido
+  `/dashboard` para admin e `/professor` para professor como placeholders;
+  a Fase 7 pode renomear se fizer sentido, é só um rename de pasta.
+- `modules/users/queries.ts` criado agora (não em `lib/permissions`, que é
+  a Fase 1.7) só com o necessário para os layouts funcionarem; a Fase 1.7
+  generaliza isso num helper de permissões mais completo.
+- Testado localmente via Docker com dois usuários reais (admin e
+  professor, mesma escola): cada um só acessa a própria área, e tentar a
+  área errada faz bounce para a área certa em vez de erro. Acesso não
+  autenticado a `/dashboard` e `/professor` confirmado redirecionando
+  para `/login`.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
