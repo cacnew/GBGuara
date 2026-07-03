@@ -53,7 +53,7 @@
   configurada via `next/font`; tema escuro como padrão com toggle
   claro/escuro funcional em uma página de teste.
 
-- [ ] **0.8 — Criar `docs/PROJECT.md`, `docs/FINANCEIRO.md`, `docs/ROADMAP.md`, `docs/DECISIONS.md`**
+- [x] **0.8 — Criar `docs/PROJECT.md`, `docs/FINANCEIRO.md`, `docs/ROADMAP.md`, `docs/DECISIONS.md`**
   Critério de pronto: arquivos criados com conteúdo inicial resumindo,
   respectivamente: visão geral do produto, regras financeiras (seção 11 do
   doc mestre), este roadmap por fases, e decisões técnicas já tomadas
