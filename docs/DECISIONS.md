@@ -30,6 +30,19 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   client-side data fetching/cache mais adiante.
 - **date-fns**: manipulação de datas (vencimentos, presenças, graduações).
 
+## Estrutura de pastas (Fase 0.4)
+
+- Estrutura criada conforme seção 7 do `NEXUSDOJO_PROJECT.md`, com uma
+  exceção: `lib/utils.ts` (arquivo, criado pelo `shadcn/ui` com o helper
+  `cn()`) foi mantido como arquivo em vez de virar pasta `lib/utils/`,
+  porque o `components.json` do shadcn já aponta o alias `@/lib/utils`
+  para esse arquivo. Criar uma pasta com o mesmo nome quebraria essa
+  convenção sem necessidade real no momento.
+- Pastas de módulos futuros (`lib/permissions`, `lib/dates`, `lib/money`,
+  `modules/*`, `app/(auth|admin|teacher|public)`, `app/api`) criadas vazias
+  com `.gitkeep`, para serem preenchidas nas fases correspondentes do
+  `TASK.md`.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

@@ -33,7 +33,7 @@
   Critério de pronto: `react-hook-form`, `zod`, `@tanstack/react-query`,
   `date-fns` instalados; um formulário de teste trivial valida com Zod.
 
-- [ ] **0.4 — Criar estrutura de pastas proposta**
+- [x] **0.4 — Criar estrutura de pastas proposta**
   Critério de pronto: pastas `app/(auth)`, `app/(admin)`, `app/(teacher)`,
   `app/(public)`, `components/`, `lib/`, `modules/`, `supabase/`, `docs/`,
   `scripts/` criadas conforme seção 7 do `NEXUSDOJO_PROJECT.md`, com
