@@ -92,7 +92,7 @@
   autenticados para login; usuário autenticado só acessa rotas do seu
   `role` (`admin` ou `teacher`).
 
-- [ ] **1.7 — `lib/permissions`: helper central de checagem de role/school_id**
+- [x] **1.7 — `lib/permissions`: helper central de checagem de role/school_id**
   Critério de pronto: função utilitária usada por server actions/rotas para
   validar `role` e `school_id` do usuário logado antes de qualquer operação
   sensível; usada no fluxo de login como prova de conceito.

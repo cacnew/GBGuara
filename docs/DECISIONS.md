@@ -167,6 +167,21 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   autenticado a `/dashboard` e `/professor` confirmado redirecionando
   para `/login`.
 
+## Helper central de permissões (Fase 1.7)
+
+- `lib/permissions/index.ts`: `requireUser()` (exige autenticação),
+  `requireRole(role)` (exige autenticação + role específico, com bounce
+  para a área correta em caso de role errado) e `requireSameSchool(schoolId)`
+  (defesa em profundidade — falha rápido na aplicação antes mesmo de a RLS
+  do banco bloquear, para operações sensíveis que recebem um `school_id`
+  de fora, ex: formulário).
+- Os layouts `app/(admin)/layout.tsx` e `app/(teacher)/layout.tsx` (Fase
+  1.6) foram refatorados para usar `requireRole()` em vez da checagem
+  ad-hoc que tinham antes — mesmo comportamento, agora centralizado.
+- Reconfirmado localmente via Docker que o refactor não mudou o
+  comportamento observável (admin/professor, bounce por role, redirect de
+  não autenticado).
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
