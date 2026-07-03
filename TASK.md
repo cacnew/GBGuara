@@ -72,7 +72,7 @@
   Critério de pronto: ao inserir uma `school`, uma `unit` default é criada
   automaticamente (trigger ou função Postgres); testado manualmente via SQL.
 
-- [ ] **1.3 — Migration: tabela `users` (perfil de aplicação)**
+- [x] **1.3 — Migration: tabela `users` (perfil de aplicação)**
   Critério de pronto: tabela `users` criada vinculada a `auth.users` via
   `auth_user_id`; RLS garante que um usuário só enxerga registros do próprio
   `school_id`.

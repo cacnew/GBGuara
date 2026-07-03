@@ -74,6 +74,26 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   substituídos por uma página inicial mínima da marca (usada aqui também
   para validar visualmente paleta/tipografia/toggle).
 
+## Padrão de RLS multi-tenant (Fase 1.3)
+
+- Função `public.current_school_id()` (SECURITY DEFINER, STABLE) resolve o
+  `school_id` do usuário autenticado a partir de `public.users`, evitando
+  recursão de RLS quando a própria tabela `users` referencia a si mesma em
+  uma policy — padrão oficial recomendado pela documentação da Supabase.
+  Todas as tabelas com `school_id` devem usar essa função nas suas policies
+  em vez de reescrever a subquery toda vez.
+- **RLS sozinha não basta**: além de `ENABLE ROW LEVEL SECURITY` + policy,
+  é preciso `GRANT` explícito de tabela para o papel `authenticated` (o
+  Postgres nega por privilégio antes mesmo de avaliar as policies). O papel
+  `anon` não recebe grant em nenhuma tabela de dados da escola — descoberto
+  na prática ao testar via REST com um JWT real (retornava "permission
+  denied" mesmo com a policy correta até o grant ser adicionado).
+- Testado localmente ponta a ponta: criado usuário via Admin API do GoTrue
+  (`/auth/v1/admin/users`), logado via `/auth/v1/token?grant_type=password`
+  e consultado `schools`/`units`/`users` via REST com o JWT real — usuário
+  da "Escola A" só enxergou dados da própria escola, nunca os de uma
+  "Escola B" criada só para o teste negativo.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
