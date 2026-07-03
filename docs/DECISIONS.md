@@ -18,6 +18,18 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
 - **recharts**: biblioteca de gráficos para os dashboards (Fase 7) —
   recomendada no documento mestre, boa integração com React/Tailwind.
 
+## Libs de dados/formulário (Fase 0.3)
+
+- **react-hook-form + zod**: conforme documento mestre. Formulários
+  controlados com validação declarativa.
+- **@hookform/resolvers**: não estava listado explicitamente no documento
+  mestre, mas é a ponte oficial entre `react-hook-form` e `zod`
+  (`zodResolver`) — sem ele não dá para usar as duas libs juntas.
+- **@tanstack/react-query**: `QueryProvider` (`lib/providers/query-provider.tsx`)
+  já plugado no `app/layout.tsx` para os módulos que precisarem de
+  client-side data fetching/cache mais adiante.
+- **date-fns**: manipulação de datas (vencimentos, presenças, graduações).
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

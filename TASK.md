@@ -29,7 +29,7 @@
   `recharts` instalados e listados no `package.json` com justificativa em
   `docs/DECISIONS.md`.
 
-- [ ] **0.3 — Configurar libs de dados/formulário**
+- [x] **0.3 — Configurar libs de dados/formulário**
   Critério de pronto: `react-hook-form`, `zod`, `@tanstack/react-query`,
   `date-fns` instalados; um formulário de teste trivial valida com Zod.
 
