@@ -112,6 +112,34 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   `supabase.auth.signInWithPassword` a partir de uma Route Handler
   temporária usando `lib/supabase/server.ts` (removida após confirmar).
 
+## Onboarding: escola + admin (Fase 1.5)
+
+- `lib/supabase/admin.ts`: client separado com a `service_role` key
+  (bypassa RLS), usado só em código server-side privilegiado — nunca
+  exposto ao browser. Necessário porque o onboarding cria o primeiro
+  usuário de uma escola nova, quando ainda não existe ninguém autenticado
+  para satisfazer as policies normais de `users`/`schools`.
+- Duas etapas não podem estar na mesma transação Postgres porque uma delas
+  não é uma operação de banco: (1) criar o usuário no `auth.users` via
+  Admin API do GoTrue (`admin.auth.admin.createUser`), depois (2) criar
+  `schools` + `users` via a função `public.create_school_with_admin`
+  (transação real no Postgres). Se (2) falhar, a Server Action apaga o
+  `auth.users` criado em (1) para não deixar conta órfã sem perfil.
+- Formulário em `app/(public)/onboarding/page.tsx` (RHF + Zod, reaproveitando
+  o padrão já validado na Fase 0.3) chama a Server Action
+  `app/(public)/onboarding/actions.ts#onboardSchool` diretamente (sem
+  `<form action>` nativo), o que permite mostrar toast de erro/sucesso e
+  navegar via `router.push` no client.
+- `<Toaster />` do `sonner` plugado no layout raiz (estava instalado desde
+  a Fase 0.2, mas nunca tinha sido usado até agora).
+- Testado localmente ponta a ponta via Docker (rota temporária removida
+  depois): escola + unidade default + admin criados corretamente numa
+  chamada; e-mail duplicado retorna erro tratado sem tentar gravar nada no
+  banco.
+- O redirecionamento pós-sucesso vai para `/login`, que só é criada na
+  Fase 1.6 — até lá, o redirect aponta para uma rota que ainda não existe
+  (esperado, será resolvido na próxima subtarefa).
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

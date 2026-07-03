@@ -82,7 +82,7 @@
   configurados (SSR-safe, cookies); login por e-mail/senha funcional em
   ambiente local.
 
-- [ ] **1.5 — Fluxo de cadastro de escola + admin (onboarding inicial)**
+- [x] **1.5 — Fluxo de cadastro de escola + admin (onboarding inicial)**
   Critério de pronto: uma tela `(public)` permite criar `school` + primeiro
   `user` admin + `unit` default em uma transação; após sucesso, redireciona
   para login.

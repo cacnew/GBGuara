@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
+import { Toaster } from "sonner";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import "./globals.css";
 
@@ -45,6 +46,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col font-sans">
         <QueryProvider>{children}</QueryProvider>
+        <Toaster richColors theme="dark" />
       </body>
     </html>
   );
