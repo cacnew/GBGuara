@@ -24,7 +24,7 @@
   Critério de pronto: `npx create-next-app` rodado com App Router + TypeScript +
   Tailwind; projeto builda e sobe localmente (`npm run dev`) sem erros.
 
-- [ ] **0.2 — Configurar shadcn/ui e dependências de UI**
+- [x] **0.2 — Configurar shadcn/ui e dependências de UI**
   Critério de pronto: shadcn/ui inicializado; `lucide-react`, `sonner`,
   `recharts` instalados e listados no `package.json` com justificativa em
   `docs/DECISIONS.md`.
