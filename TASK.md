@@ -77,7 +77,7 @@
   `auth_user_id`; RLS garante que um usuário só enxerga registros do próprio
   `school_id`.
 
-- [ ] **1.4 — Configurar Supabase Auth (client + server helpers)**
+- [x] **1.4 — Configurar Supabase Auth (client + server helpers)**
   Critério de pronto: `lib/supabase/client.ts` e `lib/supabase/server.ts`
   configurados (SSR-safe, cookies); login por e-mail/senha funcional em
   ambiente local.

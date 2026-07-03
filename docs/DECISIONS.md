@@ -94,6 +94,24 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   da "Escola A" só enxergou dados da própria escola, nunca os de uma
   "Escola B" criada só para o teste negativo.
 
+## Supabase Auth: client/server helpers (Fase 1.4)
+
+- `@supabase/ssr` + `@supabase/supabase-js` instalados. `lib/supabase/client.ts`
+  (browser) e `lib/supabase/server.ts` (Server Components/Actions, via
+  `next/headers`) seguem o padrão oficial de SSR da Supabase.
+- `proxy.ts` na raiz (não `middleware.ts`) chama
+  `lib/supabase/middleware.ts#updateSession` para renovar o token de sessão
+  a cada request. O Next.js 16 deprecou a convenção `middleware.ts` em
+  favor de `proxy.ts` (mesma API, arquivo/nome de função diferentes) — o
+  próprio build avisou isso; migramos imediatamente para não carregar uma
+  convenção já deprecada desde o início do projeto. A checagem de rota
+  protegida (redirecionar não autenticado para `/login`) fica para a Fase
+  1.6 — por enquanto o proxy só renova sessão.
+- Login por e-mail/senha validado localmente de ponta a ponta: usuário
+  criado via Admin API do GoTrue, chamada real a
+  `supabase.auth.signInWithPassword` a partir de uma Route Handler
+  temporária usando `lib/supabase/server.ts` (removida após confirmar).
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
