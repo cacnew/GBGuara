@@ -68,7 +68,7 @@
   na tabela; policy mínima de leitura/escrita por `school_id` documentada
   (mesmo que ainda não haja `users` para testar de ponta a ponta).
 
-- [ ] **1.2 — Migration: tabela `units` + seed de unidade default via trigger/função**
+- [x] **1.2 — Migration: tabela `units` + seed de unidade default via trigger/função**
   Critério de pronto: ao inserir uma `school`, uma `unit` default é criada
   automaticamente (trigger ou função Postgres); testado manualmente via SQL.
 
