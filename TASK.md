@@ -39,7 +39,7 @@
   `scripts/` criadas conforme seção 7 do `NEXUSDOJO_PROJECT.md`, com
   `.gitkeep` onde necessário.
 
-- [ ] **0.5 — Criar `.env.example` e configurar variáveis de ambiente**
+- [x] **0.5 — Criar `.env.example` e configurar variáveis de ambiente**
   Critério de pronto: `.env.example` com todas as variáveis da seção 6 do
   documento mestre, sem valores reais; `.env.local` no `.gitignore`.
 
