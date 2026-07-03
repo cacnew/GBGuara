@@ -97,7 +97,7 @@
   validar `role` e `school_id` do usuário logado antes de qualquer operação
   sensível; usada no fluxo de login como prova de conceito.
 
-- [ ] **1.8 — Cadastro de professores (fluxo admin cria login de teacher)**
+- [x] **1.8 — Cadastro de professores (fluxo admin cria login de teacher)**
   Critério de pronto: admin consegue criar um `teacher` vinculado a um
   `user` com `role = teacher`; teacher consegue logar e ver um dashboard
   vazio placeholder.

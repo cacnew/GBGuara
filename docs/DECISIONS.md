@@ -182,6 +182,29 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   comportamento observável (admin/professor, bounce por role, redirect de
   não autenticado).
 
+## Cadastro de professores: login, não ficha completa (Fase 1.8)
+
+- Fase 1.8 cria só o **login** do professor (`auth.users` + `public.users`
+  com `role = 'teacher'`), em `app/(admin)/teachers/new/`. A ficha completa
+  do professor (tabela `teachers`, foto, telefone) é a Fase 2.5 — ainda não
+  existe. `requireRole("admin")` (Fase 1.7) garante que só um admin chega
+  na Server Action, e o `school_id` do novo professor vem do próprio
+  `adminProfile.schoolId`, nunca de um campo do formulário.
+- **`service_role` também precisa de GRANT de tabela**, mesma lição da
+  Fase 1.3 com `authenticated`: RLS bypassada ≠ privilégio de tabela.
+  Descoberto ao tentar `admin.from("users").insert(...)` diretamente (em
+  vez de via função SECURITY DEFINER, como no onboarding da Fase 1.5) e
+  levar "permission denied". Corrigido com uma migration que dá `GRANT ALL`
+  em `schools`/`units`/`users` para `service_role`, mais um
+  `ALTER DEFAULT PRIVILEGES` para que toda tabela nova já nasça com esse
+  grant — diferente de `authenticated`, que continua exigindo grant
+  explícito tabela a tabela de propósito (força pensar em RLS a cada
+  tabela nova).
+- Testado localmente via Docker ponta a ponta: admin autenticado cria o
+  professor, professor loga e acessa `/professor` (200), é barrado de
+  `/dashboard` (bounce), e o `school_id` gravado bate com o do admin que
+  criou o login.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
