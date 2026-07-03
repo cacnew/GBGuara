@@ -43,6 +43,17 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   com `.gitkeep`, para serem preenchidas nas fases correspondentes do
   `TASK.md`.
 
+## Supabase CLI (Fase 0.6)
+
+- Instalado como devDependency local (`npm install --save-dev supabase`),
+  não globalmente — é a forma oficialmente suportada pela Supabase para
+  Windows/npm. Uso via `npx supabase <comando>`.
+- `supabase init` + `supabase start` validados localmente via Docker
+  (Studio em `http://127.0.0.1:54323`); serviços parados após o teste
+  (`supabase stop`) para não deixar containers rodando sem necessidade.
+- `project_id` em `supabase/config.toml` ajustado de `Gracie_Barra`
+  (default a partir do nome da pasta) para `nexusdojo`.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

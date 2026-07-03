@@ -1,0 +1,3 @@
+-- Seeds de demonstração do NexusDojo.
+-- Populado incrementalmente conforme as migrations forem criadas
+-- (ver Fase 7.5 do TASK.md para o seed completo de demonstração).

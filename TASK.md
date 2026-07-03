@@ -43,7 +43,7 @@
   Critério de pronto: `.env.example` com todas as variáveis da seção 6 do
   documento mestre, sem valores reais; `.env.local` no `.gitignore`.
 
-- [ ] **0.6 — Inicializar projeto Supabase local**
+- [x] **0.6 — Inicializar projeto Supabase local**
   Critério de pronto: `supabase init` rodado; `supabase/migrations` e
   `supabase/seed.sql` existem (vazios); `supabase start` sobe localmente.
 
