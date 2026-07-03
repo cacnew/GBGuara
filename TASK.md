@@ -1,0 +1,385 @@
+# TASK.md — NexusDojo
+
+> Fonte única da verdade do progresso do projeto. Ver protocolo completo de
+> sincronização, ciclo de execução e parada por limite de contexto em `CLAUDE.md`.
+>
+> Ordem lógica de dependência — não pule subtarefas. Marque `[x]` apenas após
+> commit + push correspondente.
+
+**Decisões já travadas para este planejamento** (não reabrir sem motivo forte):
+- Migrations em SQL puro via Supabase CLI (`supabase/migrations`), sem ORM.
+- Paleta visual base: **Opção 1 — Tatame Red** (`#0B0B0F`, `#18181B`, `#27272A`, `#F4F4F5`, `#C8102E`).
+- Fila única de subtarefas — sem dono fixo por subtarefa; cada dev pega a
+  próxima `[ ]` pendente ao iniciar sessão (protocolo do `CLAUDE.md`).
+- Anotações `> PARALELIZÁVEL` marcam blocos de subtarefas sem dependência
+  entre si — podem ser feitas por dev/agente diferentes, ou via
+  Ruflo/Claude-Flow (`swarm_init` + `agent_spawn`) dentro de uma mesma sessão,
+  quando fizer sentido. Não é obrigatório usar Ruflo — é só onde há ganho real.
+
+---
+
+## Fase 0 — Planejamento e Setup
+
+- [ ] **0.1 — Criar projeto Next.js base**
+  Critério de pronto: `npx create-next-app` rodado com App Router + TypeScript +
+  Tailwind; projeto builda e sobe localmente (`npm run dev`) sem erros.
+
+- [ ] **0.2 — Configurar shadcn/ui e dependências de UI**
+  Critério de pronto: shadcn/ui inicializado; `lucide-react`, `sonner`,
+  `recharts` instalados e listados no `package.json` com justificativa em
+  `docs/DECISIONS.md`.
+
+- [ ] **0.3 — Configurar libs de dados/formulário**
+  Critério de pronto: `react-hook-form`, `zod`, `@tanstack/react-query`,
+  `date-fns` instalados; um formulário de teste trivial valida com Zod.
+
+- [ ] **0.4 — Criar estrutura de pastas proposta**
+  Critério de pronto: pastas `app/(auth)`, `app/(admin)`, `app/(teacher)`,
+  `app/(public)`, `components/`, `lib/`, `modules/`, `supabase/`, `docs/`,
+  `scripts/` criadas conforme seção 7 do `NEXUSDOJO_PROJECT.md`, com
+  `.gitkeep` onde necessário.
+
+- [ ] **0.5 — Criar `.env.example` e configurar variáveis de ambiente**
+  Critério de pronto: `.env.example` com todas as variáveis da seção 6 do
+  documento mestre, sem valores reais; `.env.local` no `.gitignore`.
+
+- [ ] **0.6 — Inicializar projeto Supabase local**
+  Critério de pronto: `supabase init` rodado; `supabase/migrations` e
+  `supabase/seed.sql` existem (vazios); `supabase start` sobe localmente.
+
+- [ ] **0.7 — Definir e documentar paleta e tipografia**
+  Critério de pronto: `tailwind.config` com tokens da paleta Tatame Red;
+  fonte definida (Inter para texto + Outfit ou Space Grotesk para títulos)
+  configurada via `next/font`; tema escuro como padrão com toggle
+  claro/escuro funcional em uma página de teste.
+
+- [ ] **0.8 — Criar `docs/PROJECT.md`, `docs/FINANCEIRO.md`, `docs/ROADMAP.md`, `docs/DECISIONS.md`**
+  Critério de pronto: arquivos criados com conteúdo inicial resumindo,
+  respectivamente: visão geral do produto, regras financeiras (seção 11 do
+  doc mestre), este roadmap por fases, e decisões técnicas já tomadas
+  (schema SQL puro, paleta, stack).
+
+---
+
+## Fase 1 — Base e Autenticação
+
+- [ ] **1.1 — Migration: tabela `schools` + RLS básica**
+  Critério de pronto: migration criada e aplicada localmente; RLS habilitada
+  na tabela; policy mínima de leitura/escrita por `school_id` documentada
+  (mesmo que ainda não haja `users` para testar de ponta a ponta).
+
+- [ ] **1.2 — Migration: tabela `units` + seed de unidade default via trigger/função**
+  Critério de pronto: ao inserir uma `school`, uma `unit` default é criada
+  automaticamente (trigger ou função Postgres); testado manualmente via SQL.
+
+- [ ] **1.3 — Migration: tabela `users` (perfil de aplicação)**
+  Critério de pronto: tabela `users` criada vinculada a `auth.users` via
+  `auth_user_id`; RLS garante que um usuário só enxerga registros do próprio
+  `school_id`.
+
+- [ ] **1.4 — Configurar Supabase Auth (client + server helpers)**
+  Critério de pronto: `lib/supabase/client.ts` e `lib/supabase/server.ts`
+  configurados (SSR-safe, cookies); login por e-mail/senha funcional em
+  ambiente local.
+
+- [ ] **1.5 — Fluxo de cadastro de escola + admin (onboarding inicial)**
+  Critério de pronto: uma tela `(public)` permite criar `school` + primeiro
+  `user` admin + `unit` default em uma transação; após sucesso, redireciona
+  para login.
+
+- [ ] **1.6 — Tela de login e proteção de rotas `(admin)`/`(teacher)`**
+  Critério de pronto: middleware/layout redireciona usuários não
+  autenticados para login; usuário autenticado só acessa rotas do seu
+  `role` (`admin` ou `teacher`).
+
+- [ ] **1.7 — `lib/permissions`: helper central de checagem de role/school_id**
+  Critério de pronto: função utilitária usada por server actions/rotas para
+  validar `role` e `school_id` do usuário logado antes de qualquer operação
+  sensível; usada no fluxo de login como prova de conceito.
+
+- [ ] **1.8 — Cadastro de professores (fluxo admin cria login de teacher)**
+  Critério de pronto: admin consegue criar um `teacher` vinculado a um
+  `user` com `role = teacher`; teacher consegue logar e ver um dashboard
+  vazio placeholder.
+
+---
+
+## Fase 2 — Cadastros base
+
+> **PARALELIZÁVEL**: as subtarefas 2.1–2.5 (Modalidades, Faixas, Alunos,
+> Responsáveis, Professores — CRUD completo) dependem apenas da Fase 1
+> pronta, não umas das outras. Podem ser distribuídas entre os dois devs ou
+> executadas via subagentes Ruflo em paralelo dentro de uma sessão, desde
+> que cada uma toque apenas seus próprios arquivos em `modules/<entidade>`.
+
+- [ ] **2.1 — Migration + CRUD de `modalities` (com seed default)**
+  Critério de pronto: CRUD completo (listar/criar/editar/inativar) em
+  `(admin)`; seed com as 7 modalidades padrão da seção 10.8 aplicado.
+
+- [ ] **2.2 — Migration + CRUD de `belt_systems` e `belts` (com seeds jiu-jitsu adulto/kids)**
+  Critério de pronto: CRUD de sistemas de faixa e faixas individuais;
+  seeds de jiu-jitsu adulto e kids aplicados conforme seção 10.10.
+
+- [ ] **2.3 — Migration + CRUD completo de `students`**
+  Critério de pronto: cadastro, edição, listagem com busca por nome/status,
+  e inativação de aluno; campos obrigatórios validados com Zod
+  (nome, data de nascimento; demais opcionais conforme seção 10.4).
+
+- [ ] **2.4 — Migration + CRUD de `guardians` e `student_guardians`**
+  Critério de pronto: possível vincular um ou mais responsáveis a um aluno,
+  marcando responsável principal e responsável financeiro, a partir da
+  ficha do aluno.
+
+- [ ] **2.5 — Migration + CRUD completo de `teachers` (ficha detalhada)**
+  Critério de pronto: CRUD completo de professores incluindo foto (campo
+  `photo_url`, sem upload real ainda — só URL manual); tela de ficha do
+  professor.
+
+- [ ] **2.6 — Migration: `teacher_graduations`**
+  Critério de pronto: tabela criada com RLS; possível registrar graduação
+  de um professor a partir da ficha dele (sem tela dedicada de histórico
+  ainda, apenas inserir/listar).
+
+---
+
+## Fase 3 — Turmas e sessões
+
+- [ ] **3.1 — Migration + CRUD de `class_groups` (turmas/horários)**
+  Critério de pronto: admin cria turma com modalidade, professor principal,
+  dias da semana, horário início/fim, `suggested_audience` (apenas
+  informativo, sem bloqueio); listagem e edição funcionais.
+
+- [ ] **3.2 — Migration de `class_sessions` + geração de "turmas do dia"**
+  Critério de pronto: dado o `week_days`/horário de cada `class_group`,
+  uma query/view retorna as turmas previstas para hoje; abrir uma sessão
+  cria (ou reaproveita) o registro em `class_sessions` para a data atual.
+
+- [ ] **3.3 — Tela "Turmas do dia" (admin e professor)**
+  Critério de pronto: lista as turmas do dia corrente com horário, professor
+  e modalidade; botão para abrir/entrar na chamada de cada uma.
+
+- [ ] **3.4 — Ação de abrir/cancelar sessão de aula avulsa ("extra")**
+  Critério de pronto: possível criar uma `class_session` com status `extra`
+  fora da grade fixa (ex: Open Mat) e cancelar uma sessão futura já aberta.
+
+---
+
+## Fase 4 — Frequência
+
+- [ ] **4.1 — Migration de `attendances` com constraint `UNIQUE(class_session_id, student_id)`**
+  Critério de pronto: migration aplicada; teste manual confirma que inserir
+  presença duplicada na mesma sessão é rejeitado pelo banco.
+
+- [ ] **4.2 — Busca rápida de aluno ativo (componente reutilizável)**
+  Critério de pronto: componente de busca por nome, com foto (se houver) e
+  faixa/grau visíveis, filtrando apenas alunos `ativo` da escola; usado
+  depois na tela de chamada.
+
+- [ ] **4.3 — Tela de chamada mobile-first (registrar presença)**
+  Critério de pronto: dentro de uma `class_session`, professor busca aluno e
+  marca presente em um clique; qualquer aluno ativo da escola pode ser
+  adicionado, mesmo sem vínculo prévio com a turma; layout otimizado para uso
+  com uma mão no celular (botões grandes, sem poluição visual).
+
+- [ ] **4.4 — Lista de presentes da sessão + remoção de presença incorreta**
+  Critério de pronto: dentro da tela de chamada, lista de quem já foi
+  marcado presente na sessão, com opção de desfazer (remover) um registro
+  indevido antes de fechar a chamada.
+
+- [ ] **4.5 — Histórico de presença por aluno**
+  Critério de pronto: aba/seção na ficha do aluno lista suas presenças
+  (data, turma, professor que registrou), permitindo múltiplas presenças no
+  mesmo dia em turmas diferentes.
+
+---
+
+## Fase 5 — Financeiro núcleo
+
+> **PARALELIZÁVEL** apenas dentro do bloco de cadastro-base (5.1–5.3, tabelas
+> e planos) — elas não dependem umas das outras além da ordem de criação de
+> schema. As subtarefas de contrato/parcela (5.4 em diante) são sequenciais e
+> dependem de 5.1–5.3 estarem prontos.
+
+- [ ] **5.1 — Migration + CRUD de `price_tables`**
+  Critério de pronto: admin cria/edita tabela de preços com vigência
+  (`valid_from`/`valid_until`) e status (`active`/`inactive`/`legacy`).
+
+- [ ] **5.2 — Migration + CRUD de `plans` (vinculados a uma price_table)**
+  Critério de pronto: dentro de uma tabela de preços, criar planos com
+  duração, preço base, parcelamento sugerido; listagem mostra alunos/
+  contratos vinculados (placeholder até Fase 5.4 existir).
+
+- [ ] **5.3 — Migration de `financial_accounts` (com seed mínimo: caixa/pix/banco)**
+  Critério de pronto: tabela criada com RLS; seed de contas padrão aplicado
+  no `seed.sql`.
+
+- [ ] **5.4 — Migration de `contracts` + `contract_students`**
+  Critério de pronto: schema aplicado com RLS; regra de "apenas um contrato
+  ativo por aluno" documentada (validação de aplicação virá em 5.6).
+
+- [ ] **5.5 — Migration de `contract_installments` + função de geração automática de parcelas**
+  Critério de pronto: dada uma criação de contrato (preço final, nº de
+  parcelas, primeiro vencimento), uma função/trigger gera as parcelas
+  corretamente, ajustando arredondamento na última parcela; testado com
+  1x, 3x e 12x.
+
+- [ ] **5.6 — Fluxo "Associar plano ao aluno" (criação de contrato completo)**
+  Critério de pronto: formulário na ficha do aluno percorre tabela → plano →
+  datas → desconto → valor final → parcelamento → responsável financeiro →
+  confirmação; ao salvar, cria `contract` + `contract_students` +
+  `contract_installments` em uma transação; se já existir contrato ativo,
+  pergunta se deve encerrar o anterior antes de prosseguir.
+
+- [ ] **5.7 — Migration de `financial_movements`**
+  Critério de pronto: tabela criada; ao registrar pagamento de parcela
+  (5.8), um `financial_movement` do tipo `income` é criado automaticamente.
+
+- [ ] **5.8 — Ação "Registrar pagamento" de parcela (total e parcial)**
+  Critério de pronto: marcar parcela como paga exige data de pagamento e
+  forma de pagamento; pagamento parcial atualiza `paid_amount` e
+  `remaining_amount` e mantém status `partially_paid`; parcela paga não pode
+  ser excluída.
+
+- [ ] **5.9 — Ação "Cancelar parcela futura" e "Estornar pagamento"**
+  Critério de pronto: cancelar uma parcela pendente futura muda seu status
+  sem apagar histórico; estorno cria um `financial_movement` do tipo
+  `refund` sem apagar o registro original.
+
+- [ ] **5.10 — Migration de `student_financial_exemptions`**
+  Critério de pronto: tabela criada; aluno com isenção ativa não aparece
+  como inadimplente mesmo com parcela vencida.
+
+- [ ] **5.11 — Job/rotina de identificação de inadimplência**
+  Critério de pronto: query (view ou função) que classifica aluno como
+  `overdue` quando há parcela vencida e não paga, respeitando isenções
+  ativas; usada nas telas 5.13 e no dashboard financeiro.
+
+- [ ] **5.12 — Aba financeira na ficha do aluno**
+  Critério de pronto: resumo (plano atual, situação financeira, próximo
+  vencimento, valor em aberto/vencido, total pago/contratado) + detalhe do
+  contrato atual + ações (renovar, trocar plano, encerrar, pausar) conforme
+  seção 11.13.
+
+- [ ] **5.13 — Tela de parcelas (com filtros) e tela de inadimplentes**
+  Critério de pronto: parcelas filtráveis por mês/status/aluno/plano/forma
+  de pagamento; tela de inadimplentes lista aluno, responsável financeiro,
+  valor e dias em atraso, com link para a ficha financeira do aluno.
+
+- [ ] **5.14 — Migration de `payment_adjustments` (modelagem mínima)**
+  Critério de pronto: tabela criada e migrada conforme seção 11.10; sem
+  tela dedicada — apenas schema pronto para uso futuro (renegociação).
+
+---
+
+## Fase 6 — Graduação
+
+- [ ] **6.1 — Migration de `graduation_history`**
+  Critério de pronto: tabela criada com RLS; registrar graduação atualiza
+  `current_belt_id`/`current_degree`/`last_graduation_date` no `students`
+  em uma transação.
+
+- [ ] **6.2 — Tela "Registrar graduação" na ficha do aluno**
+  Critério de pronto: formulário mostra faixa/grau atual, permite definir
+  nova faixa/grau, data e observações do professor; grava histórico.
+
+- [ ] **6.3 — Indicadores de apoio à graduação (frequência e tempo desde última graduação)**
+  Critério de pronto: ficha do aluno mostra nº de presenças desde a última
+  graduação e tempo decorrido, como indicador — sem bloquear ou sugerir
+  graduação automaticamente.
+
+---
+
+## Fase 7 — Dashboards
+
+> **PARALELIZÁVEL**: 7.1 (dashboard admin) e 7.2 (dashboard professor) não
+> compartilham componentes além de cards genéricos já existentes de
+> `components/dashboard` — podem ser feitos em paralelo por dev diferente
+> depois que os cards genéricos (7.0) estiverem prontos.
+
+- [ ] **7.0 — Componentes genéricos de dashboard (`components/dashboard`)**
+  Critério de pronto: componente de "card de métrica" e "lista resumida"
+  reutilizáveis, usados pelas próximas duas subtarefas.
+
+- [ ] **7.1 — Dashboard do administrador**
+  Critério de pronto: cards e listas da seção 14 (admin) implementados
+  usando queries reais (alunos ativos, inadimplentes, receita prevista/
+  recebida do mês, presenças no mês, ausentes há 15+ dias, próximos
+  vencimentos, últimas presenças/graduações/pagamentos, turmas do dia).
+
+- [ ] **7.2 — Dashboard do professor**
+  Critério de pronto: turmas do dia, acesso rápido à chamada, últimas
+  chamadas feitas por ele, alunos recentes e observações recentes.
+
+- [ ] **7.3 — Dashboard financeiro dedicado**
+  Critério de pronto: cards da seção 11.13 (receita prevista/recebida,
+  valor em aberto/vencido, alunos inadimplentes, contratos ativos, parcelas
+  vencidas e a vencer em 7 dias) em uma tela própria dentro do módulo
+  financeiro.
+
+- [ ] **7.4 — Migration de `audit_logs` + instrumentação das ações sensíveis já implementadas**
+  Critério de pronto: tabela criada; ações de alteração de pagamento,
+  cancelamento de parcela, alteração de contrato, alteração de presença,
+  alteração de graduação e alteração de dados pessoais do aluno passam a
+  gravar log (`entity_type`, `entity_id`, `action`, `changes`).
+
+- [ ] **7.5 — Seeds de demonstração completos**
+  Critério de pronto: `seed.sql` popula 1 escola, 1 unidade, 2 professores,
+  30 alunos, 5 turmas, modalidades, faixas, 2 tabelas de preço com 4 planos
+  cada, contratos variados (parcelas pagas/pendentes/vencidas), presenças e
+  graduações — usado para validar o MVP 1A de ponta a ponta com a escola
+  piloto.
+
+- [ ] **7.6 — Checklist de validação do MVP 1A contra os critérios de sucesso (seção 22)**
+  Critério de pronto: percorrer manualmente cada item da seção 22 do
+  `NEXUSDOJO_PROJECT.md` no ambiente com os seeds de 7.5 e confirmar que
+  funciona no celular; qualquer item que falhar vira subtarefa nova antes de
+  considerar o MVP 1A concluído.
+
+---
+
+## Fase 8 — MVP 1B (só inicia após validação do MVP 1A na Fase 7.6)
+
+- [ ] **8.1 — Upload de foto de aluno/professor via Supabase Storage**
+  Critério de pronto: substitui os campos `photo_url` manuais por upload
+  real de imagem, com preview.
+
+- [ ] **8.2 — Migration + CRUD de leads e conversão de lead para aluno**
+  Critério de pronto: cadastro de lead, funil simples, ação "converter em
+  aluno" que cria um `student` reaproveitando os dados do lead.
+
+- [ ] **8.3 — Integração WhatsApp manual via Evolution API**
+  Critério de pronto: envio manual de mensagem avulsa para aluno/lead a
+  partir da ficha dele, usando `EVOLUTION_API_URL`/`EVOLUTION_API_KEY` do
+  `.env`; sem automação/régua ainda.
+
+- [ ] **8.4 — Lista de aniversariantes do mês**
+  Critério de pronto: tela/lista com aniversariantes do mês corrente,
+  reaproveitando o componente de busca de aluno quando fizer sentido.
+
+- [ ] **8.5 — Audit logs completos (cobertura das ações restantes)**
+  Critério de pronto: revisão de todas as mutações do sistema (não só as
+  listadas em 7.4) e garantia de que ações sensíveis remanescentes também
+  logam em `audit_logs`.
+
+- [ ] **8.6 — PWA refinado (manifest, ícones, instalável)**
+  Critério de pronto: `manifest.json` completo, ícones em múltiplos
+  tamanhos, app instalável no celular, funcionando offline apenas para
+  shell básico (sem sincronização offline de dados).
+
+- [ ] **8.7 — Revisão de política de privacidade e relatórios financeiros extras**
+  Critério de pronto: página de política de privacidade revisada
+  juridicamente pelo usuário (Carlos define o texto final); relatórios
+  financeiros adicionais definidos junto ao usuário antes de implementar
+  (evitar escopo não aprovado).
+
+---
+
+## Fora de escopo até novo aviso (não criar subtarefas para isso ainda)
+
+Pagamento online, Pix automático, boleto, cartão online, integração Asaas,
+régua automática de cobrança, área do aluno/responsável, check-in por QR
+Code, currículo técnico, avaliação qualitativa, campeonatos/eventos/
+seminários, multiunidade com telas próprias, IA, catraca física,
+marketplace, white label, app nativo — ver seção 19 do
+`NEXUSDOJO_PROJECT.md`. Só entram no `TASK.md` quando o usuário aprovar
+formalmente o início do MVP 2/MVP 3.
