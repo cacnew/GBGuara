@@ -63,7 +63,7 @@
 
 ## Fase 1 — Base e Autenticação
 
-- [ ] **1.1 — Migration: tabela `schools` + RLS básica**
+- [x] **1.1 — Migration: tabela `schools` + RLS básica**
   Critério de pronto: migration criada e aplicada localmente; RLS habilitada
   na tabela; policy mínima de leitura/escrita por `school_id` documentada
   (mesmo que ainda não haja `users` para testar de ponta a ponta).
