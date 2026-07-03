@@ -20,7 +20,7 @@
 
 ## Fase 0 — Planejamento e Setup
 
-- [ ] **0.1 — Criar projeto Next.js base**
+- [x] **0.1 — Criar projeto Next.js base**
   Critério de pronto: `npx create-next-app` rodado com App Router + TypeScript +
   Tailwind; projeto builda e sobe localmente (`npm run dev`) sem erros.
 
