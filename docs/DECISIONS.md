@@ -449,6 +449,29 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   não tem consumidor até a Fase 4.3): aluno ativo com faixa aparece
   corretamente, aluno inativo não aparece na busca.
 
+## Tela de chamada (Fase 4.3)
+
+- `app/attendance/[sessionId]` fica **fora** de `(admin)` e `(teacher)`
+  (rota real, não route group) porque os dois papéis precisam acessá-la a
+  partir do mesmo botão "Abrir chamada" (Fase 3.3). Sem o layout de grupo
+  para proteger automaticamente, a página chama `requireUser()`
+  diretamente — não `requireRole()`, já que tanto admin quanto professor
+  podem fazer chamada.
+- `markPresent()` (`modules/attendance/actions.ts`) devolve o
+  `attendanceId` criado, usado depois pela Fase 4.4 para remover uma
+  presença específica sem precisar de outra consulta.
+- Erro de duplicidade (constraint da Fase 4.1, código Postgres `23505`)
+  vira mensagem amigável ("Esse aluno já está presente nesta sessão") em
+  vez de expor o erro técnico do banco.
+- Layout pensado para celular: botões grandes, busca com foco automático,
+  lista de presentes compacta — sem menu, sem sidebar, só o essencial da
+  seção 16 do documento mestre.
+- Testado localmente via Docker: acesso não autenticado bloqueado
+  (redirect para `/login`), aluno marcado presente com um clique, e
+  segunda tentativa do mesmo aluno na mesma sessão rejeitada com
+  mensagem clara — confirmado tanto via chamada direta da action quanto
+  na página renderizada ("Presentes (1)").
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

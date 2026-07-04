@@ -175,7 +175,7 @@
   faixa/grau visíveis, filtrando apenas alunos `ativo` da escola; usado
   depois na tela de chamada.
 
-- [ ] **4.3 — Tela de chamada mobile-first (registrar presença)**
+- [x] **4.3 — Tela de chamada mobile-first (registrar presença)**
   Critério de pronto: dentro de uma `class_session`, professor busca aluno e
   marca presente em um clique; qualquer aluno ativo da escola pode ser
   adicionado, mesmo sem vínculo prévio com a turma; layout otimizado para uso
