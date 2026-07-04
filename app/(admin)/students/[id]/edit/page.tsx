@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { buttonVariants } from "@/components/ui/button";
 import type { StudentInput } from "@/lib/validations/student";
 import { EditStudentForm } from "./form";
 import { GuardiansSection, type GuardianLink } from "./guardians-section";
@@ -42,7 +44,15 @@ export default async function EditStudentPage({
   return (
     <div className="flex flex-1 flex-col items-center gap-10 p-6 text-foreground">
       <div className="w-full max-w-sm">
-        <h1 className="font-heading text-2xl font-semibold">Editar aluno</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="font-heading text-2xl font-semibold">Editar aluno</h1>
+          <Link
+            href={`/students/${student.id}/contract/new`}
+            className={buttonVariants({ size: "sm" })}
+          >
+            Associar plano
+          </Link>
+        </div>
       </div>
       <EditStudentForm
         id={student.id}
