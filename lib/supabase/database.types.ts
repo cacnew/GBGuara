@@ -683,6 +683,97 @@ export type Database = {
           },
         ]
       }
+      graduation_history: {
+        Row: {
+          created_at: string
+          graduation_date: string
+          id: string
+          modality_id: string
+          new_belt_id: string
+          new_degree: number
+          notes: string | null
+          previous_belt_id: string | null
+          previous_degree: number
+          registered_by_teacher_id: string | null
+          school_id: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          graduation_date?: string
+          id?: string
+          modality_id: string
+          new_belt_id: string
+          new_degree?: number
+          notes?: string | null
+          previous_belt_id?: string | null
+          previous_degree?: number
+          registered_by_teacher_id?: string | null
+          school_id: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          graduation_date?: string
+          id?: string
+          modality_id?: string
+          new_belt_id?: string
+          new_degree?: number
+          notes?: string | null
+          previous_belt_id?: string | null
+          previous_degree?: number
+          registered_by_teacher_id?: string | null
+          school_id?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "graduation_history_modality_id_fkey"
+            columns: ["modality_id"]
+            isOneToOne: false
+            referencedRelation: "modalities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_history_new_belt_id_fkey"
+            columns: ["new_belt_id"]
+            isOneToOne: false
+            referencedRelation: "belts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_history_previous_belt_id_fkey"
+            columns: ["previous_belt_id"]
+            isOneToOne: false
+            referencedRelation: "belts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_history_registered_by_teacher_id_fkey"
+            columns: ["registered_by_teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_history_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_history_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guardians: {
         Row: {
           created_at: string

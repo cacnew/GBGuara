@@ -273,7 +273,7 @@
 
 ## Fase 6 — Graduação
 
-- [ ] **6.1 — Migration de `graduation_history`**
+- [x] **6.1 — Migration de `graduation_history`**
   Critério de pronto: tabela criada com RLS; registrar graduação atualiza
   `current_belt_id`/`current_degree`/`last_graduation_date` no `students`
   em uma transação.

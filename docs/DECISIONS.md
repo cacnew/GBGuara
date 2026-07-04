@@ -832,6 +832,25 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
 - Testado localmente via Docker: insert válido, rejeição de
   `adjustment_type` fora do vocabulário controlado.
 
+## Migration de `graduation_history` (Fase 6.1)
+
+- Trigger `AFTER INSERT` (não Server Action sequencial) — o critério da
+  subtarefa exige explicitamente "em uma transação"; um trigger no
+  mesmo INSERT garante atomicidade de verdade, ao contrário do padrão
+  de chamadas sequenciais usado no módulo financeiro (Fases 5.6/5.8/5.9),
+  que não tinha essa exigência. Mesmo padrão da geração automática de
+  parcelas (Fase 5.5).
+- Trigger não é `SECURITY DEFINER` — roda com o privilégio de quem
+  inseriu o registro, então o UPDATE em `students` precisa satisfazer a
+  RLS normalmente (já coberto pela policy de update existente desde a
+  Fase 1.3).
+- Sem grant/policy de `update`/`delete` em `graduation_history` — é um
+  histórico, só `select`/`insert`.
+- Testado localmente via Docker com usuário autenticado real (não
+  service_role): insert de graduação atualizou `current_belt_id`,
+  `current_degree` e `last_graduation_date` do aluno corretamente na
+  mesma operação.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
