@@ -434,6 +434,71 @@ export type Database = {
           },
         ]
       }
+      teacher_graduations: {
+        Row: {
+          belt_id: string
+          created_at: string
+          degree: number
+          id: string
+          modality_id: string
+          school_id: string
+          since_date: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          belt_id: string
+          created_at?: string
+          degree?: number
+          id?: string
+          modality_id: string
+          school_id: string
+          since_date?: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          belt_id?: string
+          created_at?: string
+          degree?: number
+          id?: string
+          modality_id?: string
+          school_id?: string
+          since_date?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_graduations_belt_id_fkey"
+            columns: ["belt_id"]
+            isOneToOne: false
+            referencedRelation: "belts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_graduations_modality_id_fkey"
+            columns: ["modality_id"]
+            isOneToOne: false
+            referencedRelation: "modalities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_graduations_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_graduations_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teachers: {
         Row: {
           created_at: string

@@ -321,6 +321,16 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   de `main_teacher_id` (aluno vinculado a um professor, e
   `on delete set null` disparando corretamente ao excluir o professor).
 
+## Graduação de professores (Fase 2.6)
+
+- `teacher_graduations` sem tela de histórico dedicada — inserir/listar
+  direto na ficha do professor (`app/(admin)/teachers/[id]/edit`), mesmo
+  padrão de "seção extra" usado para responsáveis do aluno (Fase 2.4).
+- Com os clients já tipados (`Database`) desde a Fase 2.4, o embed
+  `modalities(name)`/`belts(name)` já veio certo como objeto único de
+  primeira — não repetiu o bug de indexação `[0]` das fases anteriores.
+- Com isso, a Fase 2 (Cadastros base) está concluída.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

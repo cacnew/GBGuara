@@ -135,7 +135,7 @@
   `photo_url`, sem upload real ainda — só URL manual); tela de ficha do
   professor.
 
-- [ ] **2.6 — Migration: `teacher_graduations`**
+- [x] **2.6 — Migration: `teacher_graduations`**
   Critério de pronto: tabela criada com RLS; possível registrar graduação
   de um professor a partir da ficha dele (sem tela dedicada de histórico
   ainda, apenas inserir/listar).

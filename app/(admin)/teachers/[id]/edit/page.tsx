@@ -2,6 +2,10 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { TeacherInput } from "@/lib/validations/teacher";
 import { EditTeacherProfileForm } from "./form";
+import {
+  GraduationsSection,
+  type TeacherGraduationRow,
+} from "./graduations-section";
 
 export default async function EditTeacherPage({
   params,
@@ -18,8 +22,35 @@ export default async function EditTeacherPage({
 
   if (!teacher) notFound();
 
+  const { data: modalities } = await supabase
+    .from("modalities")
+    .select("id, name")
+    .eq("status", "active")
+    .order("name");
+
+  const { data: belts } = await supabase
+    .from("belts")
+    .select("id, name")
+    .order("name");
+
+  const { data: graduationRows } = await supabase
+    .from("teacher_graduations")
+    .select("id, degree, since_date, modalities(name), belts(name)")
+    .eq("teacher_id", id)
+    .order("since_date", { ascending: false });
+
+  const graduations: TeacherGraduationRow[] = (graduationRows ?? []).map(
+    (row) => ({
+      id: row.id,
+      modalityName: row.modalities?.name ?? "",
+      beltName: row.belts?.name ?? "",
+      degree: row.degree,
+      sinceDate: row.since_date,
+    }),
+  );
+
   return (
-    <div className="flex flex-1 flex-col items-center gap-6 p-6 text-foreground">
+    <div className="flex flex-1 flex-col items-center gap-10 p-6 text-foreground">
       <div className="w-full max-w-sm">
         <h1 className="font-heading text-2xl font-semibold">
           Editar professor
@@ -35,6 +66,12 @@ export default async function EditTeacherPage({
           status: teacher.status as TeacherInput["status"],
           notes: teacher.notes ?? "",
         }}
+      />
+      <GraduationsSection
+        teacherId={teacher.id}
+        modalities={modalities ?? []}
+        belts={belts ?? []}
+        graduations={graduations}
       />
     </div>
   );
