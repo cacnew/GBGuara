@@ -52,6 +52,12 @@ export default async function AdminDashboardPage() {
         >
           Faixas
         </Link>
+        <Link
+          href="/finance/price-tables"
+          className={buttonVariants({ variant: "outline", className: "w-fit" })}
+        >
+          Tabelas de preço
+        </Link>
       </div>
     </div>
   );

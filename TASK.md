@@ -200,7 +200,7 @@
 > schema. As subtarefas de contrato/parcela (5.4 em diante) são sequenciais e
 > dependem de 5.1–5.3 estarem prontos.
 
-- [ ] **5.1 — Migration + CRUD de `price_tables`**
+- [x] **5.1 — Migration + CRUD de `price_tables`**
   Critério de pronto: admin cria/edita tabela de preços com vigência
   (`valid_from`/`valid_until`) e status (`active`/`inactive`/`legacy`).
 

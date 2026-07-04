@@ -497,6 +497,22 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   query quanto na renderização da ficha do aluno.
 - Com isso, a Fase 4 (Frequência) está concluída.
 
+## Tabelas de preço (Fase 5.1)
+
+- Link "Planos" da listagem (`/finance/plans?priceTableId=...`) e a
+  contagem de planos por tabela ficaram para a Fase 5.2, quando a tabela
+  `plans` existir — referenciar `plans(id)` no `.select()` antes da
+  tabela existir ainda compilava (o gerador de tipos não falha para
+  relações desconhecidas do jeito que falha para colunas/tabelas
+  inexistentes numa query direta), mas quebraria em runtime
+  ("could not find relationship"). Removido por enquanto; a Fase 5.2
+  adiciona de volta corretamente.
+- CRUD segue exatamente o mesmo padrão das fases anteriores (RLS por
+  `school_id`, form compartilhado create/edit, status como campo do
+  form em vez de ação separada).
+- Testado localmente via Docker: criar tabela, editar (mudar vigência de
+  fim e status para `legacy`), listagem retornando 200.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
