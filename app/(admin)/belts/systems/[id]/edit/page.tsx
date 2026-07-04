@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import type { BeltSystemInput } from "@/lib/validations/belt";
 import { EditBeltSystemForm } from "./form";
 
 export default async function EditBeltSystemPage({
@@ -37,7 +38,7 @@ export default async function EditBeltSystemPage({
         defaultValues={{
           modalityId: beltSystem.modality_id,
           name: beltSystem.name,
-          audience: beltSystem.audience,
+          audience: beltSystem.audience as BeltSystemInput["audience"],
           description: beltSystem.description ?? "",
         }}
       />

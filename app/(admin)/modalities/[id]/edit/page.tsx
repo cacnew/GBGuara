@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import type { ModalityInput } from "@/lib/validations/modality";
 import { EditModalityForm } from "./edit-form";
 
 export default async function EditModalityPage({
@@ -30,7 +31,7 @@ export default async function EditModalityPage({
           name: modality.name,
           slug: modality.slug,
           icon: modality.icon ?? "",
-          status: modality.status,
+          status: modality.status as ModalityInput["status"],
         }}
       />
     </div>

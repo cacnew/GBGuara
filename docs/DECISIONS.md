@@ -258,6 +258,46 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   automaticamente, editado (nome e status), encontrado pela busca por
   nome, e rota `/students` bloqueada para não autenticado.
 
+## Responsáveis na ficha do aluno (Fase 2.4)
+
+- `guardians`/`student_guardians` (seções 10.5/10.6) gerenciados direto na
+  página de edição do aluno (`app/(admin)/students/[id]/edit`), não numa
+  tela própria de "responsáveis" — bate com o que o critério da subtarefa
+  pedia ("a partir da ficha do aluno").
+- "Responsável principal" único por aluno é garantido na aplicação, não
+  por constraint de banco: ao marcar um vínculo como principal, a Server
+  Action zera `is_primary` dos outros vínculos do mesmo aluno antes de
+  gravar o novo. Não é atômico entre as duas queries (sem transação real),
+  aceitável para o volume de uso do MVP 1A; se virar problema, dá para
+  mover essa lógica para um trigger no banco depois.
+
+## Tipos gerados do Supabase (Fase 2.4)
+
+- **Bug real encontrado**: sem tipos gerados, o `supabase-js` não sabe a
+  cardinalidade de um relacionamento embutido (`select("...", tabela(...))")`)
+  e o TypeScript infere `array` por padrão — mas em runtime, uma relação
+  many-to-one (FK na própria tabela consultada) volta como **objeto único**,
+  não array. Isso já tinha me enganado duas vezes: `belt_systems.modalities`
+  (Fase 2.2) e `student_guardians.guardians` (Fase 2.4) — em ambos eu tinha
+  "corrigido" o erro de tipo indexando `[0]`, o que satisfazia o
+  TypeScript mas silenciosamente quebrava em runtime (o nome da modalidade
+  nunca aparecia na tela; os responsáveis apareciam sem nome). Só percebi
+  ao inspecionar o JSON real de uma chamada autenticada.
+- **Correção definitiva**: `npx supabase gen types typescript --local` para
+  gerar `lib/supabase/database.types.ts`, e os três clients
+  (`lib/supabase/client.ts`, `server.ts`, `admin.ts`) agora usam
+  `createBrowserClient<Database>` / `createServerClient<Database>` /
+  `createClient<Database>`. Com o tipo certo, o embed de relação
+  many-to-one já é inferido corretamente como objeto único — sem `[0]`.
+- Script `npm run db:types` adicionado para regenerar os tipos depois de
+  qualquer migration nova (rodar sempre que o schema mudar).
+- Efeito colateral: campos com `CHECK` constraint (ex: `status`, `role`,
+  `audience`) são tipados como `string` genérico pelos tipos gerados (o
+  gerador não lê `CHECK`), então ao passar um valor vindo do banco para um
+  campo `zod.enum` de um formulário é necessário um cast explícito
+  (`as ModalityInput["status"]`, etc.) — documentado inline em cada lugar
+  onde isso acontece.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

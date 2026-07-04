@@ -125,7 +125,7 @@
   e inativação de aluno; campos obrigatórios validados com Zod
   (nome, data de nascimento; demais opcionais conforme seção 10.4).
 
-- [ ] **2.4 — Migration + CRUD de `guardians` e `student_guardians`**
+- [x] **2.4 — Migration + CRUD de `guardians` e `student_guardians`**
   Critério de pronto: possível vincular um ou mais responsáveis a um aluno,
   marcando responsável principal e responsável financeiro, a partir da
   ficha do aluno.

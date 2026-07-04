@@ -29,6 +29,6 @@ export async function getCurrentUserProfile(): Promise<CurrentUserProfile | null
     schoolId: data.school_id,
     name: data.name,
     email: data.email,
-    role: data.role,
+    role: data.role as CurrentUserProfile["role"],
   };
 }

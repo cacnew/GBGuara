@@ -41,9 +41,7 @@ export default async function BeltsPage() {
                 {system.name}{" "}
                 <span className="text-muted-foreground">
                   ({system.audience}
-                  {system.modalities?.[0]
-                    ? ` · ${system.modalities[0].name}`
-                    : ""})
+                  {system.modalities ? ` · ${system.modalities.name}` : ""})
                 </span>
               </p>
             </div>
