@@ -558,6 +558,26 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
 - FK pendente desde a Fase 2.3 (`students.current_contract_id`) criada
   agora que `contracts` existe — confirmada via `pg_constraint`.
 
+## Geração automática de parcelas (Fase 5.5)
+
+- Trigger `AFTER INSERT ON contracts` gera as parcelas — nasce junto com
+  o contrato, sem passo manual extra na Fase 5.6.
+- Arredondamento: `base = round(final_price / n, 2)`, última parcela =
+  `final_price - base*(n-1)` — absorve a diferença de arredondamento,
+  garantindo que a soma bate exatamente com `final_price` mesmo quando a
+  divisão não é exata (confirmado com 3x de R$550 → 183.33+183.33+183.34
+  e 12x de R$2000 → 166.67×11+166.63).
+- **Achado importante**: o trigger não é `SECURITY DEFINER`, então roda
+  com o privilégio de quem inseriu o contrato (`authenticated`) — por
+  isso `contract_installments` precisa de `GRANT insert` **e** de uma
+  policy de insert (`school_id = current_school_id()`), não só o grant.
+  Quase committei só com o grant (mesma classe de erro das Fases 1.3/1.8,
+  mas do lado da policy dessa vez em vez do grant) — pego antes de
+  aplicar a migration, ao reler o arquivo.
+- Testado localmente via Docker com usuário autenticado real (não
+  service_role, para validar a RLS do trigger de verdade): 1x, 3x e 12x,
+  soma das parcelas conferindo com o valor final em todos os casos.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

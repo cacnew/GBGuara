@@ -217,7 +217,7 @@
   Critério de pronto: schema aplicado com RLS; regra de "apenas um contrato
   ativo por aluno" documentada (validação de aplicação virá em 5.6).
 
-- [ ] **5.5 — Migration de `contract_installments` + função de geração automática de parcelas**
+- [x] **5.5 — Migration de `contract_installments` + função de geração automática de parcelas**
   Critério de pronto: dada uma criação de contrato (preço final, nº de
   parcelas, primeiro vencimento), uma função/trigger gera as parcelas
   corretamente, ajustando arredondamento na última parcela; testado com
