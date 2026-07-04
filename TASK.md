@@ -170,7 +170,7 @@
   Critério de pronto: migration aplicada; teste manual confirma que inserir
   presença duplicada na mesma sessão é rejeitado pelo banco.
 
-- [ ] **4.2 — Busca rápida de aluno ativo (componente reutilizável)**
+- [x] **4.2 — Busca rápida de aluno ativo (componente reutilizável)**
   Critério de pronto: componente de busca por nome, com foto (se houver) e
   faixa/grau visíveis, filtrando apenas alunos `ativo` da escola; usado
   depois na tela de chamada.

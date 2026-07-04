@@ -433,6 +433,22 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   mesma presença (mesma sessão + mesmo aluno) rejeitada pela constraint,
   confirmando a regra antes mesmo de construir a tela de chamada.
 
+## Busca rápida de aluno (Fase 4.2)
+
+- `modules/students/search.ts#searchActiveStudents`: só `status = 'ativo'`
+  (regra da seção 3 — presença é só para aluno ativo), com faixa/grau via
+  embed `belts(name, color_hex)` e limite de 20 resultados (é busca
+  incremental para tela de chamada, não listagem paginada).
+- `components/students/student-search.tsx`: client component com debounce
+  de 200ms via `useEffect` + `useTransition` — sem `react-query` aqui
+  (embora já esteja instalado no projeto) porque não há necessidade real
+  de cache entre buscas distintas nesta tela.
+- Prop `excludeIds` já prevista para a Fase 4.3 esconder da busca quem já
+  foi marcado presente na sessão em andamento.
+- Testado localmente via Docker (função de busca direta, componente ainda
+  não tem consumidor até a Fase 4.3): aluno ativo com faixa aparece
+  corretamente, aluno inativo não aparece na busca.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
