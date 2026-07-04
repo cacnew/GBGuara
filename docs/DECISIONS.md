@@ -752,6 +752,43 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   isenção aparece na view; aluno com parcela igualmente vencida mas com
   isenção `active` fica corretamente de fora.
 
+## Aba financeira na ficha do aluno (Fase 5.12)
+
+- **"Renovar plano" e "Trocar plano" reaproveitam a mesma rota**
+  (`/students/[id]/contract/new`, Fase 5.6) em vez de dois fluxos
+  separados — o wizard já pergunta se deve encerrar o contrato ativo
+  antes de criar o novo, cobrindo os dois casos (renovação natural e
+  troca de plano) com uma única implementação.
+- **"Situação financeira" é sempre calculada em tempo real** a partir da
+  view `overdue_students` (Fase 5.11) + `student_financial_exemptions`
+  (Fase 5.10) + `contracts.status` — não usa a coluna
+  `students.financial_status` (existente desde a Fase 2.3), porque nada
+  no sistema mantém essa coluna sincronizada ainda. Prioridade de
+  cálculo: isento > inadimplente > pausado > encerrado > regular.
+- Resumo (valor em aberto/vencido, total pago/contratado, próximo
+  vencimento, contadores de parcela) é calculado só a partir do
+  **contrato atual** do aluno (`students.current_contract_id`), não
+  agregado histórico entre todos os contratos já tidos — consistente
+  com a regra de "só um contrato ativo por vez" já estabelecida.
+- "Pausar contrato" ganhou o par simétrico **"Retomar contrato"**
+  (não pedido explicitamente no critério, mas óbvio o suficiente para
+  não deixar o admin preso num contrato pausado sem saída).
+- "Encerrar contrato" não bloqueia ações nas parcelas restantes
+  (registrar pagamento, cancelar, editar vencimento continuam
+  disponíveis) — decisão deliberada: um contrato encerrado pode ainda
+  ter parcelas em aberto a cobrar/reconciliar.
+- Reaproveita `registerInstallmentPayment`/`cancelInstallment`/
+  `refundInstallmentPayment` (Fases 5.8/5.9) sem alteração — a aba é
+  só a primeira UI que os expõe.
+- Testado localmente via Docker/Playwright, fluxo completo em sequência
+  no mesmo contrato: registrar pagamento total (resumo atualiza),
+  editar vencimento de parcela pendente (próximo vencimento reflete a
+  mudança), cancelar parcela futura, estornar o pagamento já registrado
+  (parcela volta a `refunded`, total pago volta a zero, valor em aberto
+  não conta a parcela estornada como aberta), pausar contrato
+  (situação/ações mudam), retomar, e encerrar (situação vira
+  "Encerrado", ações de pausar/encerrar somem, só resta trocar/renovar).
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

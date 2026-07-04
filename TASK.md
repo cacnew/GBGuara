@@ -254,7 +254,7 @@
   `overdue` quando há parcela vencida e não paga, respeitando isenções
   ativas; usada nas telas 5.13 e no dashboard financeiro.
 
-- [ ] **5.12 — Aba financeira na ficha do aluno**
+- [x] **5.12 — Aba financeira na ficha do aluno**
   Critério de pronto: resumo (plano atual, situação financeira, próximo
   vencimento, valor em aberto/vencido, total pago/contratado) + detalhe do
   contrato atual + ações (renovar, trocar plano, encerrar, pausar) conforme

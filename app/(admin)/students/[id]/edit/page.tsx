@@ -6,6 +6,8 @@ import type { StudentInput } from "@/lib/validations/student";
 import { EditStudentForm } from "./form";
 import { GuardiansSection, type GuardianLink } from "./guardians-section";
 import { AttendanceHistory } from "./attendance-history";
+import { FinancialSection } from "./financial-section";
+import { getStudentFinancialSummary } from "./financial-queries";
 
 export default async function EditStudentPage({
   params,
@@ -41,6 +43,12 @@ export default async function EditStudentPage({
     isFinancialResponsible: link.is_financial_responsible,
   }));
 
+  const financialSummary = await getStudentFinancialSummary(student.id);
+  const { data: financialAccounts } = await supabase
+    .from("financial_accounts")
+    .select("id, name")
+    .eq("status", "active");
+
   return (
     <div className="flex flex-1 flex-col items-center gap-10 p-6 text-foreground">
       <div className="w-full max-w-sm">
@@ -69,6 +77,11 @@ export default async function EditStudentPage({
         }}
       />
       <GuardiansSection studentId={student.id} guardians={guardians} />
+      <FinancialSection
+        studentId={student.id}
+        summary={financialSummary}
+        accounts={financialAccounts ?? []}
+      />
       <AttendanceHistory studentId={student.id} />
     </div>
   );
