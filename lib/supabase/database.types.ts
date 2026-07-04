@@ -346,6 +346,149 @@ export type Database = {
           },
         ]
       }
+      contract_students: {
+        Row: {
+          contract_id: string
+          created_at: string
+          id: string
+          school_id: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          id?: string
+          school_id: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          id?: string
+          school_id?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_students_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_students_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_students_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contracts: {
+        Row: {
+          created_at: string
+          discount_type: string
+          discount_value: number
+          end_date: string | null
+          final_price: number
+          financial_responsible_id: string | null
+          financial_responsible_type: string
+          first_due_date: string
+          id: string
+          installment_amount: number
+          installments_count: number
+          notes: string | null
+          original_price: number
+          payment_day: number | null
+          plan_id: string
+          price_table_id: string
+          school_id: string
+          setup_fee_amount: number
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          end_date?: string | null
+          final_price: number
+          financial_responsible_id?: string | null
+          financial_responsible_type: string
+          first_due_date: string
+          id?: string
+          installment_amount: number
+          installments_count?: number
+          notes?: string | null
+          original_price: number
+          payment_day?: number | null
+          plan_id: string
+          price_table_id: string
+          school_id: string
+          setup_fee_amount?: number
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          end_date?: string | null
+          final_price?: number
+          financial_responsible_id?: string | null
+          financial_responsible_type?: string
+          first_due_date?: string
+          id?: string
+          installment_amount?: number
+          installments_count?: number
+          notes?: string | null
+          original_price?: number
+          payment_day?: number | null
+          plan_id?: string
+          price_table_id?: string
+          school_id?: string
+          setup_fee_amount?: number
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_price_table_id_fkey"
+            columns: ["price_table_id"]
+            isOneToOne: false
+            referencedRelation: "price_tables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_accounts: {
         Row: {
           created_at: string
@@ -776,6 +919,13 @@ export type Database = {
             columns: ["current_belt_id"]
             isOneToOne: false
             referencedRelation: "belts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_current_contract_id_fkey"
+            columns: ["current_contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
           {

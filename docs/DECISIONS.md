@@ -546,6 +546,18 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   automaticamente, e o restante do trigger (modalidades, faixas)
   continua funcionando após a alteração.
 
+## Contracts + contract_students: só schema por enquanto (Fase 5.4)
+
+- `financial_responsible_id` é polimórfico (student/guardian/other via
+  `financial_responsible_type`) — sem FK, integridade fica por conta da
+  aplicação.
+- Regra "só um contrato ativo por aluno" fica documentada aqui em
+  comentário, mas a validação de verdade entra na Fase 5.6 (quando o
+  fluxo de criação de contrato existir e puder perguntar ao admin se
+  deve encerrar o contrato anterior).
+- FK pendente desde a Fase 2.3 (`students.current_contract_id`) criada
+  agora que `contracts` existe — confirmada via `pg_constraint`.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

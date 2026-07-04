@@ -213,7 +213,7 @@
   Critério de pronto: tabela criada com RLS; seed de contas padrão aplicado
   no `seed.sql`.
 
-- [ ] **5.4 — Migration de `contracts` + `contract_students`**
+- [x] **5.4 — Migration de `contracts` + `contract_students`**
   Critério de pronto: schema aplicado com RLS; regra de "apenas um contrato
   ativo por aluno" documentada (validação de aplicação virá em 5.6).
 
