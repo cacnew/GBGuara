@@ -34,6 +34,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      attendances: {
+        Row: {
+          class_session_id: string
+          created_at: string
+          id: string
+          registered_by_user_id: string
+          school_id: string
+          status: string
+          student_id: string
+          student_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          class_session_id: string
+          created_at?: string
+          id?: string
+          registered_by_user_id: string
+          school_id: string
+          status?: string
+          student_id: string
+          student_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          class_session_id?: string
+          created_at?: string
+          id?: string
+          registered_by_user_id?: string
+          school_id?: string
+          status?: string
+          student_id?: string
+          student_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendances_class_session_id_fkey"
+            columns: ["class_session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendances_registered_by_user_id_fkey"
+            columns: ["registered_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendances_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendances_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       belt_systems: {
         Row: {
           audience: string

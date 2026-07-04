@@ -166,7 +166,7 @@
 
 ## Fase 4 — Frequência
 
-- [ ] **4.1 — Migration de `attendances` com constraint `UNIQUE(class_session_id, student_id)`**
+- [x] **4.1 — Migration de `attendances` com constraint `UNIQUE(class_session_id, student_id)`**
   Critério de pronto: migration aplicada; teste manual confirma que inserir
   presença duplicada na mesma sessão é rejeitado pelo banco.
 

@@ -416,6 +416,23 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   (status `extra`), cancelar (status muda para `cancelada`), e
   confirmação visual na listagem.
 
+## Attendances: constraint de duplicidade (Fase 4.1)
+
+- `unique(class_session_id, student_id)` é a garantia real da regra
+  rígida do documento mestre (seção 3): "o mesmo aluno não pode ser
+  registrado duas vezes na mesma turma, na mesma data". A aplicação
+  (Fase 4.3) trata o erro dessa constraint como feedback amigável, mas
+  quem impede de fato é o banco.
+- Sem policy de `update` em `attendances` — o fluxo previsto (Fase 4.4)
+  é *remover* uma presença incorreta (delete), não editar; se precisar
+  trocar o status de uma presença, é apagar e registrar de novo.
+- `registered_by_user_id` referencia `public.users` (não `auth.users`
+  diretamente) — mantém consistência com o resto do schema, que sempre
+  referencia o perfil de aplicação.
+- Testado diretamente via SQL local: segunda tentativa de inserir a
+  mesma presença (mesma sessão + mesmo aluno) rejeitada pela constraint,
+  confirmando a regra antes mesmo de construir a tela de chamada.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
