@@ -130,7 +130,7 @@
   marcando responsável principal e responsável financeiro, a partir da
   ficha do aluno.
 
-- [ ] **2.5 — Migration + CRUD completo de `teachers` (ficha detalhada)**
+- [x] **2.5 — Migration + CRUD completo de `teachers` (ficha detalhada)**
   Critério de pronto: CRUD completo de professores incluindo foto (campo
   `photo_url`, sem upload real ainda — só URL manual); tela de ficha do
   professor.

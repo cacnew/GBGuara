@@ -298,6 +298,29 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   (`as ModalityInput["status"]`, etc.) — documentado inline em cada lugar
   onde isso acontece.
 
+## Ficha de professor separada do login (Fase 2.5)
+
+- O documento mestre (seção 10.7) modela `teachers` sem nenhuma coluna de
+  ligação para `users` — são conceitos deliberadamente separados: `users`
+  é conta/role de acesso ao sistema, `teachers` é o cadastro/ficha
+  profissional (pode existir um instrutor auxiliar na ficha sem nunca
+  ganhar login, por exemplo). Por isso a rota de criar **login** de
+  professor (Fase 1.8) e a rota de criar a **ficha** do professor (Fase
+  2.5) continuam sendo dois fluxos independentes, sem tentar sincronizar
+  nome/e-mail entre as duas tabelas.
+- Para não colidir nomes de rota, a tela de criação de login (Fase 1.8)
+  foi movida de `/teachers/new` para `/teachers/login/new`, liberando
+  `/teachers` (lista) e `/teachers/new` (criar) para a ficha completa —
+  mais intuitivo dado que `/teachers` agora é o catálogo de professores.
+- FK pendente desde a Fase 2.3 (`students.main_teacher_id`) finalmente
+  criada aqui (`on delete set null`), agora que `teachers` existe.
+- Aplicada via `supabase migration up --local` em vez de `db reset`, para
+  não apagar as contas de demonstração (`admin@nexusdojo.dev`,
+  `professor@nexusdojo.dev`) criadas para o usuário navegar na aplicação.
+- Testado localmente via Docker: criar/editar ficha de professor, e a FK
+  de `main_teacher_id` (aluno vinculado a um professor, e
+  `on delete set null` disparando corretamente ao excluir o professor).
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
