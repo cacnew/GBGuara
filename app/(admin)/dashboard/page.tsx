@@ -25,6 +25,12 @@ export default async function AdminDashboardPage() {
         <Link href="/classes" className={buttonVariants({ variant: "outline", className: "w-fit" })}>
           Turmas
         </Link>
+        <Link
+          href="/classes/sessions"
+          className={buttonVariants({ variant: "outline", className: "w-fit" })}
+        >
+          Sessões futuras
+        </Link>
         <Link href="/teachers" className={buttonVariants({ variant: "outline", className: "w-fit" })}>
           Professores
         </Link>

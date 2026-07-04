@@ -396,6 +396,26 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   turma de hoje aparece tanto em `/today` (admin) quanto em `/professor`
   (professor).
 
+## Sessão extra e cancelamento (Fase 3.4)
+
+- "Extra" reaproveita uma `class_group` já cadastrada (ex: "Open Mat"),
+  só que abre a sessão numa data qualquer, não necessariamente prevista
+  em `week_days` — por isso `createExtraClassSession` não usa a view
+  `todays_class_groups`, insere direto com `status = 'extra'`.
+- Continua respeitando `unique(class_group_id, date)`: não dá pra abrir
+  duas sessões da mesma turma no mesmo dia, nem uma normal e uma extra
+  juntas. Suficiente para o MVP 1A; o documento mestre não pede o
+  contrário.
+- Cancelar só afeta sessões `agendada`/`extra` (`.in("status", [...])`)
+  — nunca uma sessão já `realizada`, evitando apagar frequência
+  registrada por engano.
+- UI mínima: `/classes/sessions` (lista de sessões futuras com botão de
+  cancelar) e `/classes/sessions/new` (form: turma + data). Sem
+  calendário visual — fora de escopo do MVP 1A.
+- Testado localmente via Docker: criar sessão extra numa data futura
+  (status `extra`), cancelar (status muda para `cancelada`), e
+  confirmação visual na listagem.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

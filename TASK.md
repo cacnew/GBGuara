@@ -158,7 +158,7 @@
   Critério de pronto: lista as turmas do dia corrente com horário, professor
   e modalidade; botão para abrir/entrar na chamada de cada uma.
 
-- [ ] **3.4 — Ação de abrir/cancelar sessão de aula avulsa ("extra")**
+- [x] **3.4 — Ação de abrir/cancelar sessão de aula avulsa ("extra")**
   Critério de pronto: possível criar uma `class_session` com status `extra`
   fora da grade fixa (ex: Open Mat) e cancelar uma sessão futura já aberta.
 
