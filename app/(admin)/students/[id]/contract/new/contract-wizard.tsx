@@ -103,7 +103,8 @@ export function ContractWizard({
     return originalPrice;
   }, [originalPrice, values.discountType, values.discountValue]);
 
-  const installmentPreview = finalPrice / values.installmentsCount;
+  const installmentPreview =
+    values.installmentsCount > 0 ? finalPrice / values.installmentsCount : 0;
 
   function canAdvance(): boolean {
     if (step === 0) return !!values.priceTableId;
