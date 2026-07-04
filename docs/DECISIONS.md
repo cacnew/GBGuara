@@ -372,6 +372,30 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   abrir sessão duas vezes retorna o mesmo `id`; acesso anônimo à view
   bloqueado.
 
+## Turmas do dia: componente compartilhado (Fase 3.3)
+
+- `(admin)` e `(teacher)` são route groups (invisíveis na URL) — a mesma
+  página física não pode existir em ambos com o mesmo nome de rota
+  (colidiria), mesmo problema já resolvido na Fase 1.6. Em vez de
+  duplicar a lógica de busca das turmas de hoje, extraí um componente
+  Server compartilhado (`components/classes/todays-classes.tsx`) usado
+  por `app/(admin)/today/page.tsx` (rota nova, `/today`) e por
+  `app/(teacher)/professor/page.tsx` (dashboard do professor, que já
+  existia como placeholder desde a Fase 1.6 — agora mostra as turmas de
+  verdade).
+- Tipos gerados marcam **toda coluna de uma VIEW como nullable**
+  (mesmo colunas que são `NOT NULL`/PK na tabela de origem, como
+  `todays_class_groups.id`, que vem de `class_groups.id`). Corrigido com
+  optional chaining nos horários e non-null assertion comentada no `id`
+  (a PK nunca é null de fato).
+- Botão "Abrir chamada" já aponta para `/attendance/[sessionId]`
+  (`components/classes/open-session-button.tsx`), rota que só passa a
+  existir na Fase 4.3 — até lá, clicar levaria a um 404 se usado fora
+  desta sessão de execução contínua das fases.
+- Testado localmente via Docker com as duas contas de demonstração:
+  turma de hoje aparece tanto em `/today` (admin) quanto em `/professor`
+  (professor).
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

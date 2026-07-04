@@ -154,7 +154,7 @@
   uma query/view retorna as turmas previstas para hoje; abrir uma sessão
   cria (ou reaproveita) o registro em `class_sessions` para a data atual.
 
-- [ ] **3.3 — Tela "Turmas do dia" (admin e professor)**
+- [x] **3.3 — Tela "Turmas do dia" (admin e professor)**
   Critério de pronto: lista as turmas do dia corrente com horário, professor
   e modalidade; botão para abrir/entrar na chamada de cada uma.
 
