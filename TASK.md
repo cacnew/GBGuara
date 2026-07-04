@@ -186,7 +186,7 @@
   marcado presente na sessão, com opção de desfazer (remover) um registro
   indevido antes de fechar a chamada.
 
-- [ ] **4.5 — Histórico de presença por aluno**
+- [x] **4.5 — Histórico de presença por aluno**
   Critério de pronto: aba/seção na ficha do aluno lista suas presenças
   (data, turma, professor que registrou), permitindo múltiplas presenças no
   mesmo dia em turmas diferentes.

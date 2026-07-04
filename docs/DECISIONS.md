@@ -483,6 +483,20 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   delete de verdade, não um soft-delete, então a constraint libera
   imediatamente.
 
+## Histórico de presença por aluno (Fase 4.5)
+
+- Seção somente leitura na ficha do aluno (`attendance-history.tsx`),
+  mesmo padrão de "seção extra" das Fases 2.4/2.6 — sem paginação
+  (`limit(50)`), suficiente para o volume do MVP 1A.
+- Validação central do produto confirmada de ponta a ponta aqui: o mesmo
+  aluno registrado presente em duas turmas diferentes no mesmo dia
+  (`Turma Manha Historico` e `Turma Noite Historico`, ambas com data
+  `2026-07-04`) — a constraint da Fase 4.1 é por `(class_session_id,
+  student_id)`, não por `(student_id, date)`, então isso é permitido
+  como esperado pela seção 3 do documento mestre. Confirmado tanto na
+  query quanto na renderização da ficha do aluno.
+- Com isso, a Fase 4 (Frequência) está concluída.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

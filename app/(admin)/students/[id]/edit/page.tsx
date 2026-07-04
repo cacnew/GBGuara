@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { StudentInput } from "@/lib/validations/student";
 import { EditStudentForm } from "./form";
 import { GuardiansSection, type GuardianLink } from "./guardians-section";
+import { AttendanceHistory } from "./attendance-history";
 
 export default async function EditStudentPage({
   params,
@@ -58,6 +59,7 @@ export default async function EditStudentPage({
         }}
       />
       <GuardiansSection studentId={student.id} guardians={guardians} />
+      <AttendanceHistory studentId={student.id} />
     </div>
   );
 }
