@@ -234,7 +234,7 @@
   Critério de pronto: tabela criada; ao registrar pagamento de parcela
   (5.8), um `financial_movement` do tipo `income` é criado automaticamente.
 
-- [ ] **5.8 — Ação "Registrar pagamento" de parcela (total e parcial)**
+- [x] **5.8 — Ação "Registrar pagamento" de parcela (total e parcial)**
   Critério de pronto: marcar parcela como paga exige data de pagamento e
   forma de pagamento; pagamento parcial atualiza `paid_amount` e
   `remaining_amount` e mantém status `partially_paid`; parcela paga não pode

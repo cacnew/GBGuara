@@ -650,6 +650,41 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   constraint, e rejeição de insert sem `financial_account_id` pela
   constraint `not null`.
 
+## Ação "Registrar pagamento" (Fase 5.8)
+
+- Sem tela nova nesta fase (a aba financeira é a Fase 5.12) — só a
+  Server Action `registerInstallmentPayment`
+  (`modules/finance/payment-actions.ts`), testada via página temporária
+  (removida antes do commit final, mesmo padrão da Fase 5.5).
+- **Ordem das escritas**: o `financial_movement` é inserido *antes* de
+  atualizar a parcela — se a atualização da parcela falhar depois, o
+  movimento recém-criado é desfeito (delete) antes de retornar o erro.
+  Prioriza nunca deixar "dinheiro invisível" (parcela marcada paga sem
+  rastro de caixa) sobre o inverso (rastro de caixa sem a parcela
+  atualizada, que é um estado mais fácil de detectar e corrigir).
+- `paid_amount`/`remaining_amount` são cumulativos: cada chamada soma
+  `amountPaid` ao que já estava pago; se zerar o `remaining_amount`,
+  status vira `paid`, senão `partially_paid`. Pagamento maior que o
+  saldo em aberto é rejeitado antes de qualquer escrita.
+- Parcelas com status `paid`/`canceled`/`refunded` rejeitam novo
+  pagamento (só `pending`/`overdue`/`partially_paid` podem receber).
+- "Parcela paga não pode ser excluída" (critério da subtarefa): já
+  garantido desde a Fase 5.5 — a tabela `contract_installments` tem RLS
+  habilitada e nunca teve uma policy de `delete` criada, então o
+  Postgres nega qualquer exclusão por padrão, mesmo com o `grant delete`
+  concedido. Confirmado via teste manual (DELETE autenticado não remove
+  a linha). Nenhum código novo foi necessário para isso.
+- `financial_account_id` obrigatório no pagamento — validado contra
+  `school_id` do usuário autenticado antes de usar (mesmo padrão de
+  `requireSameSchool`, evitando usar uma conta financeira de outra
+  escola mesmo que o RLS já bloqueie no banco).
+- Testado localmente via Docker/Playwright com usuário autenticado real:
+  pagamento total (parcela vira `paid`), pagamento parcial em duas
+  chamadas somando ao valor cheio (`partially_paid` → `paid`), rejeição
+  de pagamento em parcela já paga, rejeição de valor maior que o saldo
+  em aberto (sem alterar a parcela), e confirmação de que a parcela paga
+  não pôde ser excluída via RLS.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
