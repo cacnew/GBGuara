@@ -240,7 +240,7 @@
   `remaining_amount` e mantém status `partially_paid`; parcela paga não pode
   ser excluída.
 
-- [ ] **5.9 — Ação "Cancelar parcela futura" e "Estornar pagamento"**
+- [x] **5.9 — Ação "Cancelar parcela futura" e "Estornar pagamento"**
   Critério de pronto: cancelar uma parcela pendente futura muda seu status
   sem apagar histórico; estorno cria um `financial_movement` do tipo
   `refund` sem apagar o registro original.

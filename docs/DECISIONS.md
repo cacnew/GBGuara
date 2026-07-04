@@ -685,6 +685,39 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   em aberto (sem alterar a parcela), e confirmação de que a parcela paga
   não pôde ser excluída via RLS.
 
+## Ações "Cancelar parcela futura" e "Estornar pagamento" (Fase 5.9)
+
+- `cancelInstallment`: só cancela parcela com status `pending` **e**
+  `due_date >= hoje` — interpretação literal do critério ("parcela
+  pendente futura"). Uma parcela `pending` já vencida (que seria
+  classificada `overdue` pelo job da Fase 5.11, ainda não implementado)
+  não pode ser cancelada por esta ação; o motivo, se informado, é
+  anexado ao `notes` existente (sem sobrescrever histórico anterior).
+- `refundInstallmentPayment`: só aceita parcelas `paid` ou
+  `partially_paid` (que tenham `paid_amount > 0`); rejeita estorno maior
+  que o valor efetivamente pago. Cria um `financial_movement` tipo
+  `refund` **sem apagar** o `financial_movement` `income` original —
+  o histórico de caixa preserva os dois lançamentos.
+- Status `refunded` (já existia no schema desde a Fase 5.5) é usado só
+  quando o estorno zera o `paid_amount` da parcela (estorno total).
+  Estorno parcial mantém status `partially_paid` com `paid_amount`/
+  `remaining_amount` recalculados — não existe um status
+  "parcialmente estornada" dedicado, então a parcela volta a aparecer
+  como parcialmente paga com o saldo correto.
+- Mesma ordem de escrita da Fase 5.8: o `financial_movement` de estorno
+  é inserido antes de atualizar a parcela, com rollback (delete do
+  movimento) se a atualização falhar — nunca fica um estorno "invisível"
+  sem refletir na parcela.
+- Sem tela nova (aba financeira é a Fase 5.12); testado via página
+  temporária (removida antes do commit), mesmo padrão das Fases 5.5/5.8.
+- Testado localmente via Docker/Playwright: cancelar parcela futura
+  pendente (status `canceled`, `notes` preenchido), rejeição ao tentar
+  cancelar de novo, estorno total (parcela `paid` → `refunded`,
+  `paid_amount=0`), estorno parcial (`partially_paid` com saldo
+  recalculado), rejeição de estorno acima do valor pago, e confirmação
+  de que os dois `financial_movements` (pagamento original + estorno)
+  continuam ambos no banco.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
