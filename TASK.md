@@ -260,7 +260,7 @@
   contrato atual + ações (renovar, trocar plano, encerrar, pausar) conforme
   seção 11.13.
 
-- [ ] **5.13 — Tela de parcelas (com filtros) e tela de inadimplentes**
+- [x] **5.13 — Tela de parcelas (com filtros) e tela de inadimplentes**
   Critério de pronto: parcelas filtráveis por mês/status/aluno/plano/forma
   de pagamento; tela de inadimplentes lista aluno, responsável financeiro,
   valor e dias em atraso, com link para a ficha financeira do aluno.

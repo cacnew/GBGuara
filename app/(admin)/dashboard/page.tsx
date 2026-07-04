@@ -64,6 +64,18 @@ export default async function AdminDashboardPage() {
         >
           Planos
         </Link>
+        <Link
+          href="/finance/installments"
+          className={buttonVariants({ variant: "outline", className: "w-fit" })}
+        >
+          Parcelas
+        </Link>
+        <Link
+          href="/finance/overdue"
+          className={buttonVariants({ variant: "outline", className: "w-fit" })}
+        >
+          Inadimplentes
+        </Link>
       </div>
     </div>
   );

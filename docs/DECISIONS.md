@@ -789,6 +789,36 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   (situação/ações mudam), retomar, e encerrar (situação vira
   "Encerrado", ações de pausar/encerrar somem, só resta trocar/renovar).
 
+## Telas de parcelas e de inadimplentes (Fase 5.13)
+
+- Filtro por aluno usa uma **resolução em duas etapas** (busca
+  `students` por nome → `contract_students` pelos ids encontrados →
+  filtra `contract_installments` por `contract_id in (...)`) em vez de
+  um filtro aninhado de 3 níveis via embed do PostgREST
+  (`contracts.contract_students.students.name`), que não é
+  confiável/suportado de forma direta pelo supabase-js. Mesma lógica
+  para o filtro de plano, com interseção em JS quando os dois filtros
+  (aluno + plano) estão ativos ao mesmo tempo.
+- Filtros via `searchParams` (GET form), mesmo padrão já usado em
+  `/finance/plans` (Fase 5.2) — sem estado client-side, só recarrega a
+  página com a URL atualizada.
+- Tela de inadimplentes consome a view `overdue_students` (Fase 5.11) e
+  resolve "responsável financeiro" por aluno lendo
+  `students.current_contract_id` → `contracts.financial_responsible_*`
+  (mesma lógica de resolução já usada na Fase 5.6/5.12: `student` mostra
+  o próprio nome, `guardian` busca o nome em `guardians`, `other` usa o
+  texto salvo em `contracts.notes`).
+- "Dias em atraso" calculado em JS a partir de
+  `oldest_overdue_due_date` da view — sem coluna nova no banco.
+- Links adicionados ao dashboard placeholder (Fase 1.6) só como
+  navegação temporária; a Fase 7 substitui esse dashboard por um de
+  verdade.
+- Testado localmente via Docker/Playwright: filtro por nome de aluno
+  (com e sem resultado), aluno com parcela vencida aparecendo
+  corretamente na tela de inadimplentes com dias em atraso calculados
+  certos (55 dias entre 10/mai e 04/jul) e responsável financeiro
+  resolvido corretamente para o tipo `student`.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
