@@ -12,7 +12,7 @@ export default async function PriceTablesPage() {
   const supabase = await createClient();
   const { data: priceTables } = await supabase
     .from("price_tables")
-    .select("id, name, valid_from, valid_until, status")
+    .select("id, name, valid_from, valid_until, status, plans(id)")
     .order("valid_from", { ascending: false });
 
   return (
@@ -33,6 +33,7 @@ export default async function PriceTablesPage() {
               <th className="p-3 font-medium">Nome</th>
               <th className="p-3 font-medium">Vigência</th>
               <th className="p-3 font-medium">Status</th>
+              <th className="p-3 font-medium">Planos</th>
               <th className="p-3" />
             </tr>
           </thead>
@@ -47,7 +48,16 @@ export default async function PriceTablesPage() {
                     : " – sem fim definido"}
                 </td>
                 <td className="p-3">{STATUS_LABEL[pt.status]}</td>
+                <td className="p-3 text-muted-foreground">
+                  {pt.plans?.length ?? 0}
+                </td>
                 <td className="p-3 text-right">
+                  <Link
+                    href={`/finance/plans?priceTableId=${pt.id}`}
+                    className="mr-3 text-primary hover:underline"
+                  >
+                    Planos
+                  </Link>
                   <Link
                     href={`/finance/price-tables/${pt.id}/edit`}
                     className="text-primary hover:underline"
@@ -59,7 +69,7 @@ export default async function PriceTablesPage() {
             ))}
             {!priceTables?.length && (
               <tr>
-                <td className="p-3 text-muted-foreground" colSpan={4}>
+                <td className="p-3 text-muted-foreground" colSpan={5}>
                   Nenhuma tabela de preço cadastrada.
                 </td>
               </tr>

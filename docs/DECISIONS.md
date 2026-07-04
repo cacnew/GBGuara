@@ -513,6 +513,21 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
 - Testado localmente via Docker: criar tabela, editar (mudar vigência de
   fim e status para `legacy`), listagem retornando 200.
 
+## Planos (Fase 5.2)
+
+- `classes_per_week`/`classes_total` viram `null` no banco quando
+  `unlimited = true` (em vez de manter os campos numéricos com 0
+  "esquecido") — evita ambiguidade entre "sem limite" e "limite zero".
+- Preços em `numeric(10, 2)`, não `integer`/centavos — mantém simetria
+  com o `base_price`/`setup_fee` como reais e centavos direto, mais
+  simples de exibir sem conversão, aceitável na escala do MVP 1A.
+- Link "Planos" da listagem de tabelas de preço (Fase 5.1) e a contagem
+  de planos por tabela, adiados naquela fase por dependência circular,
+  finalmente ligados aqui.
+- Testado localmente via Docker: criar plano vinculado a uma tabela,
+  editar preço e status, e a contagem de planos aparecendo corretamente
+  na listagem de tabelas de preço.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

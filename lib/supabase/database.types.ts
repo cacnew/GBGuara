@@ -434,6 +434,78 @@ export type Database = {
           },
         ]
       }
+      plans: {
+        Row: {
+          base_price: number
+          classes_per_week: number | null
+          classes_total: number | null
+          created_at: string
+          description: string | null
+          duration_months: number
+          id: string
+          loyalty_months: number
+          name: string
+          plan_duration: string
+          price_table_id: string
+          school_id: string
+          setup_fee: number
+          status: string
+          unlimited: boolean
+          updated_at: string
+        }
+        Insert: {
+          base_price: number
+          classes_per_week?: number | null
+          classes_total?: number | null
+          created_at?: string
+          description?: string | null
+          duration_months?: number
+          id?: string
+          loyalty_months?: number
+          name: string
+          plan_duration: string
+          price_table_id: string
+          school_id: string
+          setup_fee?: number
+          status?: string
+          unlimited?: boolean
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          classes_per_week?: number | null
+          classes_total?: number | null
+          created_at?: string
+          description?: string | null
+          duration_months?: number
+          id?: string
+          loyalty_months?: number
+          name?: string
+          plan_duration?: string
+          price_table_id?: string
+          school_id?: string
+          setup_fee?: number
+          status?: string
+          unlimited?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plans_price_table_id_fkey"
+            columns: ["price_table_id"]
+            isOneToOne: false
+            referencedRelation: "price_tables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plans_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       price_tables: {
         Row: {
           created_at: string

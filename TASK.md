@@ -204,7 +204,7 @@
   Critério de pronto: admin cria/edita tabela de preços com vigência
   (`valid_from`/`valid_until`) e status (`active`/`inactive`/`legacy`).
 
-- [ ] **5.2 — Migration + CRUD de `plans` (vinculados a uma price_table)**
+- [x] **5.2 — Migration + CRUD de `plans` (vinculados a uma price_table)**
   Critério de pronto: dentro de uma tabela de preços, criar planos com
   duração, preço base, parcelamento sugerido; listagem mostra alunos/
   contratos vinculados (placeholder até Fase 5.4 existir).
