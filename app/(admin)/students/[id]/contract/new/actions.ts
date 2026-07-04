@@ -85,21 +85,6 @@ export async function createContract(
     };
   }
 
-  if (activeContract) {
-    const { error: endError } = await supabase
-      .from("contracts")
-      .update({
-        status: "finished",
-        end_date: new Date().toISOString().slice(0, 10),
-      })
-      .eq("id", activeContract.id)
-      .eq("school_id", profile.schoolId);
-
-    if (endError) {
-      return { error: endError.message };
-    }
-  }
-
   const originalPrice = plan.base_price;
   const finalPrice = calculateFinalPrice(
     originalPrice,
@@ -159,6 +144,7 @@ export async function createContract(
   });
 
   if (linkError) {
+    await supabase.from("contracts").delete().eq("id", contract.id);
     return { error: linkError.message };
   }
 
@@ -168,7 +154,24 @@ export async function createContract(
     .eq("id", studentId);
 
   if (studentError) {
+    await supabase.from("contract_students").delete().eq("contract_id", contract.id);
+    await supabase.from("contracts").delete().eq("id", contract.id);
     return { error: studentError.message };
+  }
+
+  if (activeContract) {
+    const { error: endError } = await supabase
+      .from("contracts")
+      .update({
+        status: "finished",
+        end_date: new Date().toISOString().slice(0, 10),
+      })
+      .eq("id", activeContract.id)
+      .eq("school_id", profile.schoolId);
+
+    if (endError) {
+      return { error: endError.message };
+    }
   }
 
   revalidatePath(`/students/${studentId}/edit`);
