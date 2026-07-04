@@ -13,7 +13,6 @@ export type PlanOption = {
   name: string;
   basePrice: number;
   setupFee: number;
-  planDuration: string;
 };
 
 export type GuardianOption = {

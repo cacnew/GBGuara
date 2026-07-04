@@ -30,7 +30,7 @@ export default async function NewContractPage({
         .order("name"),
       supabase
         .from("plans")
-        .select("id, price_table_id, name, base_price, setup_fee, plan_duration")
+        .select("id, price_table_id, name, base_price, setup_fee")
         .eq("status", "active")
         .order("name"),
       supabase
@@ -64,7 +64,6 @@ export default async function NewContractPage({
           name: plan.name,
           basePrice: plan.base_price,
           setupFee: plan.setup_fee,
-          planDuration: plan.plan_duration,
         }))}
         guardians={guardians}
         activeContract={activeContract}

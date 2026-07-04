@@ -45,6 +45,14 @@ export const contractSchema = z
         path: ["financialResponsibleOtherName"],
       });
     }
+
+    if (data.discountType === "percentage" && data.discountValue > 100) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Desconto percentual não pode passar de 100%",
+        path: ["discountValue"],
+      });
+    }
   });
 
 export type ContractInput = z.infer<typeof contractSchema>;

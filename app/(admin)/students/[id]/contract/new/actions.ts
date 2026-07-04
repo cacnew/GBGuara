@@ -170,6 +170,8 @@ export async function createContract(
       .eq("school_id", profile.schoolId);
 
     if (endError) {
+      await supabase.from("contract_students").delete().eq("contract_id", contract.id);
+      await supabase.from("contracts").delete().eq("id", contract.id);
       return { error: endError.message };
     }
   }
