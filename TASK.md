@@ -144,7 +144,7 @@
 
 ## Fase 3 — Turmas e sessões
 
-- [ ] **3.1 — Migration + CRUD de `class_groups` (turmas/horários)**
+- [x] **3.1 — Migration + CRUD de `class_groups` (turmas/horários)**
   Critério de pronto: admin cria turma com modalidade, professor principal,
   dias da semana, horário início/fim, `suggested_audience` (apenas
   informativo, sem bloqueio); listagem e edição funcionais.

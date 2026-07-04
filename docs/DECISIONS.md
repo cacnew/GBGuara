@@ -331,6 +331,24 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   primeira — não repetiu o bug de indexação `[0]` das fases anteriores.
 - Com isso, a Fase 2 (Cadastros base) está concluída.
 
+## Turmas / class_groups (Fase 3.1)
+
+- `week_days` como `smallint[]` (0=domingo ... 6=sábado), preenchido via
+  checkboxes no formulário. Para evitar o mesmo problema de tipagem
+  `z.coerce` já visto (Fase 2.2), o schema de validação usa
+  `z.array(z.string())` (valores dos checkboxes como string) e a
+  conversão para número acontece na Server Action antes do insert/update
+  — não no schema Zod usado pelo `useForm`.
+- `suggested_audience` é só orientativo (seção 3 do documento mestre): o
+  formulário deixa isso explícito com uma nota abaixo do campo. Nada no
+  banco ou na aplicação bloqueia matrícula/presença fora do público
+  sugerido.
+- `unit_id` preenchido automaticamente com a única unidade da escola,
+  mesmo padrão já usado em `students` (Fase 2.3).
+- Testado localmente via Docker: criar turma com múltiplos dias da semana,
+  editar trocando os dias e o horário, e conferir a listagem renderizando
+  os dias abreviados (`Ter, Qui`) e o horário corretamente.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

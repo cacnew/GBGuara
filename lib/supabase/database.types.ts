@@ -133,6 +133,89 @@ export type Database = {
           },
         ]
       }
+      class_groups: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          main_teacher_id: string | null
+          modality_id: string
+          name: string
+          notes: string | null
+          school_id: string
+          start_time: string
+          status: string
+          suggested_audience: string | null
+          suggested_student_limit: number | null
+          unit_id: string
+          updated_at: string
+          week_days: number[]
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          main_teacher_id?: string | null
+          modality_id: string
+          name: string
+          notes?: string | null
+          school_id: string
+          start_time: string
+          status?: string
+          suggested_audience?: string | null
+          suggested_student_limit?: number | null
+          unit_id: string
+          updated_at?: string
+          week_days?: number[]
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          main_teacher_id?: string | null
+          modality_id?: string
+          name?: string
+          notes?: string | null
+          school_id?: string
+          start_time?: string
+          status?: string
+          suggested_audience?: string | null
+          suggested_student_limit?: number | null
+          unit_id?: string
+          updated_at?: string
+          week_days?: number[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_groups_main_teacher_id_fkey"
+            columns: ["main_teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_groups_modality_id_fkey"
+            columns: ["modality_id"]
+            isOneToOne: false
+            referencedRelation: "modalities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_groups_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_groups_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guardians: {
         Row: {
           created_at: string
