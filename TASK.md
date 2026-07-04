@@ -245,7 +245,7 @@
   sem apagar histórico; estorno cria um `financial_movement` do tipo
   `refund` sem apagar o registro original.
 
-- [ ] **5.10 — Migration de `student_financial_exemptions`**
+- [x] **5.10 — Migration de `student_financial_exemptions`**
   Critério de pronto: tabela criada; aluno com isenção ativa não aparece
   como inadimplente mesmo com parcela vencida.
 

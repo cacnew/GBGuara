@@ -718,6 +718,19 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   de que os dois `financial_movements` (pagamento original + estorno)
   continuam ambos no banco.
 
+## Migration de `student_financial_exemptions` (Fase 5.10)
+
+- `reason` ganhou check constraint (`bolsista`, `isento`, `permuta`,
+  `cortesia`, `outro`) — o documento mestre só lista o campo sem
+  vocabulário fechado, mas segue o padrão já usado em `category` de
+  `financial_movements` (Fase 5.7).
+- Sem CRUD/tela nesta subtarefa (não pedido pelo critério) — a
+  view/query de inadimplência da Fase 5.11 é quem vai consumir
+  `status = 'active'` para excluir alunos isentos da lista de
+  inadimplentes.
+- Testado localmente via Docker: insert válido, rejeição de `reason`
+  fora do vocabulário controlado.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
