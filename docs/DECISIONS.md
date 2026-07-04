@@ -623,6 +623,33 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   anterior + notes gravadas corretamente), e bloqueio do submit sem a
   confirmação da checkbox de encerramento.
 
+## Migration de `financial_movements` (Fase 5.7)
+
+- **`financial_account_id` adicionado apesar de não estar no documento
+  mestre** (seção 11.7 lista `financial_movements` sem essa coluna).
+  Sem ela, `financial_accounts` (Fase 5.3, criada especificamente para
+  saber "onde o dinheiro entrou") nunca seria referenciada por nenhuma
+  outra tabela do sistema — ficaria um schema morto. Pergunta feita ao
+  usuário sobre isso não teve resposta a tempo; segui a opção
+  recomendada (adicionar a coluna). Se Carlos preferir seguir o
+  documento à risca, é reverter para nullable ou remover a coluna nesta
+  migration antes que outras fases passem a depender dela.
+- `financial_account_id` é `not null` (todo movimento de caixa precisa
+  saber onde o dinheiro entrou) com `on delete restrict` (não permite
+  apagar uma conta financeira que já tem movimentos vinculados).
+- `student_id` é `not null` — todo movimento financeiro deste MVP está
+  ligado a um aluno (sem despesas/movimentos administrativos genéricos
+  por enquanto). `contract_id` e `contract_installment_id` são opcionais
+  (`on delete set null`) para permitir movimentos futuros não ligados a
+  parcela específica (ex: `adjustment` avulso).
+- Só schema nesta fase — a criação automática de um `financial_movement`
+  tipo `income` ao registrar pagamento de parcela é implementada na
+  Fase 5.8, junto com a ação "Registrar pagamento".
+- Testado localmente via Docker: insert válido de `income` com
+  `financial_account_id`, rejeição de `type` inválido pela check
+  constraint, e rejeição de insert sem `financial_account_id` pela
+  constraint `not null`.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

@@ -230,7 +230,7 @@
   `contract_installments` em uma transação; se já existir contrato ativo,
   pergunta se deve encerrar o anterior antes de prosseguir.
 
-- [ ] **5.7 — Migration de `financial_movements`**
+- [x] **5.7 — Migration de `financial_movements`**
   Critério de pronto: tabela criada; ao registrar pagamento de parcela
   (5.8), um `financial_movement` do tipo `income` é criado automaticamente.
 

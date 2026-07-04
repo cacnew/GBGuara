@@ -596,6 +596,93 @@ export type Database = {
           },
         ]
       }
+      financial_movements: {
+        Row: {
+          amount: number
+          category: string
+          contract_id: string | null
+          contract_installment_id: string | null
+          created_at: string
+          description: string | null
+          financial_account_id: string
+          id: string
+          movement_date: string
+          payment_method: string | null
+          school_id: string
+          student_id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category?: string
+          contract_id?: string | null
+          contract_installment_id?: string | null
+          created_at?: string
+          description?: string | null
+          financial_account_id: string
+          id?: string
+          movement_date?: string
+          payment_method?: string | null
+          school_id: string
+          student_id: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          contract_id?: string | null
+          contract_installment_id?: string | null
+          created_at?: string
+          description?: string | null
+          financial_account_id?: string
+          id?: string
+          movement_date?: string
+          payment_method?: string | null
+          school_id?: string
+          student_id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_movements_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_movements_contract_installment_id_fkey"
+            columns: ["contract_installment_id"]
+            isOneToOne: false
+            referencedRelation: "contract_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_movements_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_movements_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_movements_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guardians: {
         Row: {
           created_at: string
