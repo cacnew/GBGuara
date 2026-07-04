@@ -216,6 +216,71 @@ export type Database = {
           },
         ]
       }
+      class_sessions: {
+        Row: {
+          actual_teacher_id: string | null
+          class_group_id: string
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          school_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          actual_teacher_id?: string | null
+          class_group_id: string
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          school_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_teacher_id?: string | null
+          class_group_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          school_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_sessions_actual_teacher_id_fkey"
+            columns: ["actual_teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_sessions_class_group_id_fkey"
+            columns: ["class_group_id"]
+            isOneToOne: false
+            referencedRelation: "class_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_sessions_class_group_id_fkey"
+            columns: ["class_group_id"]
+            isOneToOne: false
+            referencedRelation: "todays_class_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_sessions_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guardians: {
         Row: {
           created_at: string
@@ -713,7 +778,89 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      todays_class_groups: {
+        Row: {
+          created_at: string | null
+          end_time: string | null
+          id: string | null
+          main_teacher_id: string | null
+          modality_id: string | null
+          name: string | null
+          notes: string | null
+          school_id: string | null
+          start_time: string | null
+          status: string | null
+          suggested_audience: string | null
+          suggested_student_limit: number | null
+          unit_id: string | null
+          updated_at: string | null
+          week_days: number[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string | null
+          main_teacher_id?: string | null
+          modality_id?: string | null
+          name?: string | null
+          notes?: string | null
+          school_id?: string | null
+          start_time?: string | null
+          status?: string | null
+          suggested_audience?: string | null
+          suggested_student_limit?: number | null
+          unit_id?: string | null
+          updated_at?: string | null
+          week_days?: number[] | null
+        }
+        Update: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string | null
+          main_teacher_id?: string | null
+          modality_id?: string | null
+          name?: string | null
+          notes?: string | null
+          school_id?: string | null
+          start_time?: string | null
+          status?: string | null
+          suggested_audience?: string | null
+          suggested_student_limit?: number | null
+          unit_id?: string | null
+          updated_at?: string | null
+          week_days?: number[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_groups_main_teacher_id_fkey"
+            columns: ["main_teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_groups_modality_id_fkey"
+            columns: ["modality_id"]
+            isOneToOne: false
+            referencedRelation: "modalities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_groups_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_groups_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       create_school_with_admin: {

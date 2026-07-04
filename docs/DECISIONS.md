@@ -349,6 +349,29 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   editar trocando os dias e o horário, e conferir a listagem renderizando
   os dias abreviados (`Ter, Qui`) e o horário corretamente.
 
+## Turmas do dia: view + abrir/reaproveitar sessão (Fase 3.2)
+
+- `todays_class_groups` é uma `VIEW` (não uma função) que filtra
+  `class_groups` ativas cujo `week_days` contém o dia da semana de
+  `current_date` (`extract(dow from current_date)`, mesma convenção
+  0=domingo usada no formulário de turmas). Recalcula sozinha a cada dia,
+  sem job nenhum.
+- **`security_invoker = true` é obrigatório na view**: por padrão, uma
+  view no Postgres roda com o privilégio de quem a criou (`postgres`,
+  que bypassa RLS localmente por ser superuser) — sem essa opção, a view
+  vazaria turmas de **todas** as escolas para qualquer usuário
+  autenticado, silenciosamente. Confirmado o comportamento correto
+  testando acesso anônimo à view (bloqueado, igual às tabelas).
+- `openOrReuseClassSession()` (`modules/classes/sessions.ts`, usada tanto
+  por admin quanto por professor) usa a constraint
+  `unique(class_group_id, date)` para nunca duplicar a sessão do dia;
+  trata também o caso de corrida (dois cliques quase simultâneos) via o
+  código de erro `23505` do Postgres, buscando a sessão que "venceu" a
+  corrida em vez de falhar.
+- Testado localmente via Docker: turma com o dia de hoje aparece na view;
+  abrir sessão duas vezes retorna o mesmo `id`; acesso anônimo à view
+  bloqueado.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

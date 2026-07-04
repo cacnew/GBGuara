@@ -149,7 +149,7 @@
   dias da semana, horário início/fim, `suggested_audience` (apenas
   informativo, sem bloqueio); listagem e edição funcionais.
 
-- [ ] **3.2 — Migration de `class_sessions` + geração de "turmas do dia"**
+- [x] **3.2 — Migration de `class_sessions` + geração de "turmas do dia"**
   Critério de pronto: dado o `week_days`/horário de cada `class_group`,
   uma query/view retorna as turmas previstas para hoje; abrir uma sessão
   cria (ou reaproveita) o registro em `class_sessions` para a data atual.
