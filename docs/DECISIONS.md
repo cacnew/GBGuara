@@ -731,6 +731,27 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
 - Testado localmente via Docker: insert válido, rejeição de `reason`
   fora do vocabulário controlado.
 
+## View de inadimplência `overdue_students` (Fase 5.11)
+
+- Implementada como **view**, não como job/rotina agendada — o critério
+  da subtarefa já descreve explicitamente "query (view ou função)".
+  Calcular em leitura evita manter um cron só para marcar parcelas como
+  vencidas, e sempre reflete a data atual sem depender de quando um job
+  rodou pela última vez.
+- `security_invoker = true` (mesmo padrão de `todays_class_groups`,
+  Fase 3.2) — sem isso a view roda com privilégio de dono e vazaria
+  inadimplentes de outras escolas.
+- Um aluno só entra na view se tiver parcela `pending`/`partially_paid`
+  com `due_date < hoje` **e** não tiver isenção `active` vigente (Fase
+  5.10) na data atual.
+- Retorna agregado por aluno (`overdue_installments_count`,
+  `overdue_amount`, `oldest_overdue_due_date`) — suficiente para a tela
+  de inadimplentes (Fase 5.13) e os cards do dashboard financeiro
+  (Fase 7.1/7.3), sem precisar expor as parcelas individuais aqui.
+- Testado localmente via Docker: aluno com parcela vencida e sem
+  isenção aparece na view; aluno com parcela igualmente vencida mas com
+  isenção `active` fica corretamente de fora.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

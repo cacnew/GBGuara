@@ -1357,6 +1357,31 @@ export type Database = {
       }
     }
     Views: {
+      overdue_students: {
+        Row: {
+          oldest_overdue_due_date: string | null
+          overdue_amount: number | null
+          overdue_installments_count: number | null
+          school_id: string | null
+          student_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_installments_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_students_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       todays_class_groups: {
         Row: {
           created_at: string | null

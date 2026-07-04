@@ -249,7 +249,7 @@
   Critério de pronto: tabela criada; aluno com isenção ativa não aparece
   como inadimplente mesmo com parcela vencida.
 
-- [ ] **5.11 — Job/rotina de identificação de inadimplência**
+- [x] **5.11 — Job/rotina de identificação de inadimplência**
   Critério de pronto: query (view ou função) que classifica aluno como
   `overdue` quando há parcela vencida e não paga, respeitando isenções
   ativas; usada nas telas 5.13 e no dashboard financeiro.
