@@ -296,7 +296,7 @@ export function StepResponsible({
           {!guardians.length && (
             <p className="text-sm text-destructive">
               Este aluno não tem responsáveis vinculados. Cadastre um na
-              seção "Responsáveis" da ficha antes de continuar.
+              seção &quot;Responsáveis&quot; da ficha antes de continuar.
             </p>
           )}
         </div>
