@@ -879,6 +879,20 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   Fase 6.1; indicadores mostraram corretamente 2 presenças e "2 meses"
   para um aluno matriculado há 64 dias sem graduação prévia.
 
+## Componentes genéricos de dashboard (Fase 7.0)
+
+- `MetricCard`: label + valor, `href` opcional (vira link clicável),
+  `variant="destructive"` para métricas de alerta (ex: inadimplentes).
+- `SummaryList`: título + lista de itens (`primary`/`secondary`/
+  `trailing`), `href` opcional por item, `viewAllHref` opcional no
+  cabeçalho, estado vazio com mensagem customizável.
+- Ambos client-agnostic (sem "use client") — funcionam tanto em Server
+  Components quanto Client Components, já que só usam `next/link` e
+  `cn()`, sem estado.
+- Testado visualmente via página temporária (removida antes do commit):
+  cards com/sem link, variante destructive, lista com itens e lista
+  vazia — todos renderizando conforme a paleta Tatame Red.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

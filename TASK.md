@@ -296,7 +296,7 @@
 > `components/dashboard` — podem ser feitos em paralelo por dev diferente
 > depois que os cards genéricos (7.0) estiverem prontos.
 
-- [ ] **7.0 — Componentes genéricos de dashboard (`components/dashboard`)**
+- [x] **7.0 — Componentes genéricos de dashboard (`components/dashboard`)**
   Critério de pronto: componente de "card de métrica" e "lista resumida"
   reutilizáveis, usados pelas próximas duas subtarefas.
 
