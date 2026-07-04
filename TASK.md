@@ -181,7 +181,7 @@
   adicionado, mesmo sem vínculo prévio com a turma; layout otimizado para uso
   com uma mão no celular (botões grandes, sem poluição visual).
 
-- [ ] **4.4 — Lista de presentes da sessão + remoção de presença incorreta**
+- [x] **4.4 — Lista de presentes da sessão + remoção de presença incorreta**
   Critério de pronto: dentro da tela de chamada, lista de quem já foi
   marcado presente na sessão, com opção de desfazer (remover) um registro
   indevido antes de fechar a chamada.

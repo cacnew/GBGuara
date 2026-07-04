@@ -472,6 +472,17 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   mensagem clara — confirmado tanto via chamada direta da action quanto
   na página renderizada ("Presentes (1)").
 
+## Remover presença incorreta (Fase 4.4)
+
+- `removeAttendance()` já existia desde a Fase 4.3 (implementada junto,
+  faz sentido dado o acoplamento natural das duas telas); esta subtarefa
+  só wireou o botão "Remover" em cada linha da lista de presentes no
+  `attendance-client.tsx`.
+- Confirmado que remover e marcar de novo funciona sem ficar "preso" pela
+  constraint `unique(class_session_id, student_id)` — a remoção é um
+  delete de verdade, não um soft-delete, então a constraint libera
+  imediatamente.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
