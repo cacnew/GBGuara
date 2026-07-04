@@ -528,6 +528,24 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   editar preço e status, e a contagem de planos aparecendo corretamente
   na listagem de tabelas de preço.
 
+## Contas financeiras: seed via trigger, não só seed.sql (Fase 5.3)
+
+- O critério da subtarefa pedia "seed de contas padrão aplicado no
+  seed.sql", mas `supabase/seed.sql` só roda uma vez, no `db reset`
+  local — não afeta escolas reais criadas via onboarding em produção.
+  Segui o mesmo padrão das Fases 2.1/2.2 (unidade default, modalidades,
+  faixas): o seed de `financial_accounts` (Caixa, Conta Bancária, Pix,
+  Cartão) entra no trigger consolidado `create_default_school_setup`,
+  garantindo que toda escola nova — local ou em produção — já nasce
+  pronta para registrar pagamento, não só a escola de demonstração do
+  ambiente local.
+- Sem CRUD nesta subtarefa (não pedido pelo critério) — só a migration e
+  o seed automático. Uma tela de gestão de contas pode entrar depois se
+  necessário.
+- Testado localmente via Docker: escola nova recebe as 4 contas padrão
+  automaticamente, e o restante do trigger (modalidades, faixas)
+  continua funcionando após a alteração.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

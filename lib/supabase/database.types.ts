@@ -346,6 +346,44 @@ export type Database = {
           },
         ]
       }
+      financial_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          school_id: string
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          school_id: string
+          status?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          school_id?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_accounts_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guardians: {
         Row: {
           created_at: string

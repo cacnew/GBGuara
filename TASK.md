@@ -209,7 +209,7 @@
   duração, preço base, parcelamento sugerido; listagem mostra alunos/
   contratos vinculados (placeholder até Fase 5.4 existir).
 
-- [ ] **5.3 — Migration de `financial_accounts` (com seed mínimo: caixa/pix/banco)**
+- [x] **5.3 — Migration de `financial_accounts` (com seed mínimo: caixa/pix/banco)**
   Critério de pronto: tabela criada com RLS; seed de contas padrão aplicado
   no `seed.sql`.
 
