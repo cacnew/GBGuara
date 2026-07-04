@@ -771,6 +771,61 @@ export type Database = {
           },
         ]
       }
+      payment_adjustments: {
+        Row: {
+          adjustment_type: string
+          amount: number
+          contract_id: string
+          created_at: string
+          created_by_user_id: string | null
+          id: string
+          reason: string | null
+          school_id: string
+        }
+        Insert: {
+          adjustment_type: string
+          amount: number
+          contract_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          reason?: string | null
+          school_id: string
+        }
+        Update: {
+          adjustment_type?: string
+          amount?: number
+          contract_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          reason?: string | null
+          school_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_adjustments_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_adjustments_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_adjustments_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           base_price: number

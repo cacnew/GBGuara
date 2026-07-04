@@ -819,6 +819,19 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   certos (55 dias entre 10/mai e 04/jul) e responsável financeiro
   resolvido corretamente para o tipo `student`.
 
+## Migration de `payment_adjustments` (Fase 5.14)
+
+- Modelagem mínima, sem tela — exatamente como o documento mestre
+  autoriza para o MVP 1A ("pode deixar apenas modelado").
+- Sem `updated_at`/policy de update: o schema do documento mestre não
+  tem coluna `updated_at`, e por natureza é um log de ajustes (append
+  only) — só `grant select, insert`, sem update/delete.
+- `created_by_user_id` referencia `users` com `on delete set null`
+  (preserva o registro do ajuste mesmo se o usuário que o criou for
+  removido depois).
+- Testado localmente via Docker: insert válido, rejeição de
+  `adjustment_type` fora do vocabulário controlado.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

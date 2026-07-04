@@ -265,7 +265,7 @@
   de pagamento; tela de inadimplentes lista aluno, responsável financeiro,
   valor e dias em atraso, com link para a ficha financeira do aluno.
 
-- [ ] **5.14 — Migration de `payment_adjustments` (modelagem mínima)**
+- [x] **5.14 — Migration de `payment_adjustments` (modelagem mínima)**
   Critério de pronto: tabela criada e migrada conforme seção 11.10; sem
   tela dedicada — apenas schema pronto para uso futuro (renegociação).
 
