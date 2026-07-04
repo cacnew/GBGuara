@@ -300,7 +300,7 @@
   Critério de pronto: componente de "card de métrica" e "lista resumida"
   reutilizáveis, usados pelas próximas duas subtarefas.
 
-- [ ] **7.1 — Dashboard do administrador**
+- [x] **7.1 — Dashboard do administrador**
   Critério de pronto: cards e listas da seção 14 (admin) implementados
   usando queries reais (alunos ativos, inadimplentes, receita prevista/
   recebida do mês, presenças no mês, ausentes há 15+ dias, próximos

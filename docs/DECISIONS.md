@@ -893,6 +893,25 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   cards com/sem link, variante destructive, lista com itens e lista
   vazia — todos renderizando conforme a paleta Tatame Red.
 
+## Dashboard do administrador (Fase 7.1)
+
+- "Ausentes há 15+ dias" calculado em JS (sem view nova): busca todos os
+  alunos ativos + todas as presenças `presente`, reduz para o último
+  `class_sessions.date` por aluno, e compara com `enrollment_date` para
+  quem nunca compareceu — evita GROUP BY complexo via supabase-js.
+- Cards e listas usam contagens separadas: a lista de inadimplentes
+  mostra só os 5 primeiros, mas o card usa uma contagem `head: true`
+  independente para não subestimar o total.
+- Embed ambíguo em `graduation_history` (duas FKs para `belts`) resolvido
+  com hint `belts!new_belt_id(name)`.
+- Mantidos os links de navegação rápida já existentes abaixo dos cards
+  novos (não removidos) — ainda úteis até a Fase 8.
+- Testado localmente via Docker/Playwright com cenário cobrindo todos os
+  10 cards e as 6 listas simultaneamente (aluno com presença hoje +
+  pagamento do mês + graduação recente + turma do dia; aluno com parcela
+  vencida há 55 dias): todos os valores calculados bateram com o
+  esperado manualmente.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
