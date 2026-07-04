@@ -16,7 +16,10 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
       <div className="flex flex-wrap gap-3">
-        <Link href="/teachers/new" className={buttonVariants({ className: "w-fit" })}>
+        <Link href="/students" className={buttonVariants({ className: "w-fit" })}>
+          Alunos
+        </Link>
+        <Link href="/teachers/new" className={buttonVariants({ variant: "outline", className: "w-fit" })}>
           Cadastrar professor
         </Link>
         <Link

@@ -233,6 +233,31 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   retornando 200 para admin autenticado e redirecionando para `/login`
   quando não autenticado.
 
+## CRUD de alunos (Fase 2.3)
+
+- `students.unit_id` é preenchido automaticamente com a única unidade da
+  escola (não há seletor no formulário) — coerente com o MVP 1A não ter
+  CRUD de unidades (seção 10.2). Quando existir multiunidade de verdade
+  (fora do MVP 1A), o formulário passa a expor a escolha.
+- `main_teacher_id` (Fase 2.5, tabela `teachers` ainda não existe) e
+  `current_contract_id` (Fase 5, tabela `contracts` ainda não existe)
+  ficam sem `FOREIGN KEY` por enquanto — a constraint é adicionada via
+  `ALTER TABLE` na migration da fase correspondente, quando a tabela
+  referenciada finalmente existir. `current_belt_id` já tem FK, pois
+  `belts` foi criada na Fase 2.2.
+- Formulário cobre os campos de uso mais comum no dia a dia (nome,
+  nascimento, CPF, telefone, e-mail, endereço, contato de emergência,
+  status, observações). Os campos de certidão médica, consentimento LGPD,
+  foto e faixa/graduação atual existem no schema mas ainda não têm UI —
+  entram nas fases que os utilizam de fato (graduação na Fase 6, foto na
+  Fase 8.1).
+- Busca por nome (`ilike`) e filtro por status implementados via query
+  string na própria listagem (`/students?q=...&status=...`), sem
+  JavaScript de client extra.
+- Testado localmente via Docker: aluno criado com `unit_id` preenchido
+  automaticamente, editado (nome e status), encontrado pela busca por
+  nome, e rota `/students` bloqueada para não autenticado.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

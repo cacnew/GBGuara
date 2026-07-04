@@ -120,7 +120,7 @@
   Critério de pronto: CRUD de sistemas de faixa e faixas individuais;
   seeds de jiu-jitsu adulto e kids aplicados conforme seção 10.10.
 
-- [ ] **2.3 — Migration + CRUD completo de `students`**
+- [x] **2.3 — Migration + CRUD completo de `students`**
   Critério de pronto: cadastro, edição, listagem com busca por nome/status,
   e inativação de aluno; campos obrigatórios validados com Zod
   (nome, data de nascimento; demais opcionais conforme seção 10.4).
