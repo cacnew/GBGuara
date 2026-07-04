@@ -578,6 +578,51 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   service_role, para validar a RLS do trigger de verdade): 1x, 3x e 12x,
   soma das parcelas conferindo com o valor final em todos os casos.
 
+## Fluxo "Associar plano ao aluno" (Fase 5.6)
+
+- Rota dedicada `students/[id]/contract/new` (em vez de modal/drawer)
+  para dar espaço de tela ao wizard de 7 passos, sem competir com o
+  resto da ficha do aluno.
+- Wizard controlado por `useState` puro no client, sem lib de state
+  machine — decisão consciente de YAGNI, o fluxo é linear e não precisa
+  de histórico/branching complexo.
+- Responsável financeiro tipo `other` (empresa/terceiro sem cadastro):
+  como `contracts.financial_responsible_id` não tem FK e não existe
+  campo de nome livre no schema, o nome informado é gravado em
+  `contracts.notes` (`financial_responsible_id` fica `null`) em vez de
+  criar uma migration nova só para isso.
+- Responsável tipo `guardian` só lista responsáveis já vinculados ao
+  aluno (via `student_guardians`), não busca entre todos os guardians da
+  escola — evita vincular financeiramente alguém que a ficha do aluno
+  ainda não reconhece como responsável.
+- O preço final é **sempre recalculado no servidor** a partir do
+  `base_price` do plano + desconto — o valor calculado no client é só
+  preview de UX, nunca é confiado pela Server Action.
+- Regra "só um contrato ativo por aluno" (pendente desde a Fase 5.4):
+  a Server Action rejeita a criação se já existir um contrato `active`
+  e o client não tiver confirmado explicitamente encerrar o anterior
+  (`endPreviousContractId` precisa bater com o id do contrato ativo
+  encontrado no servidor — nunca confia apenas na flag do client).
+- **Ordem das escritas importa**: encerrar o contrato anterior é sempre
+  o **último** passo, só depois que o novo `contract` +
+  `contract_students` + `students.current_contract_id` já foram
+  gravados com sucesso (com limpeza manual/delete se algum passo
+  intermediário falhar). Sem isso, uma falha parcial no meio da
+  sequência (sem transação/RPC — Server Actions deste projeto fazem
+  chamadas sequenciais ao Supabase, não RPC) podia deixar o aluno sem
+  nenhum contrato ativo, pior do que a regra que a subtarefa deveria
+  proteger. Risco aceito e não resolvido nesta fase: dois cliques
+  simultâneos ainda podem criar dois contratos ativos (race condition
+  de leitura-antes-da-escrita) — precisaria de constraint/índice parcial
+  no banco para fechar de verdade; deixado como risco conhecido dado o
+  uso real (admin único por escola, não concorrente).
+- Testado localmente via Docker/Playwright com usuário autenticado real:
+  fluxo completo (aluno sem contrato, 3x com soma batendo em
+  183.33+183.33+183.34), desconto percentual + responsável `guardian`,
+  troca de contrato ativo com responsável `other` (encerramento do
+  anterior + notes gravadas corretamente), e bloqueio do submit sem a
+  confirmação da checkbox de encerramento.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

@@ -223,7 +223,7 @@
   corretamente, ajustando arredondamento na última parcela; testado com
   1x, 3x e 12x.
 
-- [ ] **5.6 — Fluxo "Associar plano ao aluno" (criação de contrato completo)**
+- [x] **5.6 — Fluxo "Associar plano ao aluno" (criação de contrato completo)**
   Critério de pronto: formulário na ficha do aluno percorre tabela → plano →
   datas → desconto → valor final → parcelamento → responsável financeiro →
   confirmação; ao salvar, cria `contract` + `contract_students` +
