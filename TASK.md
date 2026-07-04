@@ -278,11 +278,11 @@
   `current_belt_id`/`current_degree`/`last_graduation_date` no `students`
   em uma transação.
 
-- [ ] **6.2 — Tela "Registrar graduação" na ficha do aluno**
+- [x] **6.2 — Tela "Registrar graduação" na ficha do aluno**
   Critério de pronto: formulário mostra faixa/grau atual, permite definir
   nova faixa/grau, data e observações do professor; grava histórico.
 
-- [ ] **6.3 — Indicadores de apoio à graduação (frequência e tempo desde última graduação)**
+- [x] **6.3 — Indicadores de apoio à graduação (frequência e tempo desde última graduação)**
   Critério de pronto: ficha do aluno mostra nº de presenças desde a última
   graduação e tempo decorrido, como indicador — sem bloquear ou sugerir
   graduação automaticamente.

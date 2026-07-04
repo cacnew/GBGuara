@@ -8,6 +8,7 @@ import { GuardiansSection, type GuardianLink } from "./guardians-section";
 import { AttendanceHistory } from "./attendance-history";
 import { FinancialSection } from "./financial-section";
 import { getStudentFinancialSummary } from "./financial-queries";
+import { GraduationSection } from "./graduation-section";
 
 export default async function EditStudentPage({
   params,
@@ -19,7 +20,7 @@ export default async function EditStudentPage({
   const { data: student } = await supabase
     .from("students")
     .select(
-      "id, name, birth_date, cpf, phone, email, address, emergency_contact, status, notes",
+      "id, name, birth_date, cpf, phone, email, address, emergency_contact, status, notes, current_degree, last_graduation_date, enrollment_date, belts(name)",
     )
     .eq("id", id)
     .single();
@@ -48,6 +49,32 @@ export default async function EditStudentPage({
     .from("financial_accounts")
     .select("id, name")
     .eq("status", "active");
+
+  const { data: beltSystems } = await supabase
+    .from("belt_systems")
+    .select("id, name")
+    .order("name");
+  const { data: belts } = await supabase
+    .from("belts")
+    .select("id, belt_system_id, name, ordering")
+    .order("ordering");
+  const { data: teachers } = await supabase
+    .from("teachers")
+    .select("id, name")
+    .order("name");
+
+  const graduationReferenceDate = student.last_graduation_date ?? student.enrollment_date;
+  const { count: attendancesSinceLastGraduation } = await supabase
+    .from("attendances")
+    .select("id, class_sessions!inner(date)", { count: "exact", head: true })
+    .eq("student_id", student.id)
+    .eq("status", "presente")
+    .gte("class_sessions.date", graduationReferenceDate);
+
+  const daysSinceLastGraduation = Math.floor(
+    (new Date().getTime() - new Date(`${graduationReferenceDate}T00:00:00Z`).getTime()) /
+      (1000 * 60 * 60 * 24),
+  );
 
   return (
     <div className="flex flex-1 flex-col items-center gap-10 p-6 text-foreground">
@@ -81,6 +108,21 @@ export default async function EditStudentPage({
         studentId={student.id}
         summary={financialSummary}
         accounts={financialAccounts ?? []}
+      />
+      <GraduationSection
+        studentId={student.id}
+        currentBeltName={student.belts?.name ?? null}
+        currentDegree={student.current_degree}
+        beltSystems={beltSystems ?? []}
+        belts={(belts ?? []).map((b) => ({
+          id: b.id,
+          beltSystemId: b.belt_system_id,
+          name: b.name,
+          ordering: b.ordering,
+        }))}
+        teachers={teachers ?? []}
+        attendancesSinceLastGraduation={attendancesSinceLastGraduation ?? 0}
+        daysSinceLastGraduation={daysSinceLastGraduation}
       />
       <AttendanceHistory studentId={student.id} />
     </div>

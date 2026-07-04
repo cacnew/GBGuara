@@ -851,6 +851,34 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   `current_degree` e `last_graduation_date` do aluno corretamente na
   mesma operação.
 
+## Tela "Registrar graduação" e indicadores (Fases 6.2/6.3)
+
+- Formulário organizado por **sistema de faixas** (`belt_systems`, já
+  nomeado por modalidade+público como "Jiu-Jitsu Adulto"/"Jiu-Jitsu
+  Kids") em vez de um cascata modalidade → público → sistema — evita um
+  terceiro nível de seleção quando o nome do sistema já identifica os
+  dois primeiros.
+- `modality_id` do registro em `graduation_history` é resolvido no
+  servidor a partir da faixa escolhida (`belts.belt_system_id →
+  belt_systems.modality_id`), não pedido no formulário — o admin só
+  escolhe faixa, não precisa escolher modalidade duas vezes.
+- "Professor responsável" é opcional e é uma lista de todos os
+  professores da escola (não restrito ao professor logado), já que essa
+  tela vive em `(admin)` — quem registra é o admin em nome de qualquer
+  professor.
+- Indicadores (6.3) usam como referência `last_graduation_date` quando
+  existe, senão `enrollment_date` (aluno nunca graduado) — nunca ficam
+  sem uma data de referência.
+- "Presenças desde a última graduação" conta só `status = 'presente'`
+  em `attendances` com `class_sessions.date >=` a data de referência —
+  são indicadores de apoio, não bloqueiam nem sugerem graduação
+  automaticamente (conforme o critério exige).
+- Testado localmente via Docker/Playwright: formulário mostra faixa/grau
+  atual corretamente, filtra faixas pelo sistema selecionado, grava
+  `graduation_history` e atualiza a faixa/grau exibidos via o trigger da
+  Fase 6.1; indicadores mostraram corretamente 2 presenças e "2 meses"
+  para um aluno matriculado há 64 dias sem graduação prévia.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
