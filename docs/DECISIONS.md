@@ -912,6 +912,23 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   vencida há 55 dias): todos os valores calculados bateram com o
   esperado manualmente.
 
+## Dashboard do professor (Fase 7.2)
+
+- "Acesso rápido à chamada" já estava coberto desde a Fase 3.3
+  (`OpenSessionButton` dentro de `TodaysClasses`) — não duplicado aqui.
+- **`teachers` e `users` não têm FK entre si** (decisão da Fase 2.5:
+  ficha de professor separada do login) — o professor logado é
+  resolvido por `teachers.email = profile.email`. Se não houver ficha
+  de professor com esse e-mail, "últimas chamadas" e "observações
+  recentes" ficam vazias (sem quebrar a página).
+- "Alunos recentes" é escopo da escola inteira (não só alunos do
+  professor) — não há relação direta aluno↔professor além de
+  `main_teacher_id`, e o critério não especifica o filtro.
+- "Observações recentes" usa `attendances.student_notes` filtrado pelas
+  sessões cujo `actual_teacher_id` é o professor logado.
+- Testado localmente via Docker/Playwright logado como professor: as
+  três listas novas renderizam corretamente em estado vazio, sem erros.
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle

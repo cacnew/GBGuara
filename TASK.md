@@ -306,7 +306,7 @@
   recebida do mês, presenças no mês, ausentes há 15+ dias, próximos
   vencimentos, últimas presenças/graduações/pagamentos, turmas do dia).
 
-- [ ] **7.2 — Dashboard do professor**
+- [x] **7.2 — Dashboard do professor**
   Critério de pronto: turmas do dia, acesso rápido à chamada, últimas
   chamadas feitas por ele, alunos recentes e observações recentes.
 
