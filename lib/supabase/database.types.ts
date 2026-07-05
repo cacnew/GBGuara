@@ -94,6 +94,13 @@ export type Database = {
             foreignKeyName: "attendances_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "birthday_students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendances_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
@@ -507,6 +514,13 @@ export type Database = {
             foreignKeyName: "contract_students_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "birthday_students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_students_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
@@ -726,6 +740,13 @@ export type Database = {
             foreignKeyName: "financial_movements_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "birthday_students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_movements_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
@@ -811,6 +832,13 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_history_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "birthday_students"
             referencedColumns: ["id"]
           },
           {
@@ -910,6 +938,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_converted_student_id_fkey"
+            columns: ["converted_student_id"]
+            isOneToOne: false
+            referencedRelation: "birthday_students"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_converted_student_id_fkey"
             columns: ["converted_student_id"]
@@ -1229,6 +1264,13 @@ export type Database = {
             foreignKeyName: "student_financial_exemptions_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "birthday_students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_financial_exemptions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
@@ -1278,6 +1320,13 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_guardians_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "birthday_students"
             referencedColumns: ["id"]
           },
           {
@@ -1608,6 +1657,44 @@ export type Database = {
       }
     }
     Views: {
+      birthday_students: {
+        Row: {
+          birth_date: string | null
+          birth_day: number | null
+          id: string | null
+          name: string | null
+          phone: string | null
+          photo_url: string | null
+          school_id: string | null
+        }
+        Insert: {
+          birth_date?: string | null
+          birth_day?: never
+          id?: string | null
+          name?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          school_id?: string | null
+        }
+        Update: {
+          birth_date?: string | null
+          birth_day?: never
+          id?: string | null
+          name?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          school_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       overdue_students: {
         Row: {
           oldest_overdue_due_date: string | null
@@ -1622,6 +1709,13 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_students_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "birthday_students"
             referencedColumns: ["id"]
           },
           {

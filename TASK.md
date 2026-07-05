@@ -416,7 +416,7 @@
   partir da ficha dele, usando `EVOLUTION_API_URL`/`EVOLUTION_API_KEY` do
   `.env`; sem automação/régua ainda.
 
-- [ ] **8.4 — Lista de aniversariantes do mês**
+- [x] **8.4 — Lista de aniversariantes do mês**
   Critério de pronto: tela/lista com aniversariantes do mês corrente,
   reaproveitando o componente de busca de aluno quando fizer sentido.
 
