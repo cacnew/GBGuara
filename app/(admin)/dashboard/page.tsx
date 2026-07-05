@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { getCurrentUserProfile } from "@/modules/users/queries";
-import { buttonVariants } from "@/components/ui/button";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { SummaryList } from "@/components/dashboard/summary-list";
 import { getAdminDashboardData } from "./queries";
@@ -137,78 +135,6 @@ export default async function AdminDashboardPage() {
             trailing: formatMoney(row.amount),
           }))}
         />
-      </div>
-
-      <div className="flex flex-wrap gap-3">
-        <Link href="/students" className={buttonVariants({ className: "w-fit" })}>
-          Alunos
-        </Link>
-        <Link href="/leads" className={buttonVariants({ variant: "outline", className: "w-fit" })}>
-          Leads
-        </Link>
-        <Link
-          href="/students/birthdays"
-          className={buttonVariants({ variant: "outline", className: "w-fit" })}
-        >
-          Aniversariantes
-        </Link>
-        <Link href="/today" className={buttonVariants({ variant: "outline", className: "w-fit" })}>
-          Turmas do dia
-        </Link>
-        <Link href="/classes" className={buttonVariants({ variant: "outline", className: "w-fit" })}>
-          Turmas
-        </Link>
-        <Link
-          href="/classes/sessions"
-          className={buttonVariants({ variant: "outline", className: "w-fit" })}
-        >
-          Sessões futuras
-        </Link>
-        <Link href="/teachers" className={buttonVariants({ variant: "outline", className: "w-fit" })}>
-          Professores
-        </Link>
-        <Link
-          href="/teachers/login/new"
-          className={buttonVariants({ variant: "outline", className: "w-fit" })}
-        >
-          Cadastrar login de professor
-        </Link>
-        <Link
-          href="/modalities"
-          className={buttonVariants({ variant: "outline", className: "w-fit" })}
-        >
-          Modalidades
-        </Link>
-        <Link
-          href="/belts"
-          className={buttonVariants({ variant: "outline", className: "w-fit" })}
-        >
-          Faixas
-        </Link>
-        <Link
-          href="/finance/price-tables"
-          className={buttonVariants({ variant: "outline", className: "w-fit" })}
-        >
-          Tabelas de preço
-        </Link>
-        <Link
-          href="/finance/plans"
-          className={buttonVariants({ variant: "outline", className: "w-fit" })}
-        >
-          Planos
-        </Link>
-        <Link
-          href="/finance/installments"
-          className={buttonVariants({ variant: "outline", className: "w-fit" })}
-        >
-          Parcelas
-        </Link>
-        <Link
-          href="/finance/overdue"
-          className={buttonVariants({ variant: "outline", className: "w-fit" })}
-        >
-          Inadimplentes
-        </Link>
       </div>
     </div>
   );
