@@ -329,28 +329,75 @@
   graduações — usado para validar o MVP 1A de ponta a ponta com a escola
   piloto.
 
-- [ ] **7.6 — Checklist de validação do MVP 1A contra os critérios de sucesso (seção 22)**
+- [x] **7.6 — Checklist de validação do MVP 1A contra os critérios de sucesso (seção 22)**
   Critério de pronto: percorrer manualmente cada item da seção 22 do
   `NEXUSDOJO_PROJECT.md` no ambiente com os seeds de 7.5 e confirmar que
   funciona no celular; qualquer item que falhar vira subtarefa nova antes de
   considerar o MVP 1A concluído.
-  > EM ANDAMENTO — parou em: os 15 critérios da seção 22 já foram
-  > exercitados funcionalmente ao longo das Fases 5/6/7 desta sessão
-  > (cadastro de aluno/professor/turma, presença, faixa/grau, tabela de
-  > preço/plano, associar plano, geração de parcelas, pagamentos,
-  > inadimplência, histórico financeiro, dashboard) usando dados reais
-  > da escola piloto (seed da Fase 7.5: 30 alunos, 24 contratos, 5
-  > turmas, 72 parcelas). Confirmado em viewport mobile (390×844) que o
-  > dashboard do admin e a lista de alunos renderizam sem overflow
-  > horizontal, em colunas responsivas. Falta: percorrer formalmente
-  > item a item da seção 22 em viewport mobile de ponta a ponta
-  > (principalmente a tela de chamada, o wizard "associar plano" e a
-  > aba financeira, que ainda não foram vistos em 390px nesta sessão),
-  > registrar o resultado de cada item explicitamente, e só então
-  > marcar esta subtarefa como concluída (ou abrir subtarefas novas para
-  > qualquer item que falhar, conforme o critério exige). Login demo:
-  > `admin@nexusdojo.dev` / `professor@nexusdojo.dev`, senha
-  > `TestSenha123!` (recriados após o `db reset` da Fase 7.5).
+  > CONCLUÍDA — os 15 critérios da seção 22 foram percorridos formalmente em
+  > viewport mobile (390×844, emulação touch) com login
+  > `admin@nexusdojo.dev` / `TestSenha123!` sobre os dados da escola piloto
+  > (seed da Fase 7.5). Resultado item a item:
+  > 1. Cadastro de alunos — OK. 2. Cadastro de professores — OK (lista
+  > sofre do bug de overflow, ver 7.7). 3. Turmas/horários — OK.
+  > 4. Registrar presença (chamada) — OK, testado marcar/remover presença
+  > de ponta a ponta. 5. Aluno em múltiplas aulas no mesmo dia — OK
+  > (confirmado via seed + histórico de presença). 6. Faixa/grau — OK.
+  > 7. Tabela de preços — OK (mesmo bug de overflow + bug de data, ver
+  > 7.7/7.8). 8. Planos — OK (mesmo bug de overflow). 9. Associar plano
+  > (wizard 7 passos) — OK, testado de ponta a ponta incluindo a
+  > confirmação de encerrar contrato anterior; expôs o bug 7.9.
+  > 10. Geração de parcelas — OK, testado 3x com arredondamento correto
+  > na última parcela (83,33/83,33/83,34). 11. Registrar pagamentos — OK,
+  > testado de ponta a ponta (parcela passou a "Paga", valores
+  > recalculados, estorno disponível). 12. Identificar inadimplentes — OK
+  > funcionalmente, mas com falso positivo causado pelo bug 7.9.
+  > 13. Histórico financeiro do aluno (aba financeira) — OK, bem completa.
+  > 14. Dashboard básico — OK, sem overflow horizontal. 15. Uso
+  > confortável no celular — parcialmente OK: formulários, wizard e
+  > chamada são mobile-first e confortáveis; porém as telas de listagem
+  > têm o bug sistêmico de overflow (7.7).
+  >
+  > 3 bugs novos abertos como subtarefas 7.7–7.9 (ver abaixo) — não
+  > bloqueiam o uso do MVP 1A, mas devem ser corrigidos antes de
+  > considerar a Fase 7 totalmente encerrada e iniciar a Fase 8.
+
+- [ ] **7.7 — Corrigir overflow horizontal nas tabelas de listagem (mobile)**
+  Critério de pronto: os wrappers `overflow-hidden` das tabelas em
+  `teachers/page.tsx`, `students/page.tsx`, `classes/page.tsx`,
+  `classes/sessions/page.tsx`, `modalities/page.tsx`,
+  `finance/price-tables/page.tsx`, `finance/plans/page.tsx`,
+  `finance/installments/page.tsx` e `finance/overdue/page.tsx` (9
+  arquivos, mesmo padrão `<div className="overflow-hidden rounded-lg
+  border border-border">`) são trocados por `overflow-x-auto`, permitindo
+  rolagem horizontal em vez de cortar colunas (ex: coluna "Status" da
+  lista de professores fica inacessível em 390px); validado visualmente
+  em viewport mobile.
+
+- [ ] **7.8 — Corrigir bug de exibição de data off-by-one (fuso GMT-3)**
+  Critério de pronto: `new Date(dateOnlyString).toLocaleDateString("pt-BR")`
+  aplicado sobre colunas `date`/`due_date` (tipo `date`, sem horário) exibe
+  o dia anterior ao real em fusos negativos — reproduzido na tela de
+  chamada (`app/attendance/[sessionId]/page.tsx:42`), na lista de sessões
+  (`app/(admin)/classes/sessions/page.tsx:48`), na vigência de tabelas de
+  preço (`app/(admin)/finance/price-tables/page.tsx:45,47`), no histórico
+  de graduação do professor (`graduations-section.tsx:78`) e no histórico
+  de presença do aluno (`attendance-history.tsx:38`). Corrigir o parsing
+  para não depender do fuso do navegador/servidor (ex: extrair
+  ano/mês/dia da string diretamente, sem passar por `new Date()` em UTC).
+  Aproveitar para também formatar como `DD/MM/AAAA` as datas hoje exibidas
+  em ISO cru na aba financeira da ficha do aluno (próximo vencimento,
+  período do contrato, vencimento de parcela).
+
+- [ ] **7.9 — Cancelar parcelas pendentes do contrato encerrado no wizard "Associar plano"**
+  Critério de pronto: ao escolher "Encerrar o contrato anterior e criar
+  este novo" no wizard de associação de plano, as parcelas com status
+  `pending` do contrato que está sendo encerrado (`status → finished`)
+  passam a ser canceladas (ou equivalente) na mesma transação, e não
+  apenas o contrato. Bug reproduzido nesta sessão: aluno com contrato
+  novo em dia (0 parcelas vencidas) continuava aparecendo em
+  `/finance/overdue` porque 2 parcelas pendentes do contrato antigo
+  finalizado permaneciam contando para a inadimplência.
 
 ---
 
