@@ -322,7 +322,7 @@
   alteração de graduação e alteração de dados pessoais do aluno passam a
   gravar log (`entity_type`, `entity_id`, `action`, `changes`).
 
-- [ ] **7.5 — Seeds de demonstração completos**
+- [x] **7.5 — Seeds de demonstração completos**
   Critério de pronto: `seed.sql` popula 1 escola, 1 unidade, 2 professores,
   30 alunos, 5 turmas, modalidades, faixas, 2 tabelas de preço com 4 planos
   cada, contratos variados (parcelas pagas/pendentes/vencidas), presenças e

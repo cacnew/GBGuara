@@ -958,3 +958,29 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
 - Presença: `markPresent`/`removeAttendance` (`modules/attendance/actions.ts`)
   instrumentados, completando a cobertura das 6 categorias exigidas.
 - Testado localmente: insert autenticado em `audit_logs` respeitando RLS.
+
+## Seeds de demonstração completos (Fase 7.5)
+
+- `supabase/seed.sql` reescrito com um bloco PL/pgSQL (`do $$ ... $$`)
+  em vez de INSERTs individuais — muito mais compacto para gerar 30
+  alunos/contratos/parcelas com variação de status via loop.
+- Escola piloto criada via insert simples em `schools` — unidade,
+  modalidades, faixas e contas financeiras vêm de graça pelo trigger
+  `create_default_school_setup` (Fases 1.2/2.1/2.2/5.3).
+- **Limitação conhecida**: `attendances.registered_by_user_id` é
+  `not null` com FK para `users`, mas nenhum usuário existe ainda num
+  `db reset` do zero (login é criado depois, via onboarding/criação de
+  professor). O seed detecta isso (`if v_admin_user_id is not null`) e
+  pula presenças nesse caso, sem quebrar o resto do seed. Para ter
+  presenças de demonstração, criar o login admin primeiro e então
+  inserir presenças manualmente (ou re-rodar só esse trecho) — não é
+  possível fazer isso em uma única passada de `db reset` sem também
+  criar `auth.users` via SQL puro, fora de escopo desta subtarefa.
+- Testado localmente via `supabase db reset` (aplica todas as
+  migrations + seed do zero): 30 alunos, 24 contratos, 72 parcelas
+  (3 por contrato, com 1/3 vencida, 1/3 parcial, 1/3 paga), 5 turmas,
+  8 planos, 15 graduações — todos os contadores bateram com o
+  esperado. Logins de demonstração (`admin@nexusdojo.dev`,
+  `professor@nexusdojo.dev`, senha `TestSenha123!`) recriados
+  manualmente após o reset, e 30 presenças inseridas manualmente para
+  completar o cenário de demonstração.
