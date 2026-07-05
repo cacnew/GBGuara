@@ -334,6 +334,23 @@
   `NEXUSDOJO_PROJECT.md` no ambiente com os seeds de 7.5 e confirmar que
   funciona no celular; qualquer item que falhar vira subtarefa nova antes de
   considerar o MVP 1A concluído.
+  > EM ANDAMENTO — parou em: os 15 critérios da seção 22 já foram
+  > exercitados funcionalmente ao longo das Fases 5/6/7 desta sessão
+  > (cadastro de aluno/professor/turma, presença, faixa/grau, tabela de
+  > preço/plano, associar plano, geração de parcelas, pagamentos,
+  > inadimplência, histórico financeiro, dashboard) usando dados reais
+  > da escola piloto (seed da Fase 7.5: 30 alunos, 24 contratos, 5
+  > turmas, 72 parcelas). Confirmado em viewport mobile (390×844) que o
+  > dashboard do admin e a lista de alunos renderizam sem overflow
+  > horizontal, em colunas responsivas. Falta: percorrer formalmente
+  > item a item da seção 22 em viewport mobile de ponta a ponta
+  > (principalmente a tela de chamada, o wizard "associar plano" e a
+  > aba financeira, que ainda não foram vistos em 390px nesta sessão),
+  > registrar o resultado de cada item explicitamente, e só então
+  > marcar esta subtarefa como concluída (ou abrir subtarefas novas para
+  > qualquer item que falhar, conforme o critério exige). Login demo:
+  > `admin@nexusdojo.dev` / `professor@nexusdojo.dev`, senha
+  > `TestSenha123!` (recriados após o `db reset` da Fase 7.5).
 
 ---
 
