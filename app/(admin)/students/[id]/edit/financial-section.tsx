@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formatDateOnly } from "@/lib/dates/format";
 import {
   registerInstallmentPayment,
   cancelInstallment,
@@ -218,7 +219,7 @@ export function FinancialSection({
         </p>
         <p>
           <span className="text-muted-foreground">Próximo vencimento:</span>{" "}
-          {summary.proximoVencimento ?? "-"}
+          {summary.proximoVencimento ? formatDateOnly(summary.proximoVencimento) : "-"}
         </p>
         <p>
           <span className="text-muted-foreground">Valor em aberto:</span>{" "}
@@ -275,8 +276,9 @@ export function FinancialSection({
             {contract.priceTableName}
           </p>
           <p>
-            <span className="text-muted-foreground">Período:</span> {contract.startDate}
-            {contract.endDate ? ` – ${contract.endDate}` : ""}
+            <span className="text-muted-foreground">Período:</span>{" "}
+            {formatDateOnly(contract.startDate)}
+            {contract.endDate ? ` – ${formatDateOnly(contract.endDate)}` : ""}
           </p>
           <p>
             <span className="text-muted-foreground">Valor original:</span>{" "}
@@ -322,7 +324,7 @@ export function FinancialSection({
                 </span>
               </div>
               <p className="text-muted-foreground">
-                Vencimento: {installment.dueDate}
+                Vencimento: {formatDateOnly(installment.dueDate)}
                 {installment.paidAmount > 0 &&
                   ` · Pago: ${formatMoney(installment.paidAmount)}`}
               </p>

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateOnly } from "@/lib/dates/format";
 import { AttendanceClient, type PresentStudent } from "./attendance-client";
 
 export default async function AttendancePage({
@@ -39,7 +40,7 @@ export default async function AttendancePage({
         </h1>
         <p className="text-sm text-muted-foreground">
           {session.class_groups?.modalities?.name} ·{" "}
-          {new Date(session.date).toLocaleDateString("pt-BR")}
+          {formatDateOnly(session.date)}
         </p>
       </div>
       <AttendanceClient

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateOnly } from "@/lib/dates/format";
 import { buttonVariants } from "@/components/ui/button";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -42,9 +43,9 @@ export default async function PriceTablesPage() {
               <tr key={pt.id} className="border-t border-border">
                 <td className="p-3">{pt.name}</td>
                 <td className="p-3 text-muted-foreground">
-                  {new Date(pt.valid_from).toLocaleDateString("pt-BR")}
+                  {formatDateOnly(pt.valid_from)}
                   {pt.valid_until
-                    ? ` – ${new Date(pt.valid_until).toLocaleDateString("pt-BR")}`
+                    ? ` – ${formatDateOnly(pt.valid_until)}`
                     : " – sem fim definido"}
                 </td>
                 <td className="p-3">{STATUS_LABEL[pt.status]}</td>

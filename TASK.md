@@ -374,7 +374,7 @@
   lista de professores fica inacessível em 390px); validado visualmente
   em viewport mobile.
 
-- [ ] **7.8 — Corrigir bug de exibição de data off-by-one (fuso GMT-3)**
+- [x] **7.8 — Corrigir bug de exibição de data off-by-one (fuso GMT-3)**
   Critério de pronto: `new Date(dateOnlyString).toLocaleDateString("pt-BR")`
   aplicado sobre colunas `date`/`due_date` (tipo `date`, sem horário) exibe
   o dia anterior ao real em fusos negativos — reproduzido na tela de

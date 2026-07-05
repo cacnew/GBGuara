@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formatDateOnly } from "@/lib/dates/format";
 import {
   teacherGraduationSchema,
   type TeacherGraduationInput,
@@ -75,7 +76,7 @@ export function GraduationsSection({
             </p>
             <p className="text-muted-foreground">
               Grau {g.degree} desde{" "}
-              {new Date(g.sinceDate).toLocaleDateString("pt-BR")}
+              {formatDateOnly(g.sinceDate)}
             </p>
           </div>
         ))}

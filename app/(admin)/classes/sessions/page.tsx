@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateOnly } from "@/lib/dates/format";
 import { buttonVariants } from "@/components/ui/button";
 import { CancelSessionButton } from "./cancel-button";
 
@@ -45,7 +46,7 @@ export default async function ClassSessionsPage() {
             {sessions?.map((session) => (
               <tr key={session.id} className="border-t border-border">
                 <td className="p-3">
-                  {new Date(session.date).toLocaleDateString("pt-BR")}
+                  {formatDateOnly(session.date)}
                 </td>
                 <td className="p-3 text-muted-foreground">
                   {session.class_groups?.name ?? "-"}

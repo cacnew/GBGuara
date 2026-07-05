@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { formatDateOnly } from "@/lib/dates/format";
 
 export async function AttendanceHistory({ studentId }: { studentId: string }) {
   const supabase = await createClient();
@@ -35,7 +36,7 @@ export async function AttendanceHistory({ studentId }: { studentId: string }) {
             </p>
             <p className="text-muted-foreground">
               {a.class_sessions?.date
-                ? new Date(a.class_sessions.date).toLocaleDateString("pt-BR")
+                ? formatDateOnly(a.class_sessions.date)
                 : "-"}{" "}
               · {STATUS_LABEL[a.status] ?? a.status} · registrado por{" "}
               {a.users?.name ?? "-"}
