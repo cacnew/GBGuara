@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import type { TeacherInput } from "@/lib/validations/teacher";
 import { EditTeacherProfileForm } from "./form";
@@ -13,6 +14,7 @@ export default async function EditTeacherPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const profile = await requireRole("admin");
   const supabase = await createClient();
   const { data: teacher } = await supabase
     .from("teachers")
@@ -58,6 +60,7 @@ export default async function EditTeacherPage({
       </div>
       <EditTeacherProfileForm
         id={teacher.id}
+        schoolId={profile.schoolId}
         defaultValues={{
           name: teacher.name,
           phone: teacher.phone ?? "",

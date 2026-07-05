@@ -403,7 +403,7 @@
 
 ## Fase 8 — MVP 1B (só inicia após validação do MVP 1A na Fase 7.6)
 
-- [ ] **8.1 — Upload de foto de aluno/professor via Supabase Storage**
+- [x] **8.1 — Upload de foto de aluno/professor via Supabase Storage**
   Critério de pronto: substitui os campos `photo_url` manuais por upload
   real de imagem, com preview.
 

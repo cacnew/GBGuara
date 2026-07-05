@@ -8,14 +8,17 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AvatarUpload } from "@/components/forms/avatar-upload";
 import { studentSchema, type StudentInput } from "@/lib/validations/student";
 import { updateStudent } from "../../actions";
 
 export function EditStudentForm({
   id,
+  schoolId,
   defaultValues,
 }: {
   id: string;
+  schoolId: string;
   defaultValues: StudentInput;
 }) {
   const router = useRouter();
@@ -23,6 +26,7 @@ export function EditStudentForm({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<StudentInput>({
     resolver: zodResolver(studentSchema),
@@ -48,6 +52,14 @@ export function EditStudentForm({
       onSubmit={handleSubmit(onSubmit)}
       className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-card p-6"
     >
+      <AvatarUpload
+        schoolId={schoolId}
+        entityType="students"
+        entityId={id}
+        currentUrl={defaultValues.photoUrl || null}
+        onUploaded={(url) => setValue("photoUrl", url)}
+      />
+
       <div className="space-y-1.5">
         <Label htmlFor="name">Nome</Label>
         <Input id="name" {...register("name")} />

@@ -13,6 +13,7 @@ export const studentSchema = z.object({
     .or(z.literal("")),
   address: z.string().trim().optional().or(z.literal("")),
   emergencyContact: z.string().trim().optional().or(z.literal("")),
+  photoUrl: z.string().trim().optional().or(z.literal("")),
   status: z.enum(["ativo", "inativo", "pausado", "cancelado", "inadimplente"]),
   notes: z.string().trim().optional().or(z.literal("")),
 });

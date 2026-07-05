@@ -8,14 +8,17 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AvatarUpload } from "@/components/forms/avatar-upload";
 import { teacherSchema, type TeacherInput } from "@/lib/validations/teacher";
 import { updateTeacherProfile } from "../../actions";
 
 export function EditTeacherProfileForm({
   id,
+  schoolId,
   defaultValues,
 }: {
   id: string;
+  schoolId: string;
   defaultValues: TeacherInput;
 }) {
   const router = useRouter();
@@ -23,6 +26,7 @@ export function EditTeacherProfileForm({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<TeacherInput>({
     resolver: zodResolver(teacherSchema),
@@ -69,15 +73,13 @@ export function EditTeacherProfileForm({
         )}
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="photoUrl">URL da foto (opcional)</Label>
-        <Input id="photoUrl" placeholder="https://..." {...register("photoUrl")} />
-        {errors.photoUrl && (
-          <p className="text-sm text-destructive">
-            {errors.photoUrl.message}
-          </p>
-        )}
-      </div>
+      <AvatarUpload
+        schoolId={schoolId}
+        entityType="teachers"
+        entityId={id}
+        currentUrl={defaultValues.photoUrl || null}
+        onUploaded={(url) => setValue("photoUrl", url)}
+      />
 
       <div className="space-y-1.5">
         <Label htmlFor="status">Status</Label>

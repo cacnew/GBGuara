@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
 import type { StudentInput } from "@/lib/validations/student";
@@ -16,11 +17,12 @@ export default async function EditStudentPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const profile = await requireRole("admin");
   const supabase = await createClient();
   const { data: student } = await supabase
     .from("students")
     .select(
-      "id, name, birth_date, cpf, phone, email, address, emergency_contact, status, notes, current_degree, last_graduation_date, enrollment_date, belts(name)",
+      "id, name, birth_date, cpf, phone, email, address, emergency_contact, photo_url, status, notes, current_degree, last_graduation_date, enrollment_date, belts(name)",
     )
     .eq("id", id)
     .single();
@@ -91,6 +93,7 @@ export default async function EditStudentPage({
       </div>
       <EditStudentForm
         id={student.id}
+        schoolId={profile.schoolId}
         defaultValues={{
           name: student.name,
           birthDate: student.birth_date ?? "",
@@ -99,6 +102,7 @@ export default async function EditStudentPage({
           email: student.email ?? "",
           address: student.address ?? "",
           emergencyContact: student.emergency_contact ?? "",
+          photoUrl: student.photo_url ?? "",
           status: student.status as StudentInput["status"],
           notes: student.notes ?? "",
         }}

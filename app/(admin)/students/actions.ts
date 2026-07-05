@@ -75,6 +75,7 @@ export async function updateStudent(
       email: parsed.data.email || null,
       address: parsed.data.address || null,
       emergency_contact: parsed.data.emergencyContact || null,
+      photo_url: parsed.data.photoUrl || null,
       status: parsed.data.status,
       notes: parsed.data.notes || null,
     })

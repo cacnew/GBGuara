@@ -64,16 +64,6 @@ export function NewTeacherProfileForm() {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="photoUrl">URL da foto (opcional)</Label>
-        <Input id="photoUrl" placeholder="https://..." {...register("photoUrl")} />
-        {errors.photoUrl && (
-          <p className="text-sm text-destructive">
-            {errors.photoUrl.message}
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-1.5">
         <Label htmlFor="notes">Observações (opcional)</Label>
         <Input id="notes" {...register("notes")} />
       </div>
