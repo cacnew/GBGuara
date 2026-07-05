@@ -1,12 +1,8 @@
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
     <div className="relative flex flex-1 flex-col items-center justify-center gap-6 bg-background px-6 text-center text-foreground">
-      <div className="absolute right-6 top-6">
-        <ThemeToggle />
-      </div>
       <h1 className="text-4xl font-heading font-semibold tracking-tight">
         NexusDojo
       </h1>

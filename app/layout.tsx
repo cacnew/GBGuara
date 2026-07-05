@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Cormorant_Garamond } from "next/font/google";
 import { Toaster } from "sonner";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
@@ -10,9 +10,10 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const outfit = Outfit({
+const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-heading",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -29,19 +30,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#0B0B0F",
+  themeColor: "#faf9f5",
 };
-
-const THEME_INIT_SCRIPT = `
-(function () {
-  try {
-    var stored = localStorage.getItem("nexusdojo-theme");
-    if (stored === "light") {
-      document.documentElement.classList.remove("dark");
-    }
-  } catch (e) {}
-})();
-`;
 
 export default function RootLayout({
   children,
@@ -51,15 +41,11 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`dark ${inter.variable} ${outfit.variable} h-full antialiased`}
-      suppressHydrationWarning
+      className={`${inter.variable} ${cormorantGaramond.variable} h-full antialiased`}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-      </head>
       <body className="min-h-full flex flex-col font-sans">
         <QueryProvider>{children}</QueryProvider>
-        <Toaster richColors theme="dark" />
+        <Toaster richColors />
         <ServiceWorkerRegister />
       </body>
     </html>
