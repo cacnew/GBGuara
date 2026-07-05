@@ -1,11 +1,16 @@
 import { requireRole } from "@/lib/permissions";
+import { AppShell } from "@/components/layout/app-shell";
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireRole("admin");
+  const profile = await requireRole("admin");
 
-  return <>{children}</>;
+  return (
+    <AppShell role="admin" userName={profile.name}>
+      {children}
+    </AppShell>
+  );
 }
