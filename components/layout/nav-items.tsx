@@ -2,10 +2,34 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { NavGroup } from "./nav-config";
+
+const OPEN_GROUPS_KEY = "nexusdojo-sidebar-open-groups";
+
+function readOpenGroups(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(OPEN_GROUPS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function setGroupOpenInStorage(label: string, open: boolean) {
+  try {
+    const current = readOpenGroups();
+    const next = open
+      ? Array.from(new Set([...current, label]))
+      : current.filter((l) => l !== label);
+    window.localStorage.setItem(OPEN_GROUPS_KEY, JSON.stringify(next));
+  } catch {
+    // localStorage indisponível (modo privado, etc.) — segue sem persistir.
+  }
+}
 
 function isGroupActive(pathname: string, group: NavGroup): boolean {
   if (group.href && pathname === group.href) return true;
@@ -20,6 +44,25 @@ function NavGroupItem({ group, pathname }: { group: NavGroup; pathname: string }
   if (active !== prevActive) {
     setPrevActive(active);
     if (active) setOpen(true);
+  }
+
+  // Lê o estado persistido só depois do mount (não durante o render), para
+  // o primeiro render no cliente bater com o HTML do servidor e evitar
+  // erro de hydration mismatch (mesmo motivo do AppShell).
+  useEffect(() => {
+    if (!active && readOpenGroups().includes(group.label)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hidratação de localStorage após o mount, não sincronização de prop
+      setOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- roda só uma vez no mount; incluir `active`/`group.label` faria o efeito re-rodar a cada navegação e sobrescrever toggles manuais do usuário
+  }, []);
+
+  function toggleOpen() {
+    setOpen((current) => {
+      const next = !current;
+      setGroupOpenInStorage(group.label, next);
+      return next;
+    });
   }
 
   const Icon = group.icon;
@@ -40,7 +83,7 @@ function NavGroupItem({ group, pathname }: { group: NavGroup; pathname: string }
             {group.label}
           </Link>
         ) : (
-          <button type="button" onClick={() => setOpen((o) => !o)} className={cn(linkClasses, "text-left")}>
+          <button type="button" onClick={toggleOpen} className={cn(linkClasses, "text-left")}>
             <Icon className="size-4" />
             {group.label}
           </button>
@@ -49,7 +92,7 @@ function NavGroupItem({ group, pathname }: { group: NavGroup; pathname: string }
           <button
             type="button"
             aria-label={open ? `Recolher ${group.label}` : `Expandir ${group.label}`}
-            onClick={() => setOpen((o) => !o)}
+            onClick={toggleOpen}
             className="rounded-md p-2 text-muted-foreground hover:bg-muted"
           >
             <ChevronDown className={cn("size-4 transition-transform", open && "rotate-180")} />

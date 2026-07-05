@@ -1,11 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { NavItems } from "./nav-items";
 import { ADMIN_NAV, TEACHER_NAV } from "./nav-config";
 import { LogoutButton } from "./logout-button";
+
+const SIDEBAR_COLLAPSED_KEY = "nexusdojo-sidebar-collapsed";
+
+function readSidebarCollapsed(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function writeSidebarCollapsed(value: boolean) {
+  try {
+    window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(value));
+  } catch {
+    // localStorage indisponível (modo privado, etc.) — segue sem persistir.
+  }
+}
 
 export function AppShell({
   role,
@@ -20,10 +40,29 @@ export function AppShell({
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
     setDrawerOpen(false);
+  }
+
+  // Lê o estado persistido só depois do mount (não durante o render), para
+  // o primeiro render no cliente bater com o HTML do servidor (que nunca
+  // sabe o valor do localStorage) e evitar erro de hydration mismatch.
+  useEffect(() => {
+    if (readSidebarCollapsed()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hidratação de localStorage após o mount, não sincronização de prop
+      setSidebarCollapsed(true);
+    }
+  }, []);
+
+  function toggleSidebar() {
+    setSidebarCollapsed((current) => {
+      const next = !current;
+      writeSidebarCollapsed(next);
+      return next;
+    });
   }
 
   return (
@@ -69,14 +108,40 @@ export function AppShell({
         </div>
       )}
 
-      <aside className="hidden w-64 shrink-0 flex-col gap-4 overflow-y-auto border-r border-border bg-card p-4 md:flex">
-        <span className="font-heading text-lg font-semibold">NexusDojo</span>
+      <aside
+        className={cn(
+          "hidden shrink-0 flex-col overflow-hidden border-r border-border bg-card transition-all duration-200 md:flex",
+          sidebarCollapsed ? "md:w-0 md:border-r-0 md:p-0" : "w-64 gap-4 p-4",
+        )}
+      >
+        <div className="flex items-center justify-between">
+          <span className="font-heading text-lg font-semibold whitespace-nowrap">NexusDojo</span>
+          <button
+            type="button"
+            aria-label="Recolher menu"
+            onClick={toggleSidebar}
+            className="rounded-md p-2 text-muted-foreground hover:bg-muted"
+          >
+            <PanelLeftClose className="size-4" />
+          </button>
+        </div>
         <NavItems groups={groups} />
         <div className="mt-auto flex flex-col gap-2 border-t border-border pt-4">
           <span className="px-3 text-sm text-muted-foreground">{userName}</span>
           <LogoutButton />
         </div>
       </aside>
+
+      {sidebarCollapsed && (
+        <button
+          type="button"
+          aria-label="Expandir menu"
+          onClick={toggleSidebar}
+          className="fixed left-3 top-3 z-40 hidden rounded-md border border-border bg-card p-2 text-muted-foreground hover:bg-muted md:flex"
+        >
+          <PanelLeftOpen className="size-4" />
+        </button>
+      )}
 
       <main className="flex min-w-0 flex-1 flex-col">{children}</main>
     </div>
