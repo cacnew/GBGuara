@@ -407,7 +407,7 @@
   Critério de pronto: substitui os campos `photo_url` manuais por upload
   real de imagem, com preview.
 
-- [ ] **8.2 — Migration + CRUD de leads e conversão de lead para aluno**
+- [x] **8.2 — Migration + CRUD de leads e conversão de lead para aluno**
   Critério de pronto: cadastro de lead, funil simples, ação "converter em
   aluno" que cria um `student` reaproveitando os dados do lead.
 
