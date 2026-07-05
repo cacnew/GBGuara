@@ -425,7 +425,7 @@
   listadas em 7.4) e garantia de que ações sensíveis remanescentes também
   logam em `audit_logs`.
 
-- [ ] **8.6 — PWA refinado (manifest, ícones, instalável)**
+- [x] **8.6 — PWA refinado (manifest, ícones, instalável)**
   Critério de pronto: `manifest.json` completo, ícones em múltiplos
   tamanhos, app instalável no celular, funcionando offline apenas para
   shell básico (sem sincronização offline de dados).
