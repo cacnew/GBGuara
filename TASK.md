@@ -411,7 +411,7 @@
   Critério de pronto: cadastro de lead, funil simples, ação "converter em
   aluno" que cria um `student` reaproveitando os dados do lead.
 
-- [ ] **8.3 — Integração WhatsApp manual via Evolution API**
+- [x] **8.3 — Integração WhatsApp manual via Evolution API**
   Critério de pronto: envio manual de mensagem avulsa para aluno/lead a
   partir da ficha dele, usando `EVOLUTION_API_URL`/`EVOLUTION_API_KEY` do
   `.env`; sem automação/régua ainda.

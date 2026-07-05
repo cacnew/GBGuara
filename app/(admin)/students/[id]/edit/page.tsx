@@ -3,6 +3,8 @@ import Link from "next/link";
 import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
+import { WhatsAppSend } from "@/components/forms/whatsapp-send";
+import { sendWhatsAppToStudent } from "@/modules/whatsapp/actions";
 import type { StudentInput } from "@/lib/validations/student";
 import { EditStudentForm } from "./form";
 import { GuardiansSection, type GuardianLink } from "./guardians-section";
@@ -108,6 +110,12 @@ export default async function EditStudentPage({
         }}
       />
       <GuardiansSection studentId={student.id} guardians={guardians} />
+      <div className="w-full max-w-sm">
+        <WhatsAppSend
+          phone={student.phone}
+          onSend={sendWhatsAppToStudent.bind(null, student.id)}
+        />
+      </div>
       <FinancialSection
         studentId={student.id}
         summary={financialSummary}

@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { WhatsAppSend } from "@/components/forms/whatsapp-send";
+import { sendWhatsAppToLead } from "@/modules/whatsapp/actions";
 import type { LeadInput } from "@/lib/validations/lead";
 import { EditLeadForm } from "./form";
 
@@ -35,6 +37,12 @@ export default async function EditLeadPage({
           notes: lead.notes ?? "",
         }}
       />
+      <div className="w-full max-w-sm">
+        <WhatsAppSend
+          phone={lead.phone}
+          onSend={sendWhatsAppToLead.bind(null, lead.id)}
+        />
+      </div>
     </div>
   );
 }
