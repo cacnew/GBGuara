@@ -310,7 +310,7 @@
   Critério de pronto: turmas do dia, acesso rápido à chamada, últimas
   chamadas feitas por ele, alunos recentes e observações recentes.
 
-- [ ] **7.3 — Dashboard financeiro dedicado**
+- [x] **7.3 — Dashboard financeiro dedicado**
   Critério de pronto: cards da seção 11.13 (receita prevista/recebida,
   valor em aberto/vencido, alunos inadimplentes, contratos ativos, parcelas
   vencidas e a vencer em 7 dias) em uma tela própria dentro do módulo

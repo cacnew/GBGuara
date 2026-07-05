@@ -929,6 +929,17 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
 - Testado localmente via Docker/Playwright logado como professor: as
   três listas novas renderizam corretamente em estado vazio, sem erros.
 
+## Dashboard financeiro dedicado (Fase 7.3)
+
+- Tela própria `/finance/dashboard` (não reaproveita o dashboard admin)
+  — critério pede "tela própria dentro do módulo financeiro".
+- "Valor em aberto" é `sum(remaining_amount)` de todas as parcelas
+  pendentes/parciais (não escopado ao mês, diferente de "receita
+  prevista/recebida" que são mensais) — reflete o saldo total em aberto
+  no momento.
+- "Parcelas vencidas" conta parcelas individuais (não alunos únicos,
+  diferente do card "Alunos inadimplentes").
+
 ## Schema de banco (Fase 1+)
 
 - **SQL puro via Supabase CLI** (`supabase/migrations`), sem ORM (Drizzle
