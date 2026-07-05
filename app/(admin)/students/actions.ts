@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { logAuditEvent } from "@/modules/audit/log";
 import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { studentSchema, type StudentInput } from "@/lib/validations/student";
@@ -56,7 +57,7 @@ export async function updateStudent(
   id: string,
   input: StudentInput,
 ): Promise<StudentActionResult> {
-  await requireRole("admin");
+  const profile = await requireRole("admin");
   const parsed = studentSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -82,6 +83,15 @@ export async function updateStudent(
   if (error) {
     return { error: error.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "student",
+    entityId: id,
+    action: "student_updated",
+  });
 
   revalidatePath("/students");
   return {};

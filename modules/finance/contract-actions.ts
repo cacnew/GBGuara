@@ -7,6 +7,7 @@ import {
   installmentDueDateSchema,
   type InstallmentDueDateInput,
 } from "@/lib/validations/contract-management";
+import { logAuditEvent } from "@/modules/audit/log";
 
 export type ContractActionResult = { error?: string };
 
@@ -51,6 +52,15 @@ export async function pauseContract(contractId: string): Promise<ContractActionR
     return { error: error.message };
   }
 
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "contract",
+    entityId: contractId,
+    action: "contract_paused",
+  });
+
   const studentId = await getStudentIdForContract(supabase, contractId);
   if (studentId) revalidatePath(`/students/${studentId}/edit`);
   return {};
@@ -83,6 +93,15 @@ export async function resumeContract(contractId: string): Promise<ContractAction
   if (error) {
     return { error: error.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "contract",
+    entityId: contractId,
+    action: "contract_resumed",
+  });
 
   const studentId = await getStudentIdForContract(supabase, contractId);
   if (studentId) revalidatePath(`/students/${studentId}/edit`);
@@ -119,6 +138,15 @@ export async function endContract(contractId: string): Promise<ContractActionRes
   if (error) {
     return { error: error.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "contract",
+    entityId: contractId,
+    action: "contract_ended",
+  });
 
   const studentId = await getStudentIdForContract(supabase, contractId);
   if (studentId) revalidatePath(`/students/${studentId}/edit`);

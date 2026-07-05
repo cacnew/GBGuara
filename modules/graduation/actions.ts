@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { graduationSchema, type GraduationInput } from "@/lib/validations/graduation";
+import { logAuditEvent } from "@/modules/audit/log";
 
 export type GraduationActionResult = { error?: string };
 
@@ -62,6 +63,16 @@ export async function registerGraduation(
   if (error) {
     return { error: error.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "student",
+    entityId: studentId,
+    action: "graduation_registered",
+    changes: { newBeltId: data.newBeltId, newDegree: data.newDegree },
+  });
 
   revalidatePath(`/students/${studentId}/edit`);
   return {};

@@ -11,6 +11,7 @@ import {
   installmentRefundSchema,
   type InstallmentRefundInput,
 } from "@/lib/validations/installment-refund";
+import { logAuditEvent } from "@/modules/audit/log";
 
 export type PaymentActionResult = { error?: string };
 
@@ -116,6 +117,16 @@ export async function registerInstallmentPayment(
     return { error: updateError.message };
   }
 
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "contract_installment",
+    entityId: installment.id,
+    action: "payment_registered",
+    changes: { amountPaid: data.amountPaid, newStatus },
+  });
+
   revalidatePath(`/students/${contractStudent.student_id}/edit`);
   return {};
 }
@@ -165,6 +176,16 @@ export async function cancelInstallment(
   if (updateError) {
     return { error: updateError.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "contract_installment",
+    entityId: installment.id,
+    action: "installment_canceled",
+    changes: { reason: reason ?? null },
+  });
 
   if (contractStudent) {
     revalidatePath(`/students/${contractStudent.student_id}/edit`);
@@ -267,6 +288,16 @@ export async function refundInstallmentPayment(
     await supabase.from("financial_movements").delete().eq("id", movement.id);
     return { error: updateError.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "contract_installment",
+    entityId: installment.id,
+    action: "payment_refunded",
+    changes: { refundAmount: data.refundAmount, newStatus },
+  });
 
   revalidatePath(`/students/${contractStudent.student_id}/edit`);
   return {};
