@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { NavGroup } from "./nav-config";
@@ -15,10 +15,12 @@ function isGroupActive(pathname: string, group: NavGroup): boolean {
 function NavGroupItem({ group, pathname }: { group: NavGroup; pathname: string }) {
   const active = isGroupActive(pathname, group);
   const [open, setOpen] = useState(active);
+  const [prevActive, setPrevActive] = useState(active);
 
-  useEffect(() => {
+  if (active !== prevActive) {
+    setPrevActive(active);
     if (active) setOpen(true);
-  }, [active]);
+  }
 
   const Icon = group.icon;
   const hasChildren = (group.children?.length ?? 0) > 0;
