@@ -196,6 +196,16 @@ export async function editInstallmentDueDate(
     return { error: error.message };
   }
 
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "contract_installment",
+    entityId: installment.id,
+    action: "installment_due_date_updated",
+    changes: { dueDate: parsed.data.dueDate },
+  });
+
   const studentId = await getStudentIdForContract(supabase, installment.contract_id);
   if (studentId) revalidatePath(`/students/${studentId}/edit`);
   return {};

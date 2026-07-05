@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { contractSchema, type ContractInput } from "@/lib/validations/contract";
+import { logAuditEvent } from "@/modules/audit/log";
 
 export type ContractActionResult = { error?: string };
 
@@ -181,6 +182,16 @@ export async function createContract(
       .eq("contract_id", activeContract.id)
       .eq("status", "pending");
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "student",
+    entityId: studentId,
+    action: "contract_created",
+    changes: { contractId: contract.id, previousContractId: activeContract?.id ?? null },
+  });
 
   revalidatePath(`/students/${studentId}/edit`);
   return {};

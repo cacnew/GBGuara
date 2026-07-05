@@ -31,23 +31,36 @@ export async function createStudent(
     return { error: "Nenhuma unidade encontrada para a escola" };
   }
 
-  const { error } = await supabase.from("students").insert({
-    school_id: profile.schoolId,
-    unit_id: unit.id,
-    name: parsed.data.name,
-    birth_date: parsed.data.birthDate,
-    cpf: parsed.data.cpf || null,
-    phone: parsed.data.phone || null,
-    email: parsed.data.email || null,
-    address: parsed.data.address || null,
-    emergency_contact: parsed.data.emergencyContact || null,
-    status: parsed.data.status,
-    notes: parsed.data.notes || null,
-  });
+  const { data: student, error } = await supabase
+    .from("students")
+    .insert({
+      school_id: profile.schoolId,
+      unit_id: unit.id,
+      name: parsed.data.name,
+      birth_date: parsed.data.birthDate,
+      cpf: parsed.data.cpf || null,
+      phone: parsed.data.phone || null,
+      email: parsed.data.email || null,
+      address: parsed.data.address || null,
+      emergency_contact: parsed.data.emergencyContact || null,
+      status: parsed.data.status,
+      notes: parsed.data.notes || null,
+    })
+    .select("id")
+    .single();
 
-  if (error) {
-    return { error: error.message };
+  if (error || !student) {
+    return { error: error?.message ?? "Não foi possível cadastrar o aluno" };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "student",
+    entityId: student.id,
+    action: "student_created",
+  });
 
   revalidatePath("/students");
   return {};

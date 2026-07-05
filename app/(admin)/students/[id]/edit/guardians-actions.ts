@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { guardianSchema, type GuardianInput } from "@/lib/validations/guardian";
+import { logAuditEvent } from "@/modules/audit/log";
 
 export type GuardianActionResult = { error?: string };
 
@@ -63,6 +64,16 @@ export async function addGuardianToStudent(
     return { error: linkError.message };
   }
 
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "student",
+    entityId: studentId,
+    action: "guardian_added",
+    changes: { guardianId: guardian.id },
+  });
+
   revalidatePath(`/students/${studentId}/edit`);
   return {};
 }
@@ -72,7 +83,7 @@ export async function updateGuardianLink(
   studentId: string,
   data: { isPrimary: boolean; isFinancialResponsible: boolean },
 ): Promise<GuardianActionResult> {
-  await requireRole("admin");
+  const profile = await requireRole("admin");
   const supabase = await createClient();
 
   if (data.isPrimary) {
@@ -91,6 +102,16 @@ export async function updateGuardianLink(
     return { error: error.message };
   }
 
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "student",
+    entityId: studentId,
+    action: "guardian_link_updated",
+    changes: data,
+  });
+
   revalidatePath(`/students/${studentId}/edit`);
   return {};
 }
@@ -99,7 +120,7 @@ export async function removeGuardianLink(
   linkId: string,
   studentId: string,
 ): Promise<GuardianActionResult> {
-  await requireRole("admin");
+  const profile = await requireRole("admin");
   const supabase = await createClient();
   const { error } = await supabase
     .from("student_guardians")
@@ -109,6 +130,16 @@ export async function removeGuardianLink(
   if (error) {
     return { error: error.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "student",
+    entityId: studentId,
+    action: "guardian_removed",
+    changes: { linkId },
+  });
 
   revalidatePath(`/students/${studentId}/edit`);
   return {};

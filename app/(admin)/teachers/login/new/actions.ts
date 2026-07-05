@@ -32,19 +32,31 @@ export async function createTeacherLogin(
     return { error: authError?.message ?? "Não foi possível criar o usuário" };
   }
 
-  const { error: dbError } = await admin.from("users").insert({
-    school_id: adminProfile.schoolId,
-    auth_user_id: authData.user.id,
-    name,
-    email,
-    role: "teacher",
-  });
+  const { data: newUser, error: dbError } = await admin
+    .from("users")
+    .insert({
+      school_id: adminProfile.schoolId,
+      auth_user_id: authData.user.id,
+      name,
+      email,
+      role: "teacher",
+    })
+    .select("id")
+    .single();
 
-  if (dbError) {
+  if (dbError || !newUser) {
     // Evita deixar um auth.users órfão sem perfil de aplicação.
     await admin.auth.admin.deleteUser(authData.user.id);
-    return { error: dbError.message };
+    return { error: dbError?.message ?? "Não foi possível criar o usuário" };
   }
+
+  await admin.from("audit_logs").insert({
+    school_id: adminProfile.schoolId,
+    user_id: adminProfile.id,
+    entity_type: "user",
+    entity_id: newUser.id,
+    action: "teacher_login_created",
+  });
 
   return {};
 }

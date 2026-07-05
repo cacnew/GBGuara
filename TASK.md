@@ -420,7 +420,7 @@
   Critério de pronto: tela/lista com aniversariantes do mês corrente,
   reaproveitando o componente de busca de aluno quando fizer sentido.
 
-- [ ] **8.5 — Audit logs completos (cobertura das ações restantes)**
+- [x] **8.5 — Audit logs completos (cobertura das ações restantes)**
   Critério de pronto: revisão de todas as mutações do sistema (não só as
   listadas em 7.4) e garantia de que ações sensíveis remanescentes também
   logam em `audit_logs`.

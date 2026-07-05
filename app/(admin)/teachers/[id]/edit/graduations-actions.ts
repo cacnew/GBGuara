@@ -7,6 +7,7 @@ import {
   teacherGraduationSchema,
   type TeacherGraduationInput,
 } from "@/lib/validations/teacher-graduation";
+import { logAuditEvent } from "@/modules/audit/log";
 
 export type TeacherGraduationActionResult = { error?: string };
 
@@ -34,6 +35,16 @@ export async function addTeacherGraduation(
   if (error) {
     return { error: error.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "teacher",
+    entityId: teacherId,
+    action: "teacher_graduation_added",
+    changes: { beltId: parsed.data.beltId, degree: parsed.data.degree },
+  });
 
   revalidatePath(`/teachers/${teacherId}/edit`);
   return {};

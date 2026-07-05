@@ -18,19 +18,32 @@ export async function createLead(input: LeadInput): Promise<LeadActionResult> {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("leads").insert({
-    school_id: profile.schoolId,
-    name: parsed.data.name,
-    phone: parsed.data.phone || null,
-    email: parsed.data.email || null,
-    source: parsed.data.source || null,
-    status: parsed.data.status,
-    notes: parsed.data.notes || null,
-  });
+  const { data: lead, error } = await supabase
+    .from("leads")
+    .insert({
+      school_id: profile.schoolId,
+      name: parsed.data.name,
+      phone: parsed.data.phone || null,
+      email: parsed.data.email || null,
+      source: parsed.data.source || null,
+      status: parsed.data.status,
+      notes: parsed.data.notes || null,
+    })
+    .select("id")
+    .single();
 
-  if (error) {
-    return { error: error.message };
+  if (error || !lead) {
+    return { error: error?.message ?? "Não foi possível cadastrar o lead" };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "lead",
+    entityId: lead.id,
+    action: "lead_created",
+  });
 
   revalidatePath("/leads");
   return {};
@@ -40,7 +53,7 @@ export async function updateLead(
   id: string,
   input: LeadInput,
 ): Promise<LeadActionResult> {
-  await requireRole("admin");
+  const profile = await requireRole("admin");
   const parsed = leadSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -63,6 +76,15 @@ export async function updateLead(
   if (error) {
     return { error: error.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "lead",
+    entityId: id,
+    action: "lead_updated",
+  });
 
   revalidatePath("/leads");
   return {};

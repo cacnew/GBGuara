@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { planSchema, type PlanInput } from "@/lib/validations/plan";
+import { logAuditEvent } from "@/modules/audit/log";
 
 export type PlanActionResult = { error?: string };
 
@@ -34,13 +35,24 @@ export async function createPlan(input: PlanInput): Promise<PlanActionResult> {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: plan, error } = await supabase
     .from("plans")
-    .insert(toRow(profile.schoolId, parsed.data));
+    .insert(toRow(profile.schoolId, parsed.data))
+    .select("id")
+    .single();
 
-  if (error) {
-    return { error: error.message };
+  if (error || !plan) {
+    return { error: error?.message ?? "Não foi possível criar o plano" };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "plan",
+    entityId: plan.id,
+    action: "plan_created",
+  });
 
   revalidatePath("/finance/plans");
   return {};
@@ -66,6 +78,15 @@ export async function updatePlan(
   if (error) {
     return { error: error.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "plan",
+    entityId: id,
+    action: "plan_updated",
+  });
 
   revalidatePath("/finance/plans");
   return {};
