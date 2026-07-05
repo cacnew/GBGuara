@@ -34,7 +34,7 @@ export default async function StudentsPage({
   const { data: students } = await query;
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
+    <div className="flex flex-1 flex-col gap-6 p-8 text-foreground">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-semibold">Alunos</h1>
         <Link href="/students/new" className={buttonVariants()}>
@@ -52,7 +52,7 @@ export default async function StudentsPage({
         <select
           name="status"
           defaultValue={status ?? ""}
-          className="h-8 rounded-lg border border-border bg-background px-2.5 text-sm"
+          className="h-10 rounded-lg border border-border bg-background px-3.5 text-sm"
         >
           <option value="">Todos os status</option>
           {Object.entries(STATUS_LABEL).map(([value, label]) => (

@@ -81,7 +81,7 @@ export default async function FinanceDashboardPage() {
   const openAmount = (openInstallments ?? []).reduce((s, r) => s + r.remaining_amount, 0);
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
+    <div className="flex flex-1 flex-col gap-6 p-8 text-foreground">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-semibold">Dashboard financeiro</h1>
         <Link href="/finance/reports" className={buttonVariants({ variant: "outline", size: "sm" })}>
