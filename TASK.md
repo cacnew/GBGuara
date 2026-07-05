@@ -316,22 +316,11 @@
   vencidas e a vencer em 7 dias) em uma tela própria dentro do módulo
   financeiro.
 
-- [ ] **7.4 — Migration de `audit_logs` + instrumentação das ações sensíveis já implementadas**
+- [x] **7.4 — Migration de `audit_logs` + instrumentação das ações sensíveis já implementadas**
   Critério de pronto: tabela criada; ações de alteração de pagamento,
   cancelamento de parcela, alteração de contrato, alteração de presença,
   alteração de graduação e alteração de dados pessoais do aluno passam a
   gravar log (`entity_type`, `entity_id`, `action`, `changes`).
-  > EM ANDAMENTO — parou em: tabela `audit_logs` criada e aplicada;
-  > instrumentado pagamento/estorno/cancelamento de parcela
-  > (`modules/finance/payment-actions.ts`), pausar/retomar/encerrar
-  > contrato (`modules/finance/contract-actions.ts`), registrar
-  > graduação (`modules/graduation/actions.ts`) e atualização de dados
-  > pessoais do aluno (`app/(admin)/students/actions.ts`). Falta:
-  > alteração de presença (`attendances`) — não localizado/instrumentado
-  > ainda por limite de contexto da sessão. Buscar a action de
-  > registrar/editar presença (provavelmente em `modules/attendance/`
-  > ou `app/(admin)/attendance/[sessionId]/`) e adicionar chamada a
-  > `logAuditEvent` no mesmo padrão dos arquivos já instrumentados.
 
 - [ ] **7.5 — Seeds de demonstração completos**
   Critério de pronto: `seed.sql` popula 1 escola, 1 unidade, 2 professores,

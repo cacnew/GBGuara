@@ -952,3 +952,9 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   (`#18181B`), cinza (`#27272A`), branco suave (`#F4F4F5`), vermelho tatame
   (`#C8102E`). Escolhida por ser a estética mais alinhada à identidade de
   "escola de luta" descrita no documento mestre (seção 15).
+
+## Instrumentação de audit_logs completa (Fase 7.4)
+
+- Presença: `markPresent`/`removeAttendance` (`modules/attendance/actions.ts`)
+  instrumentados, completando a cobertura das 6 categorias exigidas.
+- Testado localmente: insert autenticado em `audit_logs` respeitando RLS.

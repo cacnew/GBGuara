@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
+import { logAuditEvent } from "@/modules/audit/log";
 
 export type AttendanceActionResult = { error?: string; attendanceId?: string };
 
@@ -37,6 +38,16 @@ export async function markPresent(
     return { error: error.message };
   }
 
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "attendance",
+    entityId: data.id,
+    action: "attendance_marked",
+    changes: { studentId, classSessionId },
+  });
+
   revalidatePath(`/attendance/${classSessionId}`);
   return { attendanceId: data.id };
 }
@@ -48,7 +59,7 @@ export async function removeAttendance(
   attendanceId: string,
   classSessionId: string,
 ): Promise<AttendanceActionResult> {
-  await requireUser();
+  const profile = await requireUser();
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -59,6 +70,15 @@ export async function removeAttendance(
   if (error) {
     return { error: error.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "attendance",
+    entityId: attendanceId,
+    action: "attendance_removed",
+  });
 
   revalidatePath(`/attendance/${classSessionId}`);
   return {};
