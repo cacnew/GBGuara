@@ -139,6 +139,12 @@ export async function endContract(contractId: string): Promise<ContractActionRes
     return { error: error.message };
   }
 
+  await supabase
+    .from("contract_installments")
+    .update({ status: "canceled" })
+    .eq("contract_id", contractId)
+    .eq("status", "pending");
+
   await logAuditEvent({
     supabase,
     schoolId: profile.schoolId,

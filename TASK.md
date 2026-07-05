@@ -389,7 +389,7 @@
   em ISO cru na aba financeira da ficha do aluno (próximo vencimento,
   período do contrato, vencimento de parcela).
 
-- [ ] **7.9 — Cancelar parcelas pendentes do contrato encerrado no wizard "Associar plano"**
+- [x] **7.9 — Cancelar parcelas pendentes do contrato encerrado no wizard "Associar plano"**
   Critério de pronto: ao escolher "Encerrar o contrato anterior e criar
   este novo" no wizard de associação de plano, as parcelas com status
   `pending` do contrato que está sendo encerrado (`status → finished`)

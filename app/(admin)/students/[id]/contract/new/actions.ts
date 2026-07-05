@@ -174,6 +174,12 @@ export async function createContract(
       await supabase.from("contracts").delete().eq("id", contract.id);
       return { error: endError.message };
     }
+
+    await supabase
+      .from("contract_installments")
+      .update({ status: "canceled" })
+      .eq("contract_id", activeContract.id)
+      .eq("status", "pending");
   }
 
   revalidatePath(`/students/${studentId}/edit`);
