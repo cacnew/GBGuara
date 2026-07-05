@@ -430,11 +430,20 @@
   tamanhos, app instalável no celular, funcionando offline apenas para
   shell básico (sem sincronização offline de dados).
 
-- [ ] **8.7 — Revisão de política de privacidade e relatórios financeiros extras**
+- [x] **8.7 — Revisão de política de privacidade e relatórios financeiros extras**
   Critério de pronto: página de política de privacidade revisada
   juridicamente pelo usuário (Carlos define o texto final); relatórios
   financeiros adicionais definidos junto ao usuário antes de implementar
   (evitar escopo não aprovado).
+  > Decisões tomadas com o usuário nesta sessão: (1) política de
+  > privacidade — rascunho gerado (`/privacy`, baseado na LGPD e nos
+  > dados reais coletados pelo sistema) com aviso explícito de "Rascunho
+  > — não publicado", aguardando revisão jurídica e texto final do
+  > Carlos antes de ser considerado oficial; link discreto adicionado na
+  > tela de login. (2) Relatório financeiro extra escolhido: receita
+  > por período (mês a mês, prevista x recebida), implementado em
+  > `/finance/reports` com parâmetro `?months=N` (padrão 6, máx. 24),
+  > linkado a partir do dashboard financeiro.
 
 ---
 

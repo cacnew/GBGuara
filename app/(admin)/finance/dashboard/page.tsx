@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { MetricCard } from "@/components/dashboard/metric-card";
+import { buttonVariants } from "@/components/ui/button";
 
 function formatMoney(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -80,7 +82,12 @@ export default async function FinanceDashboardPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
-      <h1 className="font-heading text-2xl font-semibold">Dashboard financeiro</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-heading text-2xl font-semibold">Dashboard financeiro</h1>
+        <Link href="/finance/reports" className={buttonVariants({ variant: "outline", size: "sm" })}>
+          Receita por período
+        </Link>
+      </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <MetricCard label="Receita prevista do mês" value={formatMoney(expectedRevenueMonth)} />
         <MetricCard label="Receita recebida do mês" value={formatMoney(receivedRevenueMonth)} />

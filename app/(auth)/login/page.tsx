@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -69,6 +70,12 @@ export default function LoginPage() {
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? "Entrando..." : "Entrar"}
         </Button>
+
+        <p className="text-center text-xs text-muted-foreground">
+          <Link href="/privacy" className="hover:underline">
+            Política de privacidade
+          </Link>
+        </p>
       </form>
     </div>
   );
