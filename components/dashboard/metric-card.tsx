@@ -15,7 +15,7 @@ export function MetricCard({
   const content = (
     <div
       className={cn(
-        "rounded-lg border border-border bg-card p-4",
+        "rounded-lg border border-border bg-card p-6",
         href && "transition-colors hover:bg-muted/50",
       )}
     >

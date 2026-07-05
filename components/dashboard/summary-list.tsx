@@ -20,7 +20,7 @@ export function SummaryList({
   viewAllHref?: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="rounded-lg border border-border bg-card p-6">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-sm font-medium">{title}</p>
         {viewAllHref && (
