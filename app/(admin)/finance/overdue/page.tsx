@@ -79,7 +79,7 @@ export default async function OverdueStudentsPage() {
     <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
       <h1 className="font-heading text-2xl font-semibold">Inadimplentes</h1>
 
-      <div className="overflow-hidden rounded-lg border border-border">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>

@@ -66,7 +66,7 @@ export default async function StudentsPage({
         </button>
       </form>
 
-      <div className="overflow-hidden rounded-lg border border-border">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>

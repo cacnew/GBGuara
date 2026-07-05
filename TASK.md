@@ -362,7 +362,7 @@
   > bloqueiam o uso do MVP 1A, mas devem ser corrigidos antes de
   > considerar a Fase 7 totalmente encerrada e iniciar a Fase 8.
 
-- [ ] **7.7 — Corrigir overflow horizontal nas tabelas de listagem (mobile)**
+- [x] **7.7 — Corrigir overflow horizontal nas tabelas de listagem (mobile)**
   Critério de pronto: os wrappers `overflow-hidden` das tabelas em
   `teachers/page.tsx`, `students/page.tsx`, `classes/page.tsx`,
   `classes/sessions/page.tsx`, `modalities/page.tsx`,
