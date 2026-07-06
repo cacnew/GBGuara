@@ -14,7 +14,7 @@ export default async function EditPlanPage({
   const { data: plan } = await supabase
     .from("plans")
     .select(
-      "id, price_table_id, name, plan_duration, duration_months, base_price, classes_per_week, classes_total, unlimited, setup_fee, loyalty_months, description, status",
+      "id, price_table_id, name, plan_duration, duration_months, base_price, setup_fee, loyalty_months, description, status",
     )
     .eq("id", id)
     .single();
@@ -32,9 +32,6 @@ export default async function EditPlanPage({
     planDuration: plan.plan_duration as PlanInput["planDuration"],
     durationMonths: plan.duration_months,
     basePrice: plan.base_price,
-    classesPerWeek: plan.classes_per_week ?? 0,
-    classesTotal: plan.classes_total ?? 0,
-    unlimited: plan.unlimited,
     setupFee: plan.setup_fee,
     loyaltyMonths: plan.loyalty_months,
     description: plan.description ?? "",

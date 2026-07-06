@@ -25,7 +25,7 @@ export default async function EditStudentPage({
   const { data: student } = await supabase
     .from("students")
     .select(
-      "id, name, birth_date, cpf, phone, email, address, emergency_contact, photo_url, status, notes, current_degree, last_graduation_date, enrollment_date, belts(name)",
+      "id, name, birth_date, cpf, phone, email, address, emergency_contact, photo_url, status, notes, current_degree, last_graduation_date, enrollment_date, belts(name, belt_systems(modality_id))",
     )
     .eq("id", id)
     .single();
@@ -69,12 +69,25 @@ export default async function EditStudentPage({
     .order("name");
 
   const graduationReferenceDate = student.last_graduation_date ?? student.enrollment_date;
-  const { count: attendancesSinceLastGraduation } = await supabase
+  const { data: graduationAttendances } = await supabase
     .from("attendances")
-    .select("id, class_sessions!inner(date)", { count: "exact", head: true })
+    .select("class_sessions!inner(date, class_groups!inner(modality_id))")
     .eq("student_id", student.id)
     .eq("status", "presente")
     .gte("class_sessions.date", graduationReferenceDate);
+
+  const currentModalityId = student.belts?.belt_systems?.modality_id ?? null;
+  const validGraduationAttendanceDates = new Set(
+    (graduationAttendances ?? [])
+      .filter((attendance) => {
+        if (!currentModalityId) return true;
+        return (
+          attendance.class_sessions?.class_groups?.modality_id === currentModalityId
+        );
+      })
+      .map((attendance) => attendance.class_sessions?.date)
+      .filter((date): date is string => Boolean(date)),
+  );
 
   const daysSinceLastGraduation = Math.floor(
     (new Date().getTime() - new Date(`${graduationReferenceDate}T00:00:00Z`).getTime()) /
@@ -142,7 +155,7 @@ export default async function EditStudentPage({
               ordering: b.ordering,
             }))}
             teachers={teachers ?? []}
-            attendancesSinceLastGraduation={attendancesSinceLastGraduation ?? 0}
+            attendancesSinceLastGraduation={validGraduationAttendanceDates.size}
             daysSinceLastGraduation={daysSinceLastGraduation}
           />
         }

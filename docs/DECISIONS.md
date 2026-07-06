@@ -5,6 +5,23 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
 
 ---
 
+## Planos financeiros sem limite de aulas
+
+- Planos representam compromisso financeiro de acesso livre durante a
+  vigencia contratual. Eles nao representam pacote de aulas, credito,
+  limite semanal ou saldo de uso.
+- A presenca operacional continua registrando todas as aulas feitas pelo
+  aluno. O financeiro nunca consome presenca e nunca bloqueia chamada por
+  quantidade de aulas.
+- Os campos legados `classes_per_week`, `classes_total` e `unlimited`
+  permanecem no schema por compatibilidade, mas uma migration normaliza os
+  dados para `unlimited = true` e valores nulos nos limites, alem de criar
+  uma constraint impedindo novos limites de aula.
+- O indicador de graduacao conta dias unicos de presenca dentro da
+  modalidade da faixa atual do aluno. Multiplas aulas da mesma modalidade
+  no mesmo dia contam como um unico dia valido para graduacao; modalidades
+  diferentes nao se misturam.
+
 ## Stack de UI (Fase 0.1 / 0.2)
 
 - **shadcn/ui**: componentes copiados para o repo (não é dependência de

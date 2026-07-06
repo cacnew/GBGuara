@@ -35,23 +35,17 @@ export function PlanForm({
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<PlanInput>({
     resolver: zodResolver(planSchema),
     defaultValues: defaultValues ?? {
       durationMonths: 1,
       basePrice: 0,
-      classesPerWeek: 0,
-      classesTotal: 0,
-      unlimited: true,
       setupFee: 0,
       loyaltyMonths: 0,
       status: "active",
     },
   });
-
-  const unlimited = watch("unlimited");
 
   async function onSubmit(data: PlanInput) {
     setIsSubmitting(true);
@@ -144,32 +138,6 @@ export function PlanForm({
           </p>
         )}
       </div>
-
-      <div className="flex items-center gap-2">
-        <input id="unlimited" type="checkbox" {...register("unlimited")} />
-        <Label htmlFor="unlimited">Aulas ilimitadas</Label>
-      </div>
-
-      {!unlimited && (
-        <div className="flex gap-3">
-          <div className="flex-1 space-y-1.5">
-            <Label htmlFor="classesPerWeek">Aulas/semana</Label>
-            <Input
-              id="classesPerWeek"
-              type="number"
-              {...register("classesPerWeek", { valueAsNumber: true })}
-            />
-          </div>
-          <div className="flex-1 space-y-1.5">
-            <Label htmlFor="classesTotal">Aulas totais</Label>
-            <Input
-              id="classesTotal"
-              type="number"
-              {...register("classesTotal", { valueAsNumber: true })}
-            />
-          </div>
-        </div>
-      )}
 
       <div className="flex gap-3">
         <div className="flex-1 space-y-1.5">

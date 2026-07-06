@@ -96,7 +96,7 @@ export function GraduationSection({
         </p>
         <p>
           <span className="text-muted-foreground">
-            Presenças desde a última graduação:
+            Dias de presença desde a última graduação:
           </span>{" "}
           {attendancesSinceLastGraduation}
         </p>
