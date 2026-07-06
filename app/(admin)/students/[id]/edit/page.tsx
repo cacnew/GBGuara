@@ -12,6 +12,7 @@ import { AttendanceHistory } from "./attendance-history";
 import { FinancialSection } from "./financial-section";
 import { getStudentFinancialSummary } from "./financial-queries";
 import { GraduationSection } from "./graduation-section";
+import { StudentEditTabs } from "./student-edit-tabs";
 
 export default async function EditStudentPage({
   params,
@@ -81,62 +82,72 @@ export default async function EditStudentPage({
   );
 
   return (
-    <div className="flex flex-1 flex-col items-center gap-10 p-6 text-foreground">
-      <div className="w-full max-w-sm">
-        <div className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-semibold">Editar aluno</h1>
-          <Link
-            href={`/students/${student.id}/contract/new`}
-            className={buttonVariants({ size: "sm" })}
-          >
-            Associar plano
-          </Link>
-        </div>
+    <div className="flex flex-1 flex-col items-center gap-6 p-6 text-foreground">
+      <div className="flex w-full max-w-2xl items-center justify-between">
+        <h1 className="font-heading text-2xl font-semibold">Editar aluno</h1>
+        <Link
+          href={`/students/${student.id}/contract/new`}
+          className={buttonVariants({ size: "sm" })}
+        >
+          Associar plano
+        </Link>
       </div>
-      <EditStudentForm
-        id={student.id}
-        schoolId={profile.schoolId}
-        defaultValues={{
-          name: student.name,
-          birthDate: student.birth_date ?? "",
-          cpf: student.cpf ?? "",
-          phone: student.phone ?? "",
-          email: student.email ?? "",
-          address: student.address ?? "",
-          emergencyContact: student.emergency_contact ?? "",
-          photoUrl: student.photo_url ?? "",
-          status: student.status as StudentInput["status"],
-          notes: student.notes ?? "",
-        }}
+      <StudentEditTabs
+        personalTab={
+          <>
+            <EditStudentForm
+              id={student.id}
+              schoolId={profile.schoolId}
+              defaultValues={{
+                name: student.name,
+                birthDate: student.birth_date ?? "",
+                cpf: student.cpf ?? "",
+                phone: student.phone ?? "",
+                email: student.email ?? "",
+                address: student.address ?? "",
+                emergencyContact: student.emergency_contact ?? "",
+                photoUrl: student.photo_url ?? "",
+                status: student.status as StudentInput["status"],
+                notes: student.notes ?? "",
+              }}
+            />
+            <div className="w-full max-w-sm">
+              <WhatsAppSend
+                phone={student.phone}
+                onSend={sendWhatsAppToStudent.bind(null, student.id)}
+              />
+            </div>
+          </>
+        }
+        guardiansTab={
+          <GuardiansSection studentId={student.id} guardians={guardians} />
+        }
+        financialTab={
+          <FinancialSection
+            studentId={student.id}
+            summary={financialSummary}
+            accounts={financialAccounts ?? []}
+          />
+        }
+        graduationTab={
+          <GraduationSection
+            studentId={student.id}
+            currentBeltName={student.belts?.name ?? null}
+            currentDegree={student.current_degree}
+            beltSystems={beltSystems ?? []}
+            belts={(belts ?? []).map((b) => ({
+              id: b.id,
+              beltSystemId: b.belt_system_id,
+              name: b.name,
+              ordering: b.ordering,
+            }))}
+            teachers={teachers ?? []}
+            attendancesSinceLastGraduation={attendancesSinceLastGraduation ?? 0}
+            daysSinceLastGraduation={daysSinceLastGraduation}
+          />
+        }
+        attendanceTab={<AttendanceHistory studentId={student.id} />}
       />
-      <GuardiansSection studentId={student.id} guardians={guardians} />
-      <div className="w-full max-w-sm">
-        <WhatsAppSend
-          phone={student.phone}
-          onSend={sendWhatsAppToStudent.bind(null, student.id)}
-        />
-      </div>
-      <FinancialSection
-        studentId={student.id}
-        summary={financialSummary}
-        accounts={financialAccounts ?? []}
-      />
-      <GraduationSection
-        studentId={student.id}
-        currentBeltName={student.belts?.name ?? null}
-        currentDegree={student.current_degree}
-        beltSystems={beltSystems ?? []}
-        belts={(belts ?? []).map((b) => ({
-          id: b.id,
-          beltSystemId: b.belt_system_id,
-          name: b.name,
-          ordering: b.ordering,
-        }))}
-        teachers={teachers ?? []}
-        attendancesSinceLastGraduation={attendancesSinceLastGraduation ?? 0}
-        daysSinceLastGraduation={daysSinceLastGraduation}
-      />
-      <AttendanceHistory studentId={student.id} />
     </div>
   );
 }
