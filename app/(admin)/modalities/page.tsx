@@ -1,13 +1,22 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 
-export default async function ModalitiesPage() {
+export default async function ModalitiesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
   const supabase = await createClient();
-  const { data: modalities } = await supabase
+  const { data: modalities, count } = await supabase
     .from("modalities")
-    .select("id, name, slug, status")
-    .order("name");
+    .select("id, name, slug, status", { count: "exact" })
+    .order("name")
+    .range(...getRange(page));
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
@@ -56,6 +65,13 @@ export default async function ModalitiesPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        totalCount={count ?? 0}
+        basePath="/modalities"
+      />
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 
 const MONTH_NAMES = [
   "janeiro",
@@ -16,12 +18,19 @@ const MONTH_NAMES = [
   "dezembro",
 ];
 
-export default async function BirthdaysPage() {
+export default async function BirthdaysPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
   const supabase = await createClient();
-  const { data: birthdays } = await supabase
+  const { data: birthdays, count } = await supabase
     .from("birthday_students")
-    .select("id, name, phone, photo_url, birth_day")
-    .order("birth_day");
+    .select("id, name, phone, photo_url, birth_day", { count: "exact" })
+    .order("birth_day")
+    .range(...getRange(page));
 
   const monthName = MONTH_NAMES[new Date().getMonth()];
 
@@ -65,6 +74,13 @@ export default async function BirthdaysPage() {
           </p>
         )}
       </div>
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        totalCount={count ?? 0}
+        basePath="/students/birthdays"
+      />
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 
 function formatMoney(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -11,13 +13,23 @@ function daysOverdue(dueDate: string): number {
   return Math.round((today.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-export default async function OverdueStudentsPage() {
+export default async function OverdueStudentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
   const supabase = await createClient();
 
-  const { data: overdueRows } = await supabase
+  const { data: overdueRows, count } = await supabase
     .from("overdue_students")
-    .select("student_id, overdue_installments_count, overdue_amount, oldest_overdue_due_date")
-    .order("oldest_overdue_due_date");
+    .select(
+      "student_id, overdue_installments_count, overdue_amount, oldest_overdue_due_date",
+      { count: "exact" },
+    )
+    .order("oldest_overdue_due_date")
+    .range(...getRange(page));
 
   const studentIds = (overdueRows ?? [])
     .map((row) => row.student_id)
@@ -119,6 +131,13 @@ export default async function OverdueStudentsPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        totalCount={count ?? 0}
+        basePath="/finance/overdue"
+      />
     </div>
   );
 }

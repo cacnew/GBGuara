@@ -1,13 +1,22 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 
-export default async function TeachersPage() {
+export default async function TeachersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
   const supabase = await createClient();
-  const { data: teachers } = await supabase
+  const { data: teachers, count } = await supabase
     .from("teachers")
-    .select("id, name, phone, email, photo_url, status")
-    .order("name");
+    .select("id, name, phone, email, photo_url, status", { count: "exact" })
+    .order("name")
+    .range(...getRange(page));
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
@@ -73,6 +82,13 @@ export default async function TeachersPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        totalCount={count ?? 0}
+        basePath="/teachers"
+      />
     </div>
   );
 }

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateOnly } from "@/lib/dates/format";
 import { buttonVariants } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 
 const STATUS_LABEL: Record<string, string> = {
   active: "Ativa",
@@ -9,12 +11,21 @@ const STATUS_LABEL: Record<string, string> = {
   legacy: "Legada",
 };
 
-export default async function PriceTablesPage() {
+export default async function PriceTablesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
   const supabase = await createClient();
-  const { data: priceTables } = await supabase
+  const { data: priceTables, count } = await supabase
     .from("price_tables")
-    .select("id, name, valid_from, valid_until, status, plans(id)")
-    .order("valid_from", { ascending: false });
+    .select("id, name, valid_from, valid_until, status, plans(id)", {
+      count: "exact",
+    })
+    .order("valid_from", { ascending: false })
+    .range(...getRange(page));
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
@@ -78,6 +89,13 @@ export default async function PriceTablesPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        totalCount={count ?? 0}
+        basePath="/finance/price-tables"
+      />
     </div>
   );
 }

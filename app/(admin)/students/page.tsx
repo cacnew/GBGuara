@@ -2,6 +2,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 
 const STATUS_LABEL: Record<string, string> = {
   ativo: "Ativo",
@@ -14,14 +16,15 @@ const STATUS_LABEL: Record<string, string> = {
 export default async function StudentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
-  const { q, status } = await searchParams;
+  const { q, status, page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
   const supabase = await createClient();
 
   let query = supabase
     .from("students")
-    .select("id, name, phone, status")
+    .select("id, name, phone, status", { count: "exact" })
     .order("name");
 
   if (q) {
@@ -31,7 +34,7 @@ export default async function StudentsPage({
     query = query.eq("status", status);
   }
 
-  const { data: students } = await query;
+  const { data: students, count } = await query.range(...getRange(page));
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-8 text-foreground">
@@ -104,6 +107,14 @@ export default async function StudentsPage({
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        totalCount={count ?? 0}
+        basePath="/students"
+        searchParams={{ q, status }}
+      />
     </div>
   );
 }

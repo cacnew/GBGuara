@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 
 const DURATION_LABEL: Record<string, string> = {
   monthly: "Mensal",
@@ -25,21 +27,25 @@ function formatMoney(value: number) {
 export default async function PlansPage({
   searchParams,
 }: {
-  searchParams: Promise<{ priceTableId?: string }>;
+  searchParams: Promise<{ priceTableId?: string; page?: string }>;
 }) {
-  const { priceTableId } = await searchParams;
+  const { priceTableId, page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
   const supabase = await createClient();
 
   let query = supabase
     .from("plans")
-    .select("id, name, plan_duration, base_price, status, price_tables(name)")
+    .select(
+      "id, name, plan_duration, base_price, status, price_tables(name)",
+      { count: "exact" },
+    )
     .order("name");
 
   if (priceTableId) {
     query = query.eq("price_table_id", priceTableId);
   }
 
-  const { data: plans } = await query;
+  const { data: plans, count } = await query.range(...getRange(page));
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
@@ -112,6 +118,14 @@ export default async function PlansPage({
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        totalCount={count ?? 0}
+        basePath="/finance/plans"
+        searchParams={{ priceTableId }}
+      />
     </div>
   );
 }

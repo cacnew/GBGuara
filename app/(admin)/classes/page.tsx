@@ -2,19 +2,29 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
 import { WEEK_DAYS } from "@/lib/validations/class-group";
+import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 
 const DAY_LABEL = Object.fromEntries(
   WEEK_DAYS.map((d) => [Number(d.value), d.label.slice(0, 3)]),
 );
 
-export default async function ClassGroupsPage() {
+export default async function ClassGroupsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
   const supabase = await createClient();
-  const { data: classGroups } = await supabase
+  const { data: classGroups, count } = await supabase
     .from("class_groups")
     .select(
       "id, name, start_time, end_time, week_days, status, modalities(name), teachers(name)",
+      { count: "exact" },
     )
-    .order("name");
+    .order("name")
+    .range(...getRange(page));
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
@@ -79,6 +89,13 @@ export default async function ClassGroupsPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        totalCount={count ?? 0}
+        basePath="/classes"
+      />
     </div>
   );
 }

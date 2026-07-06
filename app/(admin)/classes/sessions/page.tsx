@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDateOnly } from "@/lib/dates/format";
 import { buttonVariants } from "@/components/ui/button";
 import { CancelSessionButton } from "./cancel-button";
+import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 
 const STATUS_LABEL: Record<string, string> = {
   agendada: "Agendada",
@@ -11,15 +13,22 @@ const STATUS_LABEL: Record<string, string> = {
   extra: "Extra",
 };
 
-export default async function ClassSessionsPage() {
+export default async function ClassSessionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
 
-  const { data: sessions } = await supabase
+  const { data: sessions, count } = await supabase
     .from("class_sessions")
-    .select("id, date, status, class_groups(name)")
+    .select("id, date, status, class_groups(name)", { count: "exact" })
     .gte("date", today)
-    .order("date");
+    .order("date")
+    .range(...getRange(page));
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
@@ -70,6 +79,13 @@ export default async function ClassSessionsPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        totalCount={count ?? 0}
+        basePath="/classes/sessions"
+      />
     </div>
   );
 }

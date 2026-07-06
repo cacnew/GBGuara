@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pendente",
@@ -38,9 +40,12 @@ export default async function InstallmentsPage({
     student?: string;
     planId?: string;
     paymentMethod?: string;
+    page?: string;
   }>;
 }) {
-  const { month, status, student, planId, paymentMethod } = await searchParams;
+  const { month, status, student, planId, paymentMethod, page: pageParam } =
+    await searchParams;
+  const page = parsePage(pageParam);
   const supabase = await createClient();
 
   const { data: plans } = await supabase
@@ -95,12 +100,14 @@ export default async function InstallmentsPage({
         }
       | null;
   }[] = [];
+  let count = 0;
 
   if (contractIdsFilter === null || contractIdsFilter.length > 0) {
     let query = supabase
       .from("contract_installments")
       .select(
         "id, installment_number, due_date, amount, remaining_amount, status, payment_method, contracts(plans(name), contract_students(students(id, name)))",
+        { count: "exact" },
       )
       .order("due_date");
 
@@ -113,8 +120,9 @@ export default async function InstallmentsPage({
       query = query.gte("due_date", `${month}-01`).lt("due_date", nextMonth(month));
     }
 
-    const { data } = await query;
+    const { data, count: totalCount } = await query.range(...getRange(page));
     installments = data ?? [];
+    count = totalCount ?? 0;
   }
 
   return (
@@ -238,6 +246,14 @@ export default async function InstallmentsPage({
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        totalCount={count}
+        basePath="/finance/installments"
+        searchParams={{ month, status, student, planId, paymentMethod }}
+      />
     </div>
   );
 }
