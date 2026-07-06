@@ -466,6 +466,14 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
 - Layout pensado para celular: botões grandes, busca com foco automático,
   lista de presentes compacta — sem menu, sem sidebar, só o essencial da
   seção 16 do documento mestre.
+  > **Revisado em 05/07/2026**: decisão revertida a pedido do usuário — a
+  > ausência de `AppShell` deixava o usuário sem saída da tela (sem
+  > sidebar, sem botão de concluir) depois de marcar presença. A rota
+  > passou a ter `app/attendance/[sessionId]/layout.tsx` próprio, que
+  > aplica `AppShell` com o `role` do usuário logado (admin ou
+  > professor), e a página ganhou um botão "Concluir chamada" que volta
+  > para `/today` ou `/professor` conforme o papel. Ver
+  > `app/attendance/[sessionId]/layout.tsx` e `page.tsx`.
 - Testado localmente via Docker: acesso não autenticado bloqueado
   (redirect para `/login`), aluno marcado presente com um clique, e
   segunda tentativa do mesmo aluno na mesma sessão rejeitada com
