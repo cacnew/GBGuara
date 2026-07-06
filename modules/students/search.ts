@@ -27,8 +27,7 @@ export async function searchActiveStudents(
     .from("students")
     .select("id, name, photo_url, current_degree, belts(name, color_hex)")
     .eq("status", "ativo")
-    .order("name")
-    .limit(20);
+    .order("name");
 
   const trimmed = query.trim();
   if (trimmed) {

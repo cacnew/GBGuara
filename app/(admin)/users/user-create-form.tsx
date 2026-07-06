@@ -2,34 +2,31 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  createTeacherLoginSchema,
-  type CreateTeacherLoginInput,
-} from "@/lib/validations/create-teacher-login";
-import { createTeacherLogin } from "./actions";
+import { createUserSchema, type CreateUserInput } from "@/lib/validations/user";
+import { createUser } from "./actions";
 
-export default function NewTeacherPage() {
+export function UserCreateForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
-    formState: { errors },
     reset,
-  } = useForm<CreateTeacherLoginInput>({
-    resolver: zodResolver(createTeacherLoginSchema),
+    formState: { errors },
+  } = useForm<CreateUserInput>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: { role: "teacher" },
   });
 
-  async function onSubmit(data: CreateTeacherLoginInput) {
+  async function onSubmit(data: CreateUserInput) {
     setIsSubmitting(true);
-    const result = await createTeacherLogin(data);
+    const result = await createUser(data);
     setIsSubmitting(false);
 
     if (result.error) {
@@ -37,35 +34,25 @@ export default function NewTeacherPage() {
       return;
     }
 
-    toast.success("Professor cadastrado com sucesso.");
+    toast.success("Usuario criado.");
     reset();
-    router.push("/teachers");
+    router.push("/users");
+    router.refresh();
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center gap-6 p-6 text-foreground">
-      <div className="flex w-full max-w-sm flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
-          <h1 className="font-heading text-2xl font-semibold">
-            Novo professor
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Cria o acesso do professor ao sistema. Ficha completa (foto,
-            telefone, faixas) chega na Fase 2.
-          </p>
-        </div>
-        <Link
-          href="/teachers"
-          className={buttonVariants({ variant: "outline" })}
-        >
-          Voltar
-        </Link>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="w-full space-y-4 rounded-lg border border-border bg-card p-6"
+    >
+      <div>
+        <h2 className="font-heading text-lg font-bold">Novo usuario</h2>
+        <p className="text-sm text-muted-foreground">
+          Crie acesso de professor ou admin para a escola.
+        </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-card p-6"
-      >
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="name">Nome</Label>
           <Input id="name" {...register("name")} />
@@ -86,9 +73,7 @@ export default function NewTeacherPage() {
           <Label htmlFor="password">Senha inicial</Label>
           <Input id="password" type="password" {...register("password")} />
           {errors.password && (
-            <p className="text-sm text-destructive">
-              {errors.password.message}
-            </p>
+            <p className="text-sm text-destructive">{errors.password.message}</p>
           )}
         </div>
 
@@ -106,10 +91,22 @@ export default function NewTeacherPage() {
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Criando..." : "Criar professor"}
-        </Button>
-      </form>
-    </div>
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="role">Papel</Label>
+          <select
+            id="role"
+            {...register("role")}
+            className="w-full rounded-lg border border-input bg-background px-4 text-sm"
+          >
+            <option value="teacher">Professor</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Criando..." : "Criar usuario"}
+      </Button>
+    </form>
   );
 }

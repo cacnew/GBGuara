@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { BackLink } from "@/components/layout/back-link";
 import { createClient } from "@/lib/supabase/server";
 import type { BeltSystemInput } from "@/lib/validations/belt";
 import { EditBeltSystemForm } from "./form";
@@ -27,10 +28,11 @@ export default async function EditBeltSystemPage({
 
   return (
     <div className="flex flex-1 flex-col items-center gap-6 p-6 text-foreground">
-      <div className="w-full max-w-sm">
+      <div className="flex w-full max-w-sm items-center justify-between gap-3">
         <h1 className="font-heading text-2xl font-semibold">
           Editar sistema de faixa
         </h1>
+        <BackLink href="/belts" />
       </div>
       <EditBeltSystemForm
         id={beltSystem.id}

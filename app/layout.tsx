@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import { Toaster } from "sonner";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
@@ -10,10 +10,10 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const cormorantGaramond = Cormorant_Garamond({
+const manrope = Manrope({
   variable: "--font-heading",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#faf9f5",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -41,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${cormorantGaramond.variable} h-full antialiased`}
+      className={`${inter.variable} ${manrope.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
         <QueryProvider>{children}</QueryProvider>

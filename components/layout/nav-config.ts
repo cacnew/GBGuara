@@ -8,6 +8,7 @@ import {
   Layers,
   Tags,
   Wallet,
+  ShieldCheck,
 } from "lucide-react";
 
 export type NavLeaf = {
@@ -26,6 +27,7 @@ export type NavGroup = {
 export const ADMIN_NAV: NavGroup[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Turmas do dia", href: "/today", icon: CalendarDays },
+  { label: "Usuários", href: "/users", icon: ShieldCheck },
   {
     label: "Alunos",
     href: "/students",
@@ -46,7 +48,7 @@ export const ADMIN_NAV: NavGroup[] = [
     href: "/classes",
     icon: Layers,
     collapsible: true,
-    children: [{ label: "Sessões futuras", href: "/classes/sessions" }],
+    children: [{ label: "Sessões", href: "/classes/sessions" }],
   },
   { label: "Faixas", href: "/belts", icon: Tags },
   { label: "Modalidades", href: "/modalities", icon: Tags },
@@ -67,4 +69,5 @@ export const ADMIN_NAV: NavGroup[] = [
 
 export const TEACHER_NAV: NavGroup[] = [
   { label: "Dashboard", href: "/professor", icon: LayoutDashboard },
+  { label: "Histórico de chamadas", href: "/professor/sessions", icon: CalendarDays },
 ];

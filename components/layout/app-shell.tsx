@@ -66,14 +66,14 @@ export function AppShell({
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden md:flex-row">
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4 md:hidden">
-        <span className="font-heading text-lg font-semibold">NexusDojo</span>
+    <div className="flex h-dvh flex-col overflow-hidden bg-background md:flex-row">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-4 md:hidden">
+        <span className="font-heading text-lg font-bold text-primary">NexusDojo</span>
         <button
           type="button"
           aria-label="Abrir menu"
           onClick={() => setDrawerOpen(true)}
-          className="rounded-md p-2 hover:bg-muted"
+          className="rounded-full p-2 hover:bg-card"
         >
           <Menu className="size-5" />
         </button>
@@ -87,14 +87,14 @@ export function AppShell({
             className="absolute inset-0 bg-black/40"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="absolute inset-y-0 left-0 flex w-72 flex-col gap-4 overflow-y-auto bg-card p-4">
+          <div className="absolute inset-y-0 left-0 flex w-72 flex-col gap-4 overflow-y-auto bg-background p-4">
             <div className="flex items-center justify-between">
-              <span className="font-heading text-lg font-semibold">NexusDojo</span>
+              <span className="font-heading text-lg font-bold text-primary">NexusDojo</span>
               <button
                 type="button"
                 aria-label="Fechar menu"
                 onClick={() => setDrawerOpen(false)}
-                className="rounded-md p-2 hover:bg-muted"
+                className="rounded-full p-2 hover:bg-card"
               >
                 <X className="size-5" />
               </button>
@@ -110,17 +110,17 @@ export function AppShell({
 
       <aside
         className={cn(
-          "hidden min-h-0 shrink-0 flex-col overflow-x-hidden overflow-y-auto border-r border-border bg-card transition-all duration-200 md:flex",
+          "hidden min-h-0 shrink-0 flex-col overflow-x-hidden overflow-y-auto border-r border-border bg-background transition-all duration-200 md:flex",
           sidebarCollapsed ? "md:w-0 md:border-r-0 md:p-0" : "w-64 gap-4 p-4",
         )}
       >
         <div className="flex items-center justify-between">
-          <span className="font-heading text-lg font-semibold whitespace-nowrap">NexusDojo</span>
+          <span className="font-heading text-lg font-bold text-primary whitespace-nowrap">NexusDojo</span>
           <button
             type="button"
             aria-label="Recolher menu"
             onClick={toggleSidebar}
-            className="rounded-md p-2 text-muted-foreground hover:bg-muted"
+            className="rounded-full p-2 text-muted-foreground hover:bg-card"
           >
             <PanelLeftClose className="size-4" />
           </button>
@@ -137,7 +137,7 @@ export function AppShell({
           type="button"
           aria-label="Expandir menu"
           onClick={toggleSidebar}
-          className="fixed left-3 top-3 z-40 hidden rounded-md border border-border bg-card p-2 text-muted-foreground hover:bg-muted md:flex"
+          className="fixed left-3 top-3 z-40 hidden rounded-full border border-border bg-background p-2 text-muted-foreground hover:bg-card md:flex"
         >
           <PanelLeftOpen className="size-4" />
         </button>

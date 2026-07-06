@@ -68,10 +68,10 @@ function NavGroupItem({ group, pathname }: { group: NavGroup; pathname: string }
   const Icon = group.icon;
   const hasChildren = (group.children?.length ?? 0) > 0;
   const linkClasses = cn(
-    "flex flex-1 items-center gap-2 rounded-md px-3 py-2 text-sm",
+    "flex flex-1 items-center gap-2 rounded-full px-3 py-2 text-sm font-bold",
     active
-      ? "bg-secondary text-secondary-foreground"
-      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+      ? "bg-foreground text-white"
+      : "text-foreground hover:bg-card",
   );
 
   return (
@@ -93,7 +93,7 @@ function NavGroupItem({ group, pathname }: { group: NavGroup; pathname: string }
             type="button"
             aria-label={open ? `Recolher ${group.label}` : `Expandir ${group.label}`}
             onClick={toggleOpen}
-            className="rounded-md p-2 text-muted-foreground hover:bg-muted"
+            className="rounded-full p-2 text-muted-foreground hover:bg-card"
           >
             <ChevronDown className={cn("size-4 transition-transform", open && "rotate-180")} />
           </button>
@@ -108,10 +108,10 @@ function NavGroupItem({ group, pathname }: { group: NavGroup; pathname: string }
                 key={child.href}
                 href={child.href}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-sm",
+                  "rounded-full px-3 py-1.5 text-sm font-bold",
                   childActive
-                    ? "bg-secondary text-secondary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    ? "bg-foreground text-white"
+                    : "text-muted-foreground hover:bg-card hover:text-foreground",
                 )}
               >
                 {child.label}

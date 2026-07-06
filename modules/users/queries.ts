@@ -6,6 +6,7 @@ export type CurrentUserProfile = {
   name: string;
   email: string;
   role: "admin" | "teacher";
+  status: "active" | "inactive";
 };
 
 export async function getCurrentUserProfile(): Promise<CurrentUserProfile | null> {
@@ -18,11 +19,12 @@ export async function getCurrentUserProfile(): Promise<CurrentUserProfile | null
 
   const { data } = await supabase
     .from("users")
-    .select("id, school_id, name, email, role")
+    .select("id, school_id, name, email, role, status")
     .eq("auth_user_id", user.id)
     .single();
 
   if (!data) return null;
+  if (data.status !== "active") return null;
 
   return {
     id: data.id,
@@ -30,5 +32,6 @@ export async function getCurrentUserProfile(): Promise<CurrentUserProfile | null
     name: data.name,
     email: data.email,
     role: data.role as CurrentUserProfile["role"],
+    status: data.status as CurrentUserProfile["status"],
   };
 }

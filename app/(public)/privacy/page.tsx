@@ -1,6 +1,12 @@
+import { BackLink } from "@/components/layout/back-link";
+
 export default function PrivacyPolicyPage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 p-6 text-foreground">
+      <div className="flex justify-end">
+        <BackLink href="/login" />
+      </div>
+
       <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm">
         <strong>Rascunho — não publicado.</strong> Este texto é um ponto de
         partida gerado automaticamente, baseado na LGPD e nos dados que o

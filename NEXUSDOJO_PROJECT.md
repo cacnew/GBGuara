@@ -1661,4 +1661,62 @@ O NexusDojo deve apoiar a operação real da escola de lutas, sem engessar a rot
 A escola decide.
 O professor valida.
 O sistema registra, organiza e mostra indicadores.
+ 
+---
+
+# Atualizacoes de produto apos validacao
+
+Esta secao consolida decisoes tomadas durante a validacao do sistema em uso.
+Em caso de conflito com trechos antigos deste documento, estas regras mais
+recentes prevalecem ate nova decisao explicita do usuario.
+
+## Planos e acesso as aulas
+
+- O sistema e voltado para escola de lutas, nao para academia com limite de
+  aulas por semana.
+- Pagou e aderiu a um plano ativo: o aluno pode treinar em qualquer turma
+  disponivel, desde que a escola/professor permita operacionalmente.
+- O sistema nao deve bloquear presenca por quantidade de aulas, pontuacao,
+  creditos, saldo ou limite semanal.
+- Campos como `classes_per_week`, `classes_total` e `unlimited`, quando
+  existirem no schema, sao informativos/legados e nao devem dirigir regra de
+  bloqueio de chamada.
+- A compatibilidade da turma com o aluno e uma decisao operacional da escola,
+  nao um bloqueio automatico do software.
+
+## Presenca e graduacao
+
+- A chamada registra a presenca real em uma sessao de aula.
+- O aluno pode ter varias presencas no mesmo dia se participou de varias
+  sessoes.
+- Para indicadores de graduacao, contar no maximo uma presenca por dia por
+  modalidade.
+- Modalidades nao se misturam para graduacao: uma presenca de jiu-jitsu nao
+  conta para muay thai, boxe ou outra modalidade.
+- Frequencia e indicador de apoio; a graduacao continua sendo decisao manual
+  do professor ou administrador.
+
+## Historico de chamadas
+
+- A tela do dia serve para operacao imediata, mas administradores e professores
+  tambem precisam acessar sessoes passadas.
+- O historico deve permitir ver aulas ja realizadas e os alunos que
+  participaram de cada chamada.
+- Esse acesso deve estar disponivel na navegacao, nao escondido apenas por URL.
+
+## Usuarios, professores e administradores
+
+- O papel inicial de um professor e acesso basico de professor.
+- Em situacoes especiais, um professor pode ser administrador.
+- A tela de usuarios deve permitir criar usuarios e alterar role/status.
+- O sistema deve preservar pelo menos um admin ativo por escola para evitar
+  bloqueio administrativo.
+
+## UX de fluxo
+
+- Telas de criacao, edicao e assistentes devem sempre oferecer caminho de
+  retorno para a listagem, ficha ou tela de origem.
+- O professor normalmente opera pelo celular; fluxos de chamada devem ser
+  rapidos, com lista de alunos e lista de presentes sempre faceis de enxergar.
+- O design system vigente do produto e o definido em `DESIGN-pinterest.md`.
 

@@ -1,8 +1,8 @@
 import Link from "next/link";
+import { getCurrentUserProfile } from "@/modules/users/queries";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateOnly } from "@/lib/dates/format";
 import { buttonVariants } from "@/components/ui/button";
-import { CancelSessionButton } from "./cancel-button";
 import { Pagination } from "@/components/ui/pagination";
 import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 
@@ -13,39 +13,44 @@ const STATUS_LABEL: Record<string, string> = {
   extra: "Extra",
 };
 
-const PERIOD_LABEL: Record<string, string> = {
-  all: "Todas",
-  past: "Passadas",
-  upcoming: "Futuras",
-};
-
-function buildPeriodHref(period: string) {
-  return `/classes/sessions?period=${period}`;
-}
-
-export default async function ClassSessionsPage({
+export default async function TeacherSessionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; period?: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const { page: pageParam, period: periodParam } = await searchParams;
+  const { page: pageParam } = await searchParams;
   const page = parsePage(pageParam);
-  const period = periodParam === "upcoming" || periodParam === "all" ? periodParam : "past";
+  const profile = await getCurrentUserProfile();
   const supabase = await createClient();
-  const today = new Date().toISOString().slice(0, 10);
 
-  let request = supabase
-    .from("class_sessions")
-    .select("id, date, status, class_groups(name)", { count: "exact" });
+  const { data: teacher } = await supabase
+    .from("teachers")
+    .select("id")
+    .eq("email", profile?.email ?? "")
+    .maybeSingle();
 
-  if (period === "past") {
-    request = request.lt("date", today);
-  } else if (period === "upcoming") {
-    request = request.gte("date", today);
+  if (!teacher) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold">
+            Histórico de chamadas
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Nenhuma ficha de professor vinculada ao seu e-mail.
+          </p>
+        </div>
+      </div>
+    );
   }
 
-  const { data: sessions, count } = await request
-    .order("date", { ascending: period === "upcoming" })
+  const { data: sessions, count } = await supabase
+    .from("class_sessions")
+    .select("id, date, status, class_groups!inner(name, main_teacher_id)", {
+      count: "exact",
+    })
+    .eq("class_groups.main_teacher_id", teacher.id)
+    .order("date", { ascending: false })
     .range(...getRange(page));
 
   const sessionIds = (sessions ?? []).map((session) => session.id);
@@ -67,31 +72,13 @@ export default async function ClassSessionsPage({
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-heading text-2xl font-semibold">Sessões</h1>
-          <p className="text-sm text-muted-foreground">
-            Consulte aulas passadas, futuras e os alunos presentes em cada chamada.
-          </p>
-        </div>
-        <Link href="/classes/sessions/new" className={buttonVariants()}>
-          Nova sessão extra
-        </Link>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {Object.entries(PERIOD_LABEL).map(([value, label]) => (
-          <Link
-            key={value}
-            href={buildPeriodHref(value)}
-            className={buttonVariants({
-              size: "sm",
-              variant: period === value ? "default" : "outline",
-            })}
-          >
-            {label}
-          </Link>
-        ))}
+      <div>
+        <h1 className="font-heading text-2xl font-semibold">
+          Histórico de chamadas
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Aulas vinculadas a você, com acesso aos alunos presentes.
+        </p>
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-border">
@@ -116,28 +103,22 @@ export default async function ClassSessionsPage({
                 <td className="p-3">
                   {attendanceCountBySession.get(session.id) ?? 0}
                 </td>
-                <td className="p-3">
-                  <div className="flex justify-end gap-2">
-                    {session.status !== "cancelada" && (
-                      <Link
-                        href={`/attendance/${session.id}`}
-                        className={buttonVariants({ size: "sm", variant: "outline" })}
-                      >
-                        Ver chamada
-                      </Link>
-                    )}
-                    {(session.status === "agendada" || session.status === "extra") &&
-                      session.date >= today && (
-                        <CancelSessionButton sessionId={session.id} />
-                      )}
-                  </div>
+                <td className="p-3 text-right">
+                  {session.status !== "cancelada" && (
+                    <Link
+                      href={`/attendance/${session.id}`}
+                      className={buttonVariants({ size: "sm", variant: "outline" })}
+                    >
+                      Ver chamada
+                    </Link>
+                  )}
                 </td>
               </tr>
             ))}
             {!sessions?.length && (
               <tr>
                 <td className="p-3 text-muted-foreground" colSpan={5}>
-                  Nenhuma sessão encontrada.
+                  Nenhuma chamada encontrada.
                 </td>
               </tr>
             )}
@@ -149,8 +130,7 @@ export default async function ClassSessionsPage({
         page={page}
         pageSize={PAGE_SIZE}
         totalCount={count ?? 0}
-        basePath="/classes/sessions"
-        searchParams={{ period }}
+        basePath="/professor/sessions"
       />
     </div>
   );

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { BackLink } from "@/components/layout/back-link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,10 +40,11 @@ export default function NewModalityPage() {
 
   return (
     <div className="flex flex-1 flex-col items-center gap-6 p-6 text-foreground">
-      <div className="w-full max-w-sm">
+      <div className="flex w-full max-w-sm items-center justify-between gap-3">
         <h1 className="font-heading text-2xl font-semibold">
           Nova modalidade
         </h1>
+        <BackLink href="/modalities" />
       </div>
 
       <form

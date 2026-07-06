@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { BackLink } from "@/components/layout/back-link";
 import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveContractForStudent } from "./actions";
@@ -50,9 +51,12 @@ export default async function NewContractPage({
 
   return (
     <div className="flex flex-1 flex-col items-center gap-6 p-6 text-foreground">
-      <div className="w-full max-w-sm">
-        <h1 className="font-heading text-2xl font-semibold">Associar plano</h1>
-        <p className="text-sm text-muted-foreground">{student.name}</p>
+      <div className="flex w-full max-w-sm items-start justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold">Associar plano</h1>
+          <p className="text-sm text-muted-foreground">{student.name}</p>
+        </div>
+        <BackLink href={`/students/${student.id}/edit`} />
       </div>
       <ContractWizard
         studentId={student.id}

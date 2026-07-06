@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { BackLink } from "@/components/layout/back-link";
 import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import type { TeacherInput } from "@/lib/validations/teacher";
@@ -53,10 +54,11 @@ export default async function EditTeacherPage({
 
   return (
     <div className="flex flex-1 flex-col items-center gap-10 p-6 text-foreground">
-      <div className="w-full max-w-sm">
+      <div className="flex w-full max-w-sm items-center justify-between gap-3">
         <h1 className="font-heading text-2xl font-semibold">
           Editar professor
         </h1>
+        <BackLink href="/teachers" />
       </div>
       <EditTeacherProfileForm
         id={teacher.id}

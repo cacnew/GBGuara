@@ -456,3 +456,37 @@ seminários, multiunidade com telas próprias, IA, catraca física,
 marketplace, white label, app nativo — ver seção 19 do
 `NEXUSDOJO_PROJECT.md`. Só entram no `TASK.md` quando o usuário aprovar
 formalmente o início do MVP 2/MVP 3.
+ 
+---
+
+## Atualizacoes recentes de escopo e UX
+
+Estas notas registram decisoes tomadas em validacao com o usuario depois do
+roadmap original. Elas devem orientar manutencoes futuras, mesmo quando nao
+forem uma subtarefa numerada formal.
+
+- **Planos financeiros em escola de lutas:** o plano pago libera o aluno para
+  treinar nas turmas disponiveis e compativeis operacionalmente. Nao existe
+  limite de aulas por semana, pontuacao, saldo de aulas ou pacote de creditos
+  no modelo atual. Campos historicos como `classes_per_week`, `classes_total`
+  e `unlimited` nao devem ser usados para bloquear presenca.
+- **Presenca e graduacao:** a chamada registra a aula real feita. Um aluno pode
+  participar de varias aulas no mesmo dia. Para indicadores de graduacao, a
+  regra de produto e contabilizar no maximo uma presenca por dia por
+  modalidade, sem misturar modalidades diferentes.
+- **Tela de chamada:** a experiencia deve continuar mobile-first. A lista de
+  todos os alunos e a lista de presentes devem ficar visiveis em areas
+  separadas quando houver espaco, para o professor registrar presencas rapido
+  no celular ou desktop.
+- **Historico de chamadas:** administradores e professores precisam acessar
+  aulas ja realizadas, ver sessoes passadas e conferir os alunos presentes em
+  cada chamada. A navegacao deve expor esse historico, nao apenas a tela do dia.
+- **Usuarios e permissoes:** professores tem acesso basico por padrao, mas um
+  professor pode ser promovido a admin em situacoes especiais. A administracao
+  de usuarios deve permitir criar usuarios e alterar role/status, preservando
+  pelo menos um admin ativo.
+- **Fluxos com retorno:** telas de criacao, edicao e assistentes devem ter um
+  caminho claro de volta para a listagem ou ficha de origem. O usuario nao deve
+  ficar preso dentro de um fluxo funcional.
+- **Design system atual:** a direcao visual vigente passou a ser o arquivo
+  `DESIGN-pinterest.md`. Nao reintroduzir o design antigo sem aprovacao.

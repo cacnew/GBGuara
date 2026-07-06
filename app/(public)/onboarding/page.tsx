@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { onboardingSchema, type OnboardingInput } from "@/lib/validations/onboarding";
@@ -35,7 +36,12 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-background px-4 py-12 text-foreground">
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-background px-4 py-12 text-foreground">
+      <div className="flex w-full max-w-sm justify-end">
+        <Link href="/login" className={buttonVariants({ variant: "outline" })}>
+          Voltar
+        </Link>
+      </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-card p-6"

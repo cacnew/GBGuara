@@ -33,7 +33,9 @@ export default async function TeacherDashboardPage() {
               id: s.id,
               primary: s.className,
               trailing: formatDate(s.date),
+              href: `/attendance/${s.id}`,
             }))}
+            viewAllHref="/professor/sessions"
           />
           <SummaryList
             title="Alunos recentes"

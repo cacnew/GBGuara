@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NexusDojo
 
-## Getting Started
+Sistema SaaS para gestao de escolas de lutas, iniciado com foco em jiu-jitsu
+mas planejado para outras modalidades como no-gi, muay thai, boxe, wrestling,
+defesa pessoal e funcional.
 
-First, run the development server:
+O produto parte de algumas regras centrais:
+
+- Turmas sao horarios/aulas disponiveis, nao grupos fechados de alunos.
+- Aluno com plano ativo pode treinar nas turmas disponiveis sem limite semanal
+  de aulas controlado pelo sistema.
+- Presenca registra a aula real feita; para graduacao, indicadores devem contar
+  no maximo uma presenca por dia por modalidade.
+- Financeiro separa tabela de preco, plano, contrato e parcelas.
+- Professores tem acesso pratico a chamada e historico; administradores gerem
+  usuarios, financeiro, cadastros e relatorios.
+
+## Documentacao principal
+
+- `NEXUSDOJO_PROJECT.md`: documento mestre de produto e escopo.
+- `TASK.md`: progresso e decisoes operacionais do projeto.
+- `CLAUDE.md`: protocolo de trabalho colaborativo.
+- `DESIGN-pinterest.md`: design system vigente.
+
+## Desenvolvimento
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Validacao local:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
+## Stack
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- Supabase Auth/Postgres/RLS
+- React Hook Form
+- Zod
+- shadcn/ui

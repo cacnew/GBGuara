@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
+import { BackLink } from "@/components/layout/back-link";
 import { WhatsAppSend } from "@/components/forms/whatsapp-send";
 import { sendWhatsAppToStudent } from "@/modules/whatsapp/actions";
 import type { StudentInput } from "@/lib/validations/student";
@@ -96,14 +97,17 @@ export default async function EditStudentPage({
 
   return (
     <div className="flex flex-1 flex-col items-center gap-6 p-6 text-foreground">
-      <div className="flex w-full max-w-2xl items-center justify-between">
+      <div className="flex w-full max-w-2xl flex-wrap items-center justify-between gap-3">
         <h1 className="font-heading text-2xl font-semibold">Editar aluno</h1>
-        <Link
-          href={`/students/${student.id}/contract/new`}
-          className={buttonVariants({ size: "sm" })}
-        >
-          Associar plano
-        </Link>
+        <div className="flex gap-2">
+          <BackLink href="/students" />
+          <Link
+            href={`/students/${student.id}/contract/new`}
+            className={buttonVariants({ size: "sm" })}
+          >
+            Associar plano
+          </Link>
+        </div>
       </div>
       <StudentEditTabs
         personalTab={

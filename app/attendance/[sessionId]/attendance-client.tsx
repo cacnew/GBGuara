@@ -58,38 +58,45 @@ export function AttendanceClient({
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6">
-      <StudentSearch
-        onSelect={handleSelect}
-        excludeIds={present.map((p) => p.studentId)}
-      />
+    <div className="grid flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] lg:items-start">
+      <section className="min-w-0 space-y-2">
+        <h2 className="font-heading text-lg font-semibold">Todos os alunos</h2>
+        <div className="max-h-[calc(100dvh-13rem)] overflow-y-auto pr-1">
+          <StudentSearch
+            onSelect={handleSelect}
+            excludeIds={present.map((p) => p.studentId)}
+          />
+        </div>
+      </section>
 
-      <div className="space-y-2">
+      <section className="min-w-0 space-y-2 lg:sticky lg:top-0">
         <h2 className="font-heading text-lg font-semibold">
           Presentes ({present.length})
         </h2>
-        {present.map((p) => (
-          <div
-            key={p.studentId}
-            className="flex items-center justify-between rounded-lg border border-border bg-card p-3 text-sm font-medium"
-          >
-            {p.name}
-            <button
-              type="button"
-              onClick={() => handleRemove(p)}
-              disabled={removingId === p.attendanceId}
-              className="text-xs font-normal text-destructive hover:underline disabled:opacity-50"
+        <div className="max-h-[calc(100dvh-13rem)] space-y-2 overflow-y-auto pr-1">
+          {present.map((p) => (
+            <div
+              key={p.studentId}
+              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3 text-sm font-medium"
             >
-              {removingId === p.attendanceId ? "Removendo..." : "Remover"}
-            </button>
-          </div>
-        ))}
-        {!present.length && (
-          <p className="text-sm text-muted-foreground">
-            Ninguém marcado presente ainda.
-          </p>
-        )}
-      </div>
+              <span className="min-w-0 truncate">{p.name}</span>
+              <button
+                type="button"
+                onClick={() => handleRemove(p)}
+                disabled={removingId === p.attendanceId}
+                className="shrink-0 text-xs font-normal text-destructive hover:underline disabled:opacity-50"
+              >
+                {removingId === p.attendanceId ? "Removendo..." : "Remover"}
+              </button>
+            </div>
+          ))}
+          {!present.length && (
+            <p className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
+              Nenhum aluno marcado presente ainda.
+            </p>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

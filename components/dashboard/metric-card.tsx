@@ -16,13 +16,13 @@ export function MetricCard({
     <div
       className={cn(
         "rounded-lg border border-border bg-card p-6",
-        href && "transition-colors hover:bg-muted/50",
+        href && "transition-colors hover:bg-secondary",
       )}
     >
-      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="text-sm font-bold text-muted-foreground">{label}</p>
       <p
         className={cn(
-          "font-heading text-2xl font-semibold",
+          "font-heading text-2xl font-bold",
           variant === "destructive" && "text-destructive",
         )}
       >

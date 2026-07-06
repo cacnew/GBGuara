@@ -22,7 +22,7 @@ export function SummaryList({
   return (
     <div className="rounded-lg border border-border bg-card p-6">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-sm font-medium">{title}</p>
+        <p className="text-sm font-bold">{title}</p>
         {viewAllHref && (
           <Link href={viewAllHref} className="text-xs text-primary hover:underline">
             Ver todos
@@ -49,7 +49,7 @@ export function SummaryList({
             <Link
               key={item.id}
               href={item.href}
-              className="block rounded-md px-2 py-1.5 -mx-2 hover:bg-muted/50"
+              className="block rounded-lg px-2 py-1.5 -mx-2 hover:bg-secondary"
             >
               {row}
             </Link>
