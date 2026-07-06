@@ -26,6 +26,15 @@ arquivo que deve ser consultado para saber "o que já foi feito". Este
   IA, etc.) estão fora de escopo até novo aviso — ver seção 19 do
   documento mestre e o rodapé do `TASK.md`.
 
+## Polimento pós-MVP 1B
+
+Ajustes de UX/UI feitos após a Fase 8 (fora da numeração de fases do
+`TASK.md`, não fazem parte do escopo formal do MVP): sidebar colapsável,
+sidebar sempre visível + saída na tela de chamada, scroll independente
+entre sidebar e conteúdo, ficha do aluno reorganizada em abas, e
+paginação (20 registros/página) em todos os grids de listagem. Decisões
+técnicas de cada um em `docs/DECISIONS.md`.
+
 ## Como uma fase avança
 
 Cada fase é uma sequência de subtarefas em `TASK.md`, executadas uma de

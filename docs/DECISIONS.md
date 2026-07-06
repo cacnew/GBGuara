@@ -992,3 +992,78 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   `professor@nexusdojo.dev`, senha `TestSenha123!`) recriados
   manualmente após o reset, e 30 presenças inseridas manualmente para
   completar o cenário de demonstração.
+
+## Ficha do aluno em abas (pós-MVP 1B)
+
+- `/students/[id]/edit` tinha 5 seções empilhadas em coluna única
+  (dados pessoais, responsáveis, financeiro, graduação, frequência),
+  exigindo scroll longo para chegar às últimas. Reorganizado em abas
+  via novo primitivo `components/ui/tabs.tsx` (`@base-ui/react/tabs`)
+  + `student-edit-tabs.tsx`, seguindo o mesmo padrão de wrapper fino
+  já usado em `button.tsx`. Nenhuma query mudou — é reorganização
+  visual pura; cada aba mantém seu próprio fluxo de salvar.
+- Painéis usam `keepMounted` (todas as abas ficam no DOM, só
+  escondidas via CSS) para não perder edição em andamento se o
+  usuário trocar de aba sem salvar.
+- **Bug de plataforma encontrado**: `TabsTab` do base-ui não expõe
+  `data-selected` (só `data-active`, que é sobre interação/pressed,
+  não seleção). O destaque visual da aba corrente usa `aria-selected`
+  (padrão ARIA, sempre presente) em vez de um data-attribute
+  específico do base-ui.
+- Cabeçalho da página ("Editar aluno" + botão "Associar plano")
+  continua fixo, fora das abas.
+- Testado no navegador: troca de aba preserva conteúdo (`keepMounted`
+  confirmado editando um campo, trocando de aba e voltando), destaque
+  visual correto, e lista de abas rola horizontalmente em mobile
+  (390×844) sem quebrar o layout.
+
+## Scroll independente entre sidebar e conteúdo (pós-MVP 1B)
+
+- O `AppShell` usava `min-h-screen` no container raiz, deixando a
+  altura crescer junto com o conteúdo — o documento inteiro rolava
+  (sidebar e conteúdo principal juntos), e o fim de listas longas
+  (ex: `/students` com 30+ registros) ficava inacessível, com o
+  rodapé da sidebar ("Sair") empurrado para muito abaixo da viewport.
+- Corrigido com `h-dvh` + `overflow-hidden` no container raiz, e
+  `aside`/`main` cada um com seu próprio `overflow-y-auto`.
+  **Armadilha de CSS encontrada**: o `flex-1` que existia no mesmo
+  elemento tem `flex-basis: 0%`, que anula a altura fixa de `h-dvh`
+  dentro de um container flex-column (o `body`) — teve que ser
+  removido. Também foi necessário `min-h-0` em `aside`/`main`, porque
+  flex items têm `min-height: auto` por padrão, o que impede o
+  encolhimento necessário para o scroll interno funcionar.
+- Vale para todo o sistema autenticado (admin, professor, tela de
+  chamada), já que todos compartilham o mesmo `AppShell`.
+- **Cuidado ao verificar**: uma aba do navegador aberta antes dessa
+  mudança pode continuar mostrando o comportamento antigo mesmo após
+  o deploy, porque o Next.js App Router cacheia a navegação
+  client-side (Router Cache) por aba — é necessário hard refresh
+  (`Ctrl+Shift+R`) ou reabrir a aba para ver a correção.
+
+## Paginação em todos os grids de listagem (pós-MVP 1B)
+
+- Nenhuma tela de listagem tinha limite de registros — grids maiores
+  (30+ alunos, 70+ parcelas) só podiam ser vistos rolando
+  indefinidamente. Adicionado `lib/pagination.ts` (`PAGE_SIZE = 20`,
+  `parsePage`, `getRange`) e `components/ui/pagination.tsx` — um
+  componente **server-rendered** (só links com querystring `?page=N`,
+  sem JS de cliente, já que a única interação é navegar).
+- Aplicado via `.select(..., { count: "exact" })` + `.range()` em:
+  `students`, `teachers`, `leads`, `modalities`, `classes`,
+  `classes/sessions`, `finance/plans`, `finance/price-tables`,
+  `finance/installments`, `finance/overdue`, `students/birthdays`.
+- Cada página preserva os filtros já existentes na querystring (busca,
+  status, mês, plano, forma de pagamento) — testado em
+  `finance/installments` com filtro `status=pending` mantendo o
+  filtro ao trocar de página.
+- **Deixado de fora, deliberadamente**: `app/(admin)/belts` —
+  sistemas de faixa e faixas por sistema são um catálogo pequeno e
+  estável (não cresce como alunos/parcelas); paginar ali seria
+  complexidade sem necessidade real.
+- `finance/overdue` e `finance/installments` são os casos mais
+  delicados: a view `overdue_students` e a query de
+  `contract_installments` recebem o `.range()` diretamente, e os
+  lookups dependentes (students/contracts/guardians em `overdue`,
+  resolução de `contractIdsFilter` em `installments`) continuam
+  operando sobre o conjunto completo antes do corte de página, sem
+  afetar a paginação em si.
