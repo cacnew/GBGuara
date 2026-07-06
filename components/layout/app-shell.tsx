@@ -66,7 +66,7 @@ export function AppShell({
   }
 
   return (
-    <div className="flex min-h-screen flex-1 flex-col md:flex-row">
+    <div className="flex h-dvh flex-col overflow-hidden md:flex-row">
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4 md:hidden">
         <span className="font-heading text-lg font-semibold">NexusDojo</span>
         <button
@@ -110,7 +110,7 @@ export function AppShell({
 
       <aside
         className={cn(
-          "hidden shrink-0 flex-col overflow-hidden border-r border-border bg-card transition-all duration-200 md:flex",
+          "hidden min-h-0 shrink-0 flex-col overflow-x-hidden overflow-y-auto border-r border-border bg-card transition-all duration-200 md:flex",
           sidebarCollapsed ? "md:w-0 md:border-r-0 md:p-0" : "w-64 gap-4 p-4",
         )}
       >
@@ -143,7 +143,9 @@ export function AppShell({
         </button>
       )}
 
-      <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
+        {children}
+      </main>
     </div>
   );
 }
