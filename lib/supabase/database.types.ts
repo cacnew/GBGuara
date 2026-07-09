@@ -343,6 +343,7 @@ export type Database = {
           created_at: string
           date: string
           id: string
+          lesson_content: string | null
           notes: string | null
           school_id: string
           status: string
@@ -354,6 +355,7 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          lesson_content?: string | null
           notes?: string | null
           school_id: string
           status?: string
@@ -365,6 +367,7 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          lesson_content?: string | null
           notes?: string | null
           school_id?: string
           status?: string
@@ -846,6 +849,107 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      graduation_suggestions: {
+        Row: {
+          created_at: string
+          current_belt_id: string | null
+          current_degree: number | null
+          id: string
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by_user_id: string | null
+          school_id: string
+          status: string
+          student_id: string
+          suggested_belt_id: string | null
+          suggested_by_teacher_id: string | null
+          suggested_degree: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_belt_id?: string | null
+          current_degree?: number | null
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          school_id: string
+          status?: string
+          student_id: string
+          suggested_belt_id?: string | null
+          suggested_by_teacher_id?: string | null
+          suggested_degree?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_belt_id?: string | null
+          current_degree?: number | null
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          school_id?: string
+          status?: string
+          student_id?: string
+          suggested_belt_id?: string | null
+          suggested_by_teacher_id?: string | null
+          suggested_degree?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "graduation_suggestions_current_belt_id_fkey"
+            columns: ["current_belt_id"]
+            isOneToOne: false
+            referencedRelation: "belts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_suggestions_reviewed_by_user_id_fkey"
+            columns: ["reviewed_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_suggestions_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_suggestions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "birthday_students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_suggestions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_suggestions_suggested_belt_id_fkey"
+            columns: ["suggested_belt_id"]
+            isOneToOne: false
+            referencedRelation: "belts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "graduation_suggestions_suggested_by_teacher_id_fkey"
+            columns: ["suggested_by_teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
             referencedColumns: ["id"]
           },
         ]
@@ -1957,4 +2061,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

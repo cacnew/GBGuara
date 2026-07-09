@@ -19,7 +19,7 @@ export default async function AttendancePage({
 
   const { data: session } = await supabase
     .from("class_sessions")
-    .select("id, date, status, class_groups(name, modalities(name))")
+    .select("id, date, status, lesson_content, notes, class_groups(name, modalities(name))")
     .eq("id", sessionId)
     .single();
 
@@ -27,13 +27,14 @@ export default async function AttendancePage({
 
   const { data: attendances } = await supabase
     .from("attendances")
-    .select("id, student_id, students(name)")
+    .select("id, student_id, student_notes, students(name)")
     .eq("class_session_id", sessionId);
 
   const initialPresent: PresentStudent[] = (attendances ?? []).map((a) => ({
     attendanceId: a.id,
     studentId: a.student_id,
     name: a.students?.name ?? "",
+    note: a.student_notes ?? "",
   }));
 
   return (
@@ -58,6 +59,8 @@ export default async function AttendancePage({
       <AttendanceClient
         classSessionId={session.id}
         initialPresent={initialPresent}
+        initialLessonContent={session.lesson_content ?? ""}
+        initialSessionNotes={session.notes ?? ""}
       />
     </div>
   );

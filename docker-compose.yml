@@ -1,0 +1,20 @@
+name: nexusdojo
+
+services:
+  web:
+    container_name: nexusdojo
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm ci && rm -rf .next/dev && npm run dev -- --hostname 0.0.0.0"
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env.local
+    environment:
+      NEXT_PUBLIC_APP_URL: http://localhost:3001
+      SUPABASE_INTERNAL_URL: ${SUPABASE_INTERNAL_URL:-}
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next

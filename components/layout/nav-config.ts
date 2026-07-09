@@ -1,14 +1,12 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  LayoutDashboard,
   CalendarDays,
-  Users,
-  UserPlus,
+  ClipboardList,
   GraduationCap,
-  Layers,
-  Tags,
-  Wallet,
+  LayoutDashboard,
   ShieldCheck,
+  Users,
+  Wallet,
 } from "lucide-react";
 
 export type NavLeaf = {
@@ -26,48 +24,71 @@ export type NavGroup = {
 
 export const ADMIN_NAV: NavGroup[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Turmas do dia", href: "/today", icon: CalendarDays },
-  { label: "Usuários", href: "/users", icon: ShieldCheck },
   {
-    label: "Alunos",
-    href: "/students",
+    label: "Operacao",
+    icon: CalendarDays,
+    collapsible: true,
+    children: [
+      { label: "Turmas do dia", href: "/today" },
+      { label: "Historico de chamadas", href: "/classes/sessions" },
+      { label: "Turmas e horarios", href: "/classes" },
+    ],
+  },
+  {
+    label: "Pessoas",
     icon: Users,
     collapsible: true,
-    children: [{ label: "Aniversariantes", href: "/students/birthdays" }],
+    children: [
+      { label: "Alunos", href: "/students" },
+      { label: "Aniversariantes", href: "/students/birthdays" },
+      { label: "Leads", href: "/leads" },
+      { label: "Professores", href: "/teachers" },
+    ],
   },
-  { label: "Leads", href: "/leads", icon: UserPlus },
   {
-    label: "Professores",
-    href: "/teachers",
+    label: "Ensino",
     icon: GraduationCap,
     collapsible: true,
-    children: [{ label: "Cadastrar login de professor", href: "/teachers/login/new" }],
+    children: [
+      { label: "Modalidades", href: "/modalities" },
+      { label: "Faixas e graduacao", href: "/belts" },
+      { label: "Sugestoes de graduacao", href: "/graduation/suggestions" },
+    ],
   },
-  {
-    label: "Turmas",
-    href: "/classes",
-    icon: Layers,
-    collapsible: true,
-    children: [{ label: "Sessões", href: "/classes/sessions" }],
-  },
-  { label: "Faixas", href: "/belts", icon: Tags },
-  { label: "Modalidades", href: "/modalities", icon: Tags },
   {
     label: "Financeiro",
     icon: Wallet,
     collapsible: true,
     children: [
       { label: "Dashboard financeiro", href: "/finance/dashboard" },
-      { label: "Tabelas de preço", href: "/finance/price-tables" },
+      { label: "Tabelas de preco", href: "/finance/price-tables" },
       { label: "Planos", href: "/finance/plans" },
       { label: "Parcelas", href: "/finance/installments" },
       { label: "Inadimplentes", href: "/finance/overdue" },
-      { label: "Receita por período", href: "/finance/reports" },
+      { label: "Receita por periodo", href: "/finance/reports" },
+    ],
+  },
+  {
+    label: "Administracao",
+    icon: ShieldCheck,
+    collapsible: true,
+    children: [
+      { label: "Usuarios e permissoes", href: "/users" },
+      { label: "Cadastrar login de professor", href: "/teachers/login/new" },
+      { label: "Auditoria", href: "/audit" },
     ],
   },
 ];
 
 export const TEACHER_NAV: NavGroup[] = [
-  { label: "Dashboard", href: "/professor", icon: LayoutDashboard },
-  { label: "Histórico de chamadas", href: "/professor/sessions", icon: CalendarDays },
+  {
+    label: "Aulas",
+    icon: ClipboardList,
+    collapsible: true,
+    children: [
+      { label: "Turmas do dia", href: "/professor" },
+      { label: "Agenda", href: "/professor/schedule" },
+      { label: "Historico de chamadas", href: "/professor/sessions" },
+    ],
+  },
 ];

@@ -1,5 +1,35 @@
 # CLAUDE.md — Projeto Escola de Lutas
 
+## Ambiente Supabase compartilhado de desenvolvimento
+
+- O projeto agora usa um Supabase web compartilhado para desenvolvimento:
+  `nexusdojo-dev`.
+- As credenciais sensiveis ficam apenas em `.env.local`, que nao deve ser
+  commitado:
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+  - `SUPABASE_DB_PASSWORD`
+- Nao colar service role, senha do banco ou JWTs neste arquivo.
+- O schema remoto ja recebeu todas as migrations do projeto via
+  `npx supabase db push --db-url ...`.
+- Setup inicial criado no Supabase web:
+  - escola: `Gracie Barra Dev`
+  - admin dev: `admin@nexusdojo.dev`
+  - senha dev: `TestSenha123!`
+- Seeds automaticos por trigger validados no remoto:
+  - 1 unidade
+  - 7 modalidades
+  - 2 sistemas de faixa
+  - 12 faixas
+  - 4 contas financeiras
+- O `seed.sql` atual nao deve ser rodado no remoto sem revisao, porque ainda
+  contem planos historicos com limite de aulas, enquanto a migration mais
+  recente exige planos ilimitados.
+- Para rodar o app em Docker usando Supabase web, deixe
+  `SUPABASE_INTERNAL_URL` vazio. Use essa variavel apenas quando quiser forcar
+  o app em container a acessar um Supabase local.
+
 ## Visão Geral do Fluxo
 
 Este projeto é desenvolvido por 2 desenvolvedores usando Claude Code,

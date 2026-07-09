@@ -31,9 +31,13 @@ function setGroupOpenInStorage(label: string, open: boolean) {
   }
 }
 
+function isActivePath(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 function isGroupActive(pathname: string, group: NavGroup): boolean {
-  if (group.href && pathname === group.href) return true;
-  return (group.children ?? []).some((child) => pathname.startsWith(child.href));
+  if (group.href && isActivePath(pathname, group.href)) return true;
+  return (group.children ?? []).some((child) => isActivePath(pathname, child.href));
 }
 
 function NavGroupItem({ group, pathname }: { group: NavGroup; pathname: string }) {
@@ -102,7 +106,7 @@ function NavGroupItem({ group, pathname }: { group: NavGroup; pathname: string }
       {hasChildren && (!group.collapsible || open) && (
         <div className="ml-6 mt-1 flex flex-col gap-1 border-l border-border pl-3">
           {group.children!.map((child) => {
-            const childActive = pathname.startsWith(child.href);
+            const childActive = isActivePath(pathname, child.href);
             return (
               <Link
                 key={child.href}
