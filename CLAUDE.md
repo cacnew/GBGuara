@@ -21,7 +21,7 @@
   - 1 unidade
   - 7 modalidades
   - 2 sistemas de faixa
-  - 12 faixas
+  - 21 faixas de Jiu-Jitsu conforme catalogo IBJJF (8 adulto/juvenil e 13 kids)
   - 4 contas financeiras
 - O `seed.sql` atual nao deve ser rodado no remoto sem revisao, porque ainda
   contem planos historicos com limite de aulas, enquanto a migration mais

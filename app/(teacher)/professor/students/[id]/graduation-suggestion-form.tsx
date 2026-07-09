@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { BeltWithPreview } from "@/components/belts/belt-preview";
+import { IBJJF_GRADUATION_RULES_URL } from "@/lib/ibjjf";
 import { suggestGraduation } from "@/modules/teacher/actions";
 
 type BeltOption = {
   id: string;
   name: string;
   systemName: string;
+  maxDegrees: number;
 };
 
 export function GraduationSuggestionForm({
@@ -27,9 +30,16 @@ export function GraduationSuggestionForm({
   const [suggestedDegree, setSuggestedDegree] = useState(defaultDegree);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const selectedBelt = belts.find((belt) => belt.id === suggestedBeltId);
+  const maxDegree = selectedBelt?.maxDegrees ?? 10;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (suggestedDegree > maxDegree) {
+      toast.error(`Esta faixa permite grau ate ${maxDegree}.`);
+      return;
+    }
+
     setSaving(true);
     const result = await suggestGraduation(studentId, {
       suggestedBeltId,
@@ -59,7 +69,17 @@ export function GraduationSuggestionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-border bg-card p-4">
       <div>
-        <h2 className="font-heading text-lg font-semibold">Sugerir graduacao</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-heading text-lg font-semibold">Sugerir graduacao</h2>
+          <a
+            href={IBJJF_GRADUATION_RULES_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Regras IBJJF
+          </a>
+        </div>
         <p className="text-sm text-muted-foreground">
           A sugestao fica pendente para decisao do administrador.
         </p>
@@ -69,7 +89,13 @@ export function GraduationSuggestionForm({
           Faixa
           <select
             value={suggestedBeltId}
-            onChange={(event) => setSuggestedBeltId(event.target.value)}
+            onChange={(event) => {
+              const nextBelt = belts.find((belt) => belt.id === event.target.value);
+              setSuggestedBeltId(event.target.value);
+              if (nextBelt && suggestedDegree > nextBelt.maxDegrees) {
+                setSuggestedDegree(nextBelt.maxDegrees);
+              }
+            }}
             className="w-full px-3"
           >
             {belts.map((belt) => (
@@ -84,13 +110,21 @@ export function GraduationSuggestionForm({
           <input
             type="number"
             min={0}
-            max={4}
+            max={maxDegree}
             value={suggestedDegree}
             onChange={(event) => setSuggestedDegree(Number(event.target.value))}
             className="min-h-11 w-full rounded-lg border border-input bg-background px-3"
           />
         </label>
       </div>
+      {selectedBelt && (
+        <div className="rounded-lg border border-dashed border-border bg-background p-3 text-sm">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">
+            Previa selecionada
+          </p>
+          <BeltWithPreview name={selectedBelt.name} degree={suggestedDegree} />
+        </div>
+      )}
       <label className="space-y-1 text-sm font-bold">
         Observacao
         <textarea

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { maskBrazilianPhoneInput } from "@/lib/phone";
 import { guardianSchema, type GuardianInput } from "@/lib/validations/guardian";
 import {
   addGuardianToStudent,
@@ -54,7 +55,7 @@ export function GuardiansSection({
       return;
     }
 
-    toast.success("Responsável adicionado.");
+    toast.success("Responsavel adicionado.");
     reset();
     router.refresh();
   }
@@ -87,65 +88,17 @@ export function GuardiansSection({
       return;
     }
 
-    toast.success("Responsável removido do aluno.");
+    toast.success("Responsavel removido do aluno.");
     router.refresh();
   }
 
   return (
-    <div className="w-full max-w-sm space-y-4">
-      <h2 className="font-heading text-lg font-semibold">Responsáveis</h2>
-
-      <div className="space-y-2">
-        {guardians.map((link) => (
-          <div
-            key={link.linkId}
-            className="rounded-lg border border-border bg-card p-3 text-sm"
-          >
-            <div className="flex items-center justify-between">
-              <p className="font-medium">{link.name}</p>
-              <button
-                type="button"
-                onClick={() => onRemove(link.linkId)}
-                className="text-xs text-destructive hover:underline"
-              >
-                Remover
-              </button>
-            </div>
-            <p className="text-muted-foreground">
-              {link.relationship || "-"} · {link.phone || "-"}
-            </p>
-            <div className="mt-2 flex gap-4 text-xs">
-              <label className="flex items-center gap-1.5">
-                <input
-                  type="checkbox"
-                  checked={link.isPrimary}
-                  onChange={() => onToggle(link, "isPrimary")}
-                />
-                Principal
-              </label>
-              <label className="flex items-center gap-1.5">
-                <input
-                  type="checkbox"
-                  checked={link.isFinancialResponsible}
-                  onChange={() => onToggle(link, "isFinancialResponsible")}
-                />
-                Responsável financeiro
-              </label>
-            </div>
-          </div>
-        ))}
-        {!guardians.length && (
-          <p className="text-sm text-muted-foreground">
-            Nenhum responsável vinculado.
-          </p>
-        )}
-      </div>
-
+    <div className="grid w-full gap-4 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-start">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-3 rounded-lg border border-border bg-card p-4"
       >
-        <p className="text-sm font-medium">Adicionar responsável</p>
+        <p className="text-sm font-medium">Adicionar responsavel</p>
 
         <div className="space-y-1.5">
           <Label htmlFor="guardianName">Nome</Label>
@@ -157,7 +110,15 @@ export function GuardiansSection({
 
         <div className="space-y-1.5">
           <Label htmlFor="guardianPhone">Telefone (opcional)</Label>
-          <Input id="guardianPhone" {...register("phone")} />
+          <Input
+            id="guardianPhone"
+            placeholder="(61) 98151-4745"
+            {...register("phone", {
+              onChange: (event) => {
+                event.target.value = maskBrazilianPhoneInput(event.target.value);
+              },
+            })}
+          />
         </div>
 
         <div className="space-y-1.5">
@@ -165,7 +126,7 @@ export function GuardiansSection({
           <Input id="guardianRelationship" {...register("relationship")} />
         </div>
 
-        <div className="flex gap-4 text-sm">
+        <div className="flex flex-wrap gap-4 text-sm">
           <label className="flex items-center gap-1.5">
             <input type="checkbox" {...register("isPrimary")} />
             Principal
@@ -177,9 +138,59 @@ export function GuardiansSection({
         </div>
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Adicionando..." : "Adicionar responsável"}
+          {isSubmitting ? "Adicionando..." : "Adicionar responsavel"}
         </Button>
       </form>
+
+      <section className="space-y-4">
+        <h2 className="font-heading text-lg font-semibold">Responsaveis</h2>
+
+        <div className="grid gap-2 xl:grid-cols-2">
+          {guardians.map((link) => (
+            <div
+              key={link.linkId}
+              className="rounded-lg border border-border bg-card p-3 text-sm"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-medium">{link.name}</p>
+                <button
+                  type="button"
+                  onClick={() => onRemove(link.linkId)}
+                  className="shrink-0 text-xs text-destructive hover:underline"
+                >
+                  Remover
+                </button>
+              </div>
+              <p className="text-muted-foreground">
+                {link.relationship || "-"} - {link.phone || "-"}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-4 text-xs">
+                <label className="flex items-center gap-1.5">
+                  <input
+                    type="checkbox"
+                    checked={link.isPrimary}
+                    onChange={() => onToggle(link, "isPrimary")}
+                  />
+                  Principal
+                </label>
+                <label className="flex items-center gap-1.5">
+                  <input
+                    type="checkbox"
+                    checked={link.isFinancialResponsible}
+                    onChange={() => onToggle(link, "isFinancialResponsible")}
+                  />
+                  Responsavel financeiro
+                </label>
+              </div>
+            </div>
+          ))}
+          {!guardians.length && (
+            <p className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
+              Nenhum responsavel vinculado.
+            </p>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BeltPreview } from "@/components/belts/belt-preview";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -64,13 +65,10 @@ export default async function BeltsPage() {
             <tbody>
               {(beltsBySystem.get(system.id) ?? []).map((belt) => (
                 <tr key={belt.id} className="border-t border-border">
-                  <td className="w-8 p-3">
-                    <span
-                      className="inline-block size-4 rounded-full border border-border"
-                      style={{ backgroundColor: belt.color_hex ?? undefined }}
-                    />
+                  <td className="w-24 p-3">
+                    <BeltPreview name={belt.name} />
                   </td>
-                  <td className="p-3">{belt.name}</td>
+                  <td className="p-3 font-medium">{belt.name}</td>
                   <td className="p-3 text-muted-foreground">
                     Ordem {belt.ordering} · até {belt.max_degrees} graus
                   </td>

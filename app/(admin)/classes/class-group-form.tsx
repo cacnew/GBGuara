@@ -61,9 +61,9 @@ export function ClassGroupForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-card p-6"
+      className="grid w-full max-w-5xl gap-4 rounded-lg border border-border bg-card p-6 md:grid-cols-2"
     >
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 md:col-span-2">
         <Label htmlFor="name">Nome</Label>
         <Input id="name" {...register("name")} />
         {errors.name && (
@@ -108,7 +108,7 @@ export function ClassGroupForm({
         </select>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 md:col-span-2">
         <Label>Dias da semana</Label>
         <div className="flex flex-wrap gap-3 text-sm">
           {WEEK_DAYS.map((day) => (
@@ -127,8 +127,8 @@ export function ClassGroupForm({
         )}
       </div>
 
-      <div className="flex gap-3">
-        <div className="flex-1 space-y-1.5">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
           <Label htmlFor="startTime">Início</Label>
           <Input id="startTime" type="time" {...register("startTime")} />
           {errors.startTime && (
@@ -137,7 +137,7 @@ export function ClassGroupForm({
             </p>
           )}
         </div>
-        <div className="flex-1 space-y-1.5">
+        <div className="space-y-1.5">
           <Label htmlFor="endTime">Término</Label>
           <Input id="endTime" type="time" {...register("endTime")} />
           {errors.endTime && (
@@ -183,7 +183,7 @@ export function ClassGroupForm({
         )}
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 md:col-span-2">
         <Label htmlFor="notes">Observações (opcional)</Label>
         <Input id="notes" {...register("notes")} />
       </div>
@@ -200,7 +200,7 @@ export function ClassGroupForm({
         </select>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" className="w-full md:col-span-2" disabled={isSubmitting}>
         {isSubmitting ? "Salvando..." : id ? "Salvar" : "Criar turma"}
       </Button>
     </form>

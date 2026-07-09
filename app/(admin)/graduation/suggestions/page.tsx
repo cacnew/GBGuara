@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BeltWithPreview } from "@/components/belts/belt-preview";
 import { requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateOnly } from "@/lib/dates/format";
@@ -103,14 +104,22 @@ export default async function GraduationSuggestionsPage({
                   )}
                 </td>
                 <td className="p-3 text-muted-foreground">
-                  <p>
-                    {suggestion.current_belt?.name ?? "Atual"} grau{" "}
-                    {suggestion.current_degree ?? 0}
-                  </p>
-                  <p>
-                    {suggestion.suggested_belt?.name ?? "Sugerida"} grau{" "}
-                    {suggestion.suggested_degree}
-                  </p>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Atual</p>
+                      <BeltWithPreview
+                        name={suggestion.current_belt?.name ?? "Atual"}
+                        degree={suggestion.current_degree ?? 0}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Sugerida</p>
+                      <BeltWithPreview
+                        name={suggestion.suggested_belt?.name ?? "Sugerida"}
+                        degree={suggestion.suggested_degree}
+                      />
+                    </div>
+                  </div>
                 </td>
                 <td className="p-3">{suggestion.teachers?.name ?? "-"}</td>
                 <td className="p-3">{STATUS_LABEL[suggestion.status] ?? suggestion.status}</td>

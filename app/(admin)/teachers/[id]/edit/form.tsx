@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AvatarUpload } from "@/components/forms/avatar-upload";
+import { maskBrazilianPhoneInput } from "@/lib/phone";
 import { teacherSchema, type TeacherInput } from "@/lib/validations/teacher";
 import { updateTeacherProfile } from "../../actions";
 
@@ -62,7 +63,15 @@ export function EditTeacherProfileForm({
 
       <div className="space-y-1.5">
         <Label htmlFor="phone">Telefone (opcional)</Label>
-        <Input id="phone" {...register("phone")} />
+        <Input
+          id="phone"
+          placeholder="(61) 98151-4745"
+          {...register("phone", {
+            onChange: (event) => {
+              event.target.value = maskBrazilianPhoneInput(event.target.value);
+            },
+          })}
+        />
       </div>
 
       <div className="space-y-1.5">

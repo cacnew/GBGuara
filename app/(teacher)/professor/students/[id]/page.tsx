@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { BeltWithPreview } from "@/components/belts/belt-preview";
 import { BackLink } from "@/components/layout/back-link";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { SummaryList } from "@/components/dashboard/summary-list";
@@ -89,7 +90,7 @@ export default async function TeacherStudentPage({
 
   const { data: belts } = await supabase
     .from("belts")
-    .select("id, name, ordering, belt_systems(name)")
+    .select("id, name, ordering, max_degrees, belt_systems(name)")
     .order("ordering");
 
   const { data: pendingSuggestion } = await supabase
@@ -126,6 +127,14 @@ export default async function TeacherStudentPage({
               {student.belts?.name ?? "Sem faixa"} · grau {student.current_degree}
               {age !== null ? ` · ${age} anos` : ""}
             </p>
+            {student.belts?.name && (
+              <div className="mt-1 text-sm text-muted-foreground">
+                <BeltWithPreview
+                  name={student.belts.name}
+                  degree={student.current_degree}
+                />
+              </div>
+            )}
           </div>
         </div>
         <BackLink href="/professor" />
@@ -242,6 +251,7 @@ export default async function TeacherStudentPage({
               id: belt.id,
               name: belt.name,
               systemName: belt.belt_systems?.name ?? "Sistema",
+              maxDegrees: belt.max_degrees,
             }))}
             defaultBeltId={student.current_belt_id ?? belts?.[0]?.id ?? ""}
             defaultDegree={student.current_degree}

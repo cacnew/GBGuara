@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AvatarUpload } from "@/components/forms/avatar-upload";
+import { maskBrazilianPhoneInput } from "@/lib/phone";
 import { studentSchema, type StudentInput } from "@/lib/validations/student";
 import { updateStudent } from "../../actions";
 
@@ -50,15 +51,17 @@ export function EditStudentForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-card p-6"
+      className="grid w-full gap-4 rounded-lg border border-border bg-card p-6 md:grid-cols-2"
     >
-      <AvatarUpload
-        schoolId={schoolId}
-        entityType="students"
-        entityId={id}
-        currentUrl={defaultValues.photoUrl || null}
-        onUploaded={(url) => setValue("photoUrl", url)}
-      />
+      <div className="md:col-span-2">
+        <AvatarUpload
+          schoolId={schoolId}
+          entityType="students"
+          entityId={id}
+          currentUrl={defaultValues.photoUrl || null}
+          onUploaded={(url) => setValue("photoUrl", url)}
+        />
+      </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="name">Nome</Label>
@@ -85,7 +88,15 @@ export function EditStudentForm({
 
       <div className="space-y-1.5">
         <Label htmlFor="phone">Telefone (opcional)</Label>
-        <Input id="phone" {...register("phone")} />
+        <Input
+          id="phone"
+          placeholder="(61) 98151-4745"
+          {...register("phone", {
+            onChange: (event) => {
+              event.target.value = maskBrazilianPhoneInput(event.target.value);
+            },
+          })}
+        />
       </div>
 
       <div className="space-y-1.5">
@@ -96,12 +107,12 @@ export function EditStudentForm({
         )}
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 md:col-span-2">
         <Label htmlFor="address">Endereço (opcional)</Label>
         <Input id="address" {...register("address")} />
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 md:col-span-2">
         <Label htmlFor="emergencyContact">
           Contato de emergência (opcional)
         </Label>
@@ -123,12 +134,12 @@ export function EditStudentForm({
         </select>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 md:col-span-2">
         <Label htmlFor="notes">Observações (opcional)</Label>
         <Input id="notes" {...register("notes")} />
       </div>
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" className="w-full md:col-span-2" disabled={isSubmitting}>
         {isSubmitting ? "Salvando..." : "Salvar"}
       </Button>
     </form>

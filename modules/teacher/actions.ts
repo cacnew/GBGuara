@@ -99,8 +99,8 @@ export async function suggestGraduation(
     return { error: "Escolha a faixa sugerida." };
   }
 
-  if (!Number.isInteger(suggestedDegree) || suggestedDegree < 0 || suggestedDegree > 4) {
-    return { error: "Informe um grau entre 0 e 4." };
+  if (!Number.isInteger(suggestedDegree) || suggestedDegree < 0 || suggestedDegree > 10) {
+    return { error: "Informe um grau entre 0 e 10." };
   }
 
   const supabase = await createClient();

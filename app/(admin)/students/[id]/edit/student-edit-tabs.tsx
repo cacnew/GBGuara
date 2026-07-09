@@ -23,7 +23,7 @@ export function StudentEditTabs({
   attendanceTab: React.ReactNode;
 }) {
   return (
-    <Tabs defaultValue="dados" className="w-full max-w-2xl">
+    <Tabs defaultValue="dados" className="w-full max-w-7xl">
       <TabsList>
         <TabsTrigger value="dados">
           <User className="mr-1.5 size-4" />
@@ -47,16 +47,16 @@ export function StudentEditTabs({
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="dados" className="flex flex-col items-center gap-6">
+      <TabsContent value="dados" className="flex flex-col gap-6">
         {personalTab}
       </TabsContent>
-      <TabsContent value="responsaveis" className="flex flex-col items-center gap-6">
+      <TabsContent value="responsaveis" className="flex flex-col gap-6">
         {guardiansTab}
       </TabsContent>
       <TabsContent value="financeiro" className="flex flex-col items-center gap-6">
         {financialTab}
       </TabsContent>
-      <TabsContent value="graduacao" className="flex flex-col items-center gap-6">
+      <TabsContent value="graduacao" className="flex flex-col gap-6">
         {graduationTab}
       </TabsContent>
       <TabsContent value="frequencia" className="flex flex-col items-center gap-6">

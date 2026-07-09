@@ -12,7 +12,10 @@ import { GuardiansSection, type GuardianLink } from "./guardians-section";
 import { AttendanceHistory } from "./attendance-history";
 import { FinancialSection } from "./financial-section";
 import { getStudentFinancialSummary } from "./financial-queries";
-import { GraduationSection } from "./graduation-section";
+import {
+  GraduationSection,
+  type GraduationHistoryRow,
+} from "./graduation-section";
 import { StudentEditTabs } from "./student-edit-tabs";
 
 export default async function EditStudentPage({
@@ -62,12 +65,33 @@ export default async function EditStudentPage({
     .order("name");
   const { data: belts } = await supabase
     .from("belts")
-    .select("id, belt_system_id, name, ordering")
+    .select("id, belt_system_id, name, ordering, max_degrees")
     .order("ordering");
   const { data: teachers } = await supabase
     .from("teachers")
     .select("id, name")
     .order("name");
+  const { data: graduationHistoryRows } = await supabase
+    .from("graduation_history")
+    .select(
+      "id, graduation_date, previous_degree, new_degree, notes, previous_belt:belts!graduation_history_previous_belt_id_fkey(name), new_belt:belts!graduation_history_new_belt_id_fkey(name), teachers(name)",
+    )
+    .eq("student_id", student.id)
+    .order("graduation_date", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  const graduationHistory: GraduationHistoryRow[] = (
+    graduationHistoryRows ?? []
+  ).map((row) => ({
+    id: row.id,
+    date: row.graduation_date,
+    previousBeltName: row.previous_belt?.name ?? null,
+    previousDegree: row.previous_degree,
+    newBeltName: row.new_belt?.name ?? "Faixa",
+    newDegree: row.new_degree,
+    teacherName: row.teachers?.name ?? null,
+    notes: row.notes,
+  }));
 
   const graduationReferenceDate = student.last_graduation_date ?? student.enrollment_date;
   const { data: graduationAttendances } = await supabase
@@ -97,7 +121,7 @@ export default async function EditStudentPage({
 
   return (
     <div className="flex flex-1 flex-col items-center gap-6 p-6 text-foreground">
-      <div className="flex w-full max-w-2xl flex-wrap items-center justify-between gap-3">
+      <div className="flex w-full max-w-7xl flex-wrap items-center justify-between gap-3">
         <h1 className="font-heading text-2xl font-semibold">Editar aluno</h1>
         <div className="flex gap-2">
           <BackLink href="/students" />
@@ -128,7 +152,7 @@ export default async function EditStudentPage({
                 notes: student.notes ?? "",
               }}
             />
-            <div className="w-full max-w-sm">
+            <div className="w-full">
               <WhatsAppSend
                 phone={student.phone}
                 onSend={sendWhatsAppToStudent.bind(null, student.id)}
@@ -157,8 +181,10 @@ export default async function EditStudentPage({
               beltSystemId: b.belt_system_id,
               name: b.name,
               ordering: b.ordering,
+              maxDegrees: b.max_degrees,
             }))}
             teachers={teachers ?? []}
+            history={graduationHistory}
             attendancesSinceLastGraduation={validGraduationAttendanceDates.size}
             daysSinceLastGraduation={daysSinceLastGraduation}
           />
