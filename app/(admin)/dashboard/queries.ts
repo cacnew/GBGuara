@@ -44,6 +44,14 @@ export type RecentPayment = {
   date: string;
 };
 
+export type BirthdayStudent = {
+  id: string;
+  name: string;
+  phone: string | null;
+  birthDate: string;
+  birthDay: number;
+};
+
 export type AdminDashboardData = {
   activeStudents: number;
   overdueStudentsCount: number;
@@ -61,6 +69,7 @@ export type AdminDashboardData = {
   recentGraduations: RecentGraduation[];
   todaysClasses: TodaysClass[];
   recentPayments: RecentPayment[];
+  birthdayStudents: BirthdayStudent[];
 };
 
 function monthBounds(date = new Date()) {
@@ -97,6 +106,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     { data: recentGraduationRows },
     { data: todaysClassRows },
     { data: recentPaymentRows },
+    { data: birthdayRows },
   ] = await Promise.all([
     supabase.from("students").select("id", { count: "exact", head: true }).eq("status", "ativo"),
     supabase.from("teachers").select("id", { count: "exact", head: true }).eq("status", "active"),
@@ -169,6 +179,11 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       .eq("type", "income")
       .order("created_at", { ascending: false })
       .limit(5),
+    supabase
+      .from("birthday_students")
+      .select("id, name, phone, birth_date, birth_day")
+      .order("birth_day")
+      .limit(8),
   ]);
 
   const expectedRevenueMonth = (expectedInstallments ?? []).reduce(
@@ -256,6 +271,16 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     date: row.movement_date,
   }));
 
+  const birthdayStudents: BirthdayStudent[] = (birthdayRows ?? [])
+    .filter((row) => row.id && row.name && row.birth_date && row.birth_day)
+    .map((row) => ({
+      id: row.id ?? "",
+      name: row.name ?? "-",
+      phone: row.phone,
+      birthDate: row.birth_date ?? "",
+      birthDay: row.birth_day ?? 0,
+    }));
+
   return {
     activeStudents: activeStudents ?? 0,
     overdueStudentsCount: overdueStudentsCount ?? 0,
@@ -273,5 +298,6 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     recentGraduations,
     todaysClasses,
     recentPayments,
+    birthdayStudents,
   };
 }
