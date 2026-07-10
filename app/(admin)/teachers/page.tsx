@@ -47,7 +47,7 @@ export default async function TeachersPage({
     supabase
       .from("teacher_graduations")
       .select("teacher_id, degree, belts(name), modalities(name)")
-      .order("graduation_date", { ascending: false }),
+      .order("since_date", { ascending: false }),
   ]);
 
   const classesByTeacher = new Map<string, typeof classGroups>();
@@ -171,7 +171,12 @@ export default async function TeachersPage({
                         degree={graduation.degree}
                       />
                     ) : (
-                      <span className="text-muted-foreground">Sem faixa</span>
+                      <Link
+                        href={`/teachers/${teacher.id}/edit`}
+                        className="text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+                      >
+                        Cadastrar faixa
+                      </Link>
                     )}
                   </td>
                   <td className="p-3">

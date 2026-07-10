@@ -121,12 +121,15 @@ function getBeltVisual(name: string): BeltVisual {
 
 export function BeltPreview({
   name,
+  degree,
   className,
 }: {
   name: string;
+  degree?: number | null;
   className?: string;
 }) {
   const visual = getBeltVisual(name);
+  const normalizedDegree = Math.max(0, Math.min(10, degree ?? 0));
   const beltStyle: CSSProperties = {
     background: visual.background,
     borderColor: visual.border ?? "rgba(15, 23, 42, 0.22)",
@@ -150,9 +153,16 @@ export function BeltPreview({
         />
       )}
       <span
-        className="pointer-events-none absolute right-3 top-0 h-full w-4 border-x border-white/45"
+        className="pointer-events-none absolute right-2 top-0 flex h-full w-7 items-center justify-center gap-[2px] border-x border-white/45 px-[2px]"
         style={{ backgroundColor: visual.rankBar }}
-      />
+      >
+        {Array.from({ length: normalizedDegree }).map((_, index) => (
+          <span
+            key={index}
+            className="h-3 w-[2px] rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.18)]"
+          />
+        ))}
+      </span>
     </span>
   );
 }
@@ -168,7 +178,7 @@ export function BeltWithPreview({
 }) {
   return (
     <span className={cn("inline-flex items-center gap-2", className)}>
-      <BeltPreview name={name} />
+      <BeltPreview name={name} degree={degree} />
       <span>
         {name}
         {degree !== undefined && degree !== null ? ` - grau ${degree}` : ""}
