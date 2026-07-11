@@ -505,9 +505,16 @@ pré-geradas para o ano inteiro.
   > Docker/token de management API disponível nesta sessão) — regen
   > completo ainda pendente.
 
-- [ ] **9.3 — Serviço de materialização de sessões sob demanda**
-  Cria a `class_session` do dia/turma na primeira interação (sinalização ou
-  abertura de chamada), de forma idempotente.
+- [x] **9.3 — Serviço de materialização de sessões sob demanda**
+  `modules/classes/session-materialization.ts` (`getOrCreateClassSession`):
+  helper compartilhado, sem checagem de autorização própria (recebe
+  `schoolId` já resolvido por quem chama), idempotente via
+  `unique(class_group_id, date)` com tratamento de corrida (mesmo padrão
+  já testado em produção). `openOrReuseClassSession`
+  (`modules/classes/sessions.ts`, usado pela tela "Turmas do dia") foi
+  refatorado para delegar a esse helper em vez de duplicar a lógica — vira
+  a base que as APIs de aluno (9.4) e professor (9.5) vão reusar para
+  materializar sessões em datas diferentes de hoje.
 
 - [ ] **9.4 — API do aluno: agenda, sinalizar, cancelar**
   Sessões do dia com ocupação/elegibilidade calculadas; sinalizar e

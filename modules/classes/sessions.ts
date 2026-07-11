@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireUser, requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
+import { getOrCreateClassSession } from "./session-materialization";
 
 export type OpenClassSessionResult = { sessionId?: string; error?: string };
 export type ClassSessionActionResult = { error?: string };
@@ -17,49 +18,14 @@ export async function openOrReuseClassSession(
 ): Promise<OpenClassSessionResult> {
   const profile = await requireUser();
   const supabase = await createClient();
-
   const today = new Date().toISOString().slice(0, 10);
 
-  const { data: existing } = await supabase
-    .from("class_sessions")
-    .select("id")
-    .eq("class_group_id", classGroupId)
-    .eq("date", today)
-    .maybeSingle();
-
-  if (existing) {
-    return { sessionId: existing.id };
-  }
-
-  const { data: created, error } = await supabase
-    .from("class_sessions")
-    .insert({
-      school_id: profile.schoolId,
-      class_group_id: classGroupId,
-      date: today,
-    })
-    .select("id")
-    .single();
-
-  if (error?.code === "23505") {
-    // Corrida entre duas aberturas simultâneas da mesma turma/dia —
-    // a constraint unique(class_group_id, date) já garantiu que só uma
-    // foi criada; busca essa.
-    const { data: raceWinner } = await supabase
-      .from("class_sessions")
-      .select("id")
-      .eq("class_group_id", classGroupId)
-      .eq("date", today)
-      .single();
-
-    if (raceWinner) return { sessionId: raceWinner.id };
-  }
-
-  if (error || !created) {
-    return { error: error?.message ?? "Não foi possível abrir a sessão" };
-  }
-
-  return { sessionId: created.id };
+  return getOrCreateClassSession({
+    supabase,
+    schoolId: profile.schoolId,
+    classGroupId,
+    date: today,
+  });
 }
 
 /**
