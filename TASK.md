@@ -516,10 +516,27 @@ pré-geradas para o ano inteiro.
   a base que as APIs de aluno (9.4) e professor (9.5) vão reusar para
   materializar sessões em datas diferentes de hoje.
 
-- [ ] **9.4 — API do aluno: agenda, sinalizar, cancelar**
-  Sessões do dia com ocupação/elegibilidade calculadas; sinalizar e
-  cancelar sinalização com as validações da seção 3 da spec (vaga, janela
-  temporal, elegibilidade).
+- [x] **9.4 — API do aluno: agenda, sinalizar, cancelar**
+  `modules/students/agenda.ts`: `getStudentAgenda` (ocupação/elegibilidade
+  calculadas por turma/dia, sem materializar sessão), `signalAttendance` e
+  `cancelSignal`. Decisões de regra confirmadas com o usuário: janela de
+  sinalização até 7 dias antes / tolerância de 24h após o início; conflito
+  de horário **bloqueia** (não sinaliza 2 turmas sobrepostas no mesmo dia);
+  cancelamento é **soft** (`status='cancelled'`, mantém histórico, permite
+  re-sinalizar); sessão com `attendance_closed_at` preenchido trava
+  sinalizar/cancelar. Elegibilidade por faixa só compara quando aluno e
+  turma usam o mesmo `belt_system_id` (fail-closed caso contrário).
+  > Migration adicional necessária: `attendances.registered_by_user_id`
+  > passou a ser nullable (autossinalização do aluno não tem ator staff).
+  > Policies de insert/update adicionadas para o aluno em `attendances`
+  > (defesa em profundidade — aluno só insere como `signaled` de si
+  > mesmo, só transiciona `signaled↔cancelled`), verificadas
+  > end-to-end contra o Supabase compartilhado (insert como
+  > `confirmed`/para outro aluno bloqueado pela RLS; escalar
+  > `cancelled→confirmed` bloqueado).
+  > Limitação conhecida (não bloqueante): checagem de capacidade não é
+  > atômica — duas sinalizações simultâneas no último lugar podem
+  > ambas passar. Aceitável nesta fase; revisitar se virar problema real.
 
 - [ ] **9.5 — API do professor: chamada**
   Listar sinalizados da sessão, confirmar presença, incluir aluno

@@ -41,7 +41,7 @@ export type Database = {
           confirmed_by: string | null
           created_at: string
           id: string
-          registered_by_user_id: string
+          registered_by_user_id: string | null
           school_id: string
           signaled_at: string | null
           status: string
@@ -55,7 +55,7 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string
           id?: string
-          registered_by_user_id: string
+          registered_by_user_id?: string | null
           school_id: string
           signaled_at?: string | null
           status?: string
@@ -69,7 +69,7 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string
           id?: string
-          registered_by_user_id?: string
+          registered_by_user_id?: string | null
           school_id?: string
           signaled_at?: string | null
           status?: string
