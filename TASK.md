@@ -486,15 +486,24 @@ pré-geradas para o ano inteiro.
   > wxxjgogzcbgffkyfywvm`) para regenerar o arquivo completo e conferir
   > que bate com este patch manual.
 
-- [ ] **9.2 — Migration do módulo de check-in**
+- [x] **9.2 — Migration do módulo de check-in**
   Novas colunas em `class_groups` (start_date, end_date, capacity,
   min_belt_id, min_degree, sex_restriction — todas opt-in/nullable),
   `students` (sex, opcional), `class_sessions` (attendance_closed_at);
   ampliação do check de status de `attendances` +
-  signaled_at/confirmed_at/confirmed_by; nova tabela `notifications`.
-  Regenerar `database.types.ts` e aplicar no Supabase compartilhado de dev
-  (confirmar com o usuário antes de aplicar, por ser ambiente
-  compartilhado).
+  signaled_at/confirmed_at/confirmed_by; nova tabela `notifications`
+  (RLS: aluno só lê/marca como lida, insert só via service_role).
+  Aplicada no Supabase compartilhado e verificada via script: colunas
+  novas existem e são nullable, insert legado em `attendances` (estilo
+  `markPresent`, sem os campos novos) continua funcionando sem alteração.
+  > Efeito colateral corrigido: a nova FK `attendances.confirmed_by →
+  > users` criou uma segunda relação `attendances`↔`users`, tornando
+  > ambíguo o embed `users(name)` já existente em
+  > `attendance-history.tsx`. Corrigido apontando o hint da FK certa
+  > (`users!registered_by_user_id(name)`).
+  > Nota: `database.types.ts` recebeu o mesmo patch manual da 9.1 (sem
+  > Docker/token de management API disponível nesta sessão) — regen
+  > completo ainda pendente.
 
 - [ ] **9.3 — Serviço de materialização de sessões sob demanda**
   Cria a `class_session` do dia/turma na primeira interação (sinalização ou

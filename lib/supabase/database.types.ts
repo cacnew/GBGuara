@@ -37,10 +37,13 @@ export type Database = {
       attendances: {
         Row: {
           class_session_id: string
+          confirmed_at: string | null
+          confirmed_by: string | null
           created_at: string
           id: string
           registered_by_user_id: string
           school_id: string
+          signaled_at: string | null
           status: string
           student_id: string
           student_notes: string | null
@@ -48,10 +51,13 @@ export type Database = {
         }
         Insert: {
           class_session_id: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
           id?: string
           registered_by_user_id: string
           school_id: string
+          signaled_at?: string | null
           status?: string
           student_id: string
           student_notes?: string | null
@@ -59,10 +65,13 @@ export type Database = {
         }
         Update: {
           class_session_id?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
           id?: string
           registered_by_user_id?: string
           school_id?: string
+          signaled_at?: string | null
           status?: string
           student_id?: string
           student_notes?: string | null
@@ -74,6 +83,13 @@ export type Database = {
             columns: ["class_session_id"]
             isOneToOne: false
             referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendances_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
@@ -255,14 +271,20 @@ export type Database = {
       }
       class_groups: {
         Row: {
+          capacity: number | null
           created_at: string
+          end_date: string | null
           end_time: string
           id: string
           main_teacher_id: string | null
+          min_belt_id: string | null
+          min_degree: number | null
           modality_id: string
           name: string
           notes: string | null
           school_id: string
+          sex_restriction: string | null
+          start_date: string | null
           start_time: string
           status: string
           suggested_audience: string | null
@@ -272,14 +294,20 @@ export type Database = {
           week_days: number[]
         }
         Insert: {
+          capacity?: number | null
           created_at?: string
+          end_date?: string | null
           end_time: string
           id?: string
           main_teacher_id?: string | null
+          min_belt_id?: string | null
+          min_degree?: number | null
           modality_id: string
           name: string
           notes?: string | null
           school_id: string
+          sex_restriction?: string | null
+          start_date?: string | null
           start_time: string
           status?: string
           suggested_audience?: string | null
@@ -289,14 +317,20 @@ export type Database = {
           week_days?: number[]
         }
         Update: {
+          capacity?: number | null
           created_at?: string
+          end_date?: string | null
           end_time?: string
           id?: string
           main_teacher_id?: string | null
+          min_belt_id?: string | null
+          min_degree?: number | null
           modality_id?: string
           name?: string
           notes?: string | null
           school_id?: string
+          sex_restriction?: string | null
+          start_date?: string | null
           start_time?: string
           status?: string
           suggested_audience?: string | null
@@ -311,6 +345,13 @@ export type Database = {
             columns: ["main_teacher_id"]
             isOneToOne: false
             referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_groups_min_belt_id_fkey"
+            columns: ["min_belt_id"]
+            isOneToOne: false
+            referencedRelation: "belts"
             referencedColumns: ["id"]
           },
           {
@@ -339,6 +380,7 @@ export type Database = {
       class_sessions: {
         Row: {
           actual_teacher_id: string | null
+          attendance_closed_at: string | null
           class_group_id: string
           created_at: string
           date: string
@@ -351,6 +393,7 @@ export type Database = {
         }
         Insert: {
           actual_teacher_id?: string | null
+          attendance_closed_at?: string | null
           class_group_id: string
           created_at?: string
           date?: string
@@ -363,6 +406,7 @@ export type Database = {
         }
         Update: {
           actual_teacher_id?: string | null
+          attendance_closed_at?: string | null
           class_group_id?: string
           created_at?: string
           date?: string
@@ -1106,6 +1150,58 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          read_at: string | null
+          school_id: string
+          student_id: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          school_id: string
+          student_id: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          school_id?: string
+          student_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "birthday_students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_adjustments: {
         Row: {
           adjustment_type: string
@@ -1468,6 +1564,7 @@ export type Database = {
           phone: string | null
           photo_url: string | null
           school_id: string
+          sex: string | null
           status: string
           unit_id: string
           updated_at: string
@@ -1497,6 +1594,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           school_id: string
+          sex?: string | null
           status?: string
           unit_id: string
           updated_at?: string
@@ -1526,6 +1624,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           school_id?: string
+          sex?: string | null
           status?: string
           unit_id?: string
           updated_at?: string

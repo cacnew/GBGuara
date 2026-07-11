@@ -7,7 +7,7 @@ export async function AttendanceHistory({ studentId }: { studentId: string }) {
   const { data: attendances } = await supabase
     .from("attendances")
     .select(
-      "id, status, created_at, class_sessions(date, class_groups(name)), users(name)",
+      "id, status, created_at, class_sessions(date, class_groups(name)), users!registered_by_user_id(name)",
     )
     .eq("student_id", studentId)
     .order("created_at", { ascending: false })
