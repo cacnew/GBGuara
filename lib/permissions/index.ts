@@ -3,6 +3,10 @@ import {
   getCurrentUserProfile,
   type CurrentUserProfile,
 } from "@/modules/users/queries";
+import {
+  getCurrentStudentProfile,
+  type CurrentStudentProfile,
+} from "@/modules/students/queries";
 
 /**
  * Garante que existe um usuário autenticado com perfil de aplicação
@@ -47,6 +51,22 @@ export async function requireSameSchool(schoolId: string): Promise<CurrentUserPr
 
   if (profile.schoolId !== schoolId) {
     throw new Error("school_id não pertence ao usuário autenticado");
+  }
+
+  return profile;
+}
+
+/**
+ * Garante que existe um aluno autenticado (vínculo via
+ * `students.auth_user_id`, Fase 9.1) — conta separada de `public.users`,
+ * já que o aluno só pode enxergar a própria linha, nunca a escola inteira.
+ * Redireciona para /login caso contrário.
+ */
+export async function requireStudent(): Promise<CurrentStudentProfile> {
+  const profile = await getCurrentStudentProfile();
+
+  if (!profile) {
+    redirect("/login");
   }
 
   return profile;

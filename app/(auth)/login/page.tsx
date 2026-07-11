@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { loginSchema, type LoginInput } from "@/lib/validations/login";
+import { resolveLoginDestination } from "@/modules/auth/actions";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,14 +26,16 @@ export default function LoginPage() {
     setIsSubmitting(true);
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword(data);
-    setIsSubmitting(false);
 
     if (error) {
+      setIsSubmitting(false);
       toast.error("E-mail ou senha inválidos");
       return;
     }
 
-    router.push("/dashboard");
+    const destination = await resolveLoginDestination();
+    setIsSubmitting(false);
+    router.push(destination);
     router.refresh();
   }
 

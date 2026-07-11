@@ -447,15 +447,107 @@
 
 ---
 
+## Fase 9 — Módulo do Aluno (MVP 2, aprovado em 2026-07-11)
+
+Baseado em `modules/modulo_aluno.md`. Aluno passa a ter login próprio e agir
+no sistema (sinalizar/cancelar presença), não só ser um registro de dados.
+Decisões de arquitetura tomadas com o usuário antes de iniciar: (1)
+capacidade/elegibilidade de turma (faixa mínima, grau, sexo) vira bloqueio
+**opcional por turma** — turma sem esses campos preenchidos continua 100%
+flexível como hoje, sem quebrar o conceito de "turma flexível" já decidido
+na Fase 4; (2) modelo de presença é **estendido aditivamente** (novos
+status/colunas convivem com `presente/falta/falta_justificada` atuais, sem
+renomear/remover nada — o fluxo atual do professor vira o caso
+`added_by_instructor`+`confirmed`); (3) campo de sexo/gênero do aluno é
+novo, opcional; (4) sessões são materializadas **sob demanda**, não
+pré-geradas para o ano inteiro.
+
+- [x] **9.1 — Login do aluno**
+  `auth_user_id` em `students`, helper `current_student_id()` (SECURITY
+  DEFINER, mesmo padrão do `current_school_id()`), novas policies de select
+  por aluno (students, contracts, contract_students, contract_installments,
+  attendances, graduation_history, student_guardians, guardians),
+  `requireStudent()` em `lib/permissions/index.ts`, ajuste do redirect
+  pós-login para 3 destinos possíveis (admin/professor/aluno) via
+  `modules/auth/actions.ts`, fluxo admin "criar login de aluno" (validação
+  + action + página, espelhando `create-teacher-login`) com botão na ficha
+  do aluno. Sem telas do módulo ainda — só a fundação de autenticação.
+  Migration aplicada no Supabase compartilhado (`nexusdojo-dev`).
+  Verificado ponta a ponta com script temporário: aluno autentica, lê a
+  própria linha, não lê linha de outro aluno (RLS bloqueia
+  silenciosamente), não aparece em `public.users`.
+  > Nota: `database.types.ts` foi atualizado manualmente só com o campo
+  > `auth_user_id` (adição cirúrgica), porque a regeneração automática
+  > (`supabase gen types`) não funcionou neste ambiente — precisa de
+  > Docker (não disponível) ou de um Access Token de conta com privilégios
+  > de management API no projeto `nexusdojo-dev` (o token testado não
+  > tinha acesso). Quando alguém tiver Docker ou o token certo, rodar
+  > `npm run db:types` (ou `supabase gen types typescript --project-id
+  > wxxjgogzcbgffkyfywvm`) para regenerar o arquivo completo e conferir
+  > que bate com este patch manual.
+
+- [ ] **9.2 — Migration do módulo de check-in**
+  Novas colunas em `class_groups` (start_date, end_date, capacity,
+  min_belt_id, min_degree, sex_restriction — todas opt-in/nullable),
+  `students` (sex, opcional), `class_sessions` (attendance_closed_at);
+  ampliação do check de status de `attendances` +
+  signaled_at/confirmed_at/confirmed_by; nova tabela `notifications`.
+  Regenerar `database.types.ts` e aplicar no Supabase compartilhado de dev
+  (confirmar com o usuário antes de aplicar, por ser ambiente
+  compartilhado).
+
+- [ ] **9.3 — Serviço de materialização de sessões sob demanda**
+  Cria a `class_session` do dia/turma na primeira interação (sinalização ou
+  abertura de chamada), de forma idempotente.
+
+- [ ] **9.4 — API do aluno: agenda, sinalizar, cancelar**
+  Sessões do dia com ocupação/elegibilidade calculadas; sinalizar e
+  cancelar sinalização com as validações da seção 3 da spec (vaga, janela
+  temporal, elegibilidade).
+
+- [ ] **9.5 — API do professor: chamada**
+  Listar sinalizados da sessão, confirmar presença, incluir aluno
+  manualmente, fechar chamada (gera `no_show` + notificações).
+
+- [ ] **9.6 — Tela Agenda do aluno**
+  Toggle Minhas/Todas, seletor de dias da semana, cards com chips
+  Alunos/Sexo/Faixa/Graus, ação sinalizar/cancelar (seção 4.1 da spec).
+
+- [ ] **9.7 — Tela Chamada do professor**
+  Nova versão convivendo com `app/attendance/[sessionId]/attendance-client.tsx`
+  atual: sinalizados, confirmar, adicionar manual, fechar chamada (seção
+  5.1 da spec).
+
+- [ ] **9.8 — Painel e histórico do aluno**
+  Calendário de treinos, gráfico de barras jan-dez, evolução de faixas,
+  alimentados só por presenças `confirmed`/`added_by_instructor` (seção
+  4.2/4.3 da spec).
+
+- [ ] **9.9 — Minha Academia**
+  Tabs Instrutores/Alunos/Aulas com busca (seção 4.4 da spec).
+
+- [ ] **9.10 — Notificações e Perfil do aluno**
+  Feed de notificações, disparo nos eventos de confirmação/inclusão, tela
+  de perfil (seção 4.5/4.6 da spec).
+
+- [ ] **9.11 — Testes das regras de negócio**
+  Lotação, elegibilidade, dupla sinalização, cancelamento, inclusão
+  manual, no_show (seção 3 da spec).
+
+---
+
 ## Fora de escopo até novo aviso (não criar subtarefas para isso ainda)
 
 Pagamento online, Pix automático, boleto, cartão online, integração Asaas,
-régua automática de cobrança, área do aluno/responsável, check-in por QR
+régua automática de cobrança, check-in por QR
 Code, currículo técnico, avaliação qualitativa, campeonatos/eventos/
 seminários, multiunidade com telas próprias, IA, catraca física,
 marketplace, white label, app nativo — ver seção 19 do
 `NEXUSDOJO_PROJECT.md`. Só entram no `TASK.md` quando o usuário aprovar
 formalmente o início do MVP 2/MVP 3.
+
+> "Área do aluno/responsável" foi promovida e removida desta lista em
+> 2026-07-11 — ver Fase 9 acima.
  
 ---
 

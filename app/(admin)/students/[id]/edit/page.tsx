@@ -29,7 +29,7 @@ export default async function EditStudentPage({
   const { data: student } = await supabase
     .from("students")
     .select(
-      "id, name, birth_date, cpf, phone, email, address, emergency_contact, photo_url, status, notes, current_degree, last_graduation_date, enrollment_date, belts(name, belt_systems(modality_id))",
+      "id, name, birth_date, cpf, phone, email, address, emergency_contact, photo_url, status, notes, current_degree, last_graduation_date, enrollment_date, auth_user_id, belts(name, belt_systems(modality_id))",
     )
     .eq("id", id)
     .single();
@@ -130,6 +130,12 @@ export default async function EditStudentPage({
             className={buttonVariants({ size: "sm" })}
           >
             Associar plano
+          </Link>
+          <Link
+            href={`/students/${student.id}/login/new`}
+            className={buttonVariants({ size: "sm", variant: "outline" })}
+          >
+            {student.auth_user_id ? "Login criado" : "Criar login"}
           </Link>
         </div>
       </div>
