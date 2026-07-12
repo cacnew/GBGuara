@@ -538,9 +538,30 @@ pré-geradas para o ano inteiro.
   > atômica — duas sinalizações simultâneas no último lugar podem
   > ambas passar. Aceitável nesta fase; revisitar se virar problema real.
 
-- [ ] **9.5 — API do professor: chamada**
-  Listar sinalizados da sessão, confirmar presença, incluir aluno
-  manualmente, fechar chamada (gera `no_show` + notificações).
+- [x] **9.5 — API do professor: chamada**
+  `modules/attendance/roll-call.ts` (arquivo novo, convive com
+  `modules/attendance/actions.ts` sem alterá-lo): `getSessionRollCall`
+  lista todas as attendances da sessão; `confirmAttendance`/
+  `revertToSignaled` fazem o toggle presente/ausente de quem sinalizou;
+  `addStudentManually` inclui aluno direto (`added_by_instructor` +
+  confirmado); `closeRollCall` consolida `signaled` restante em
+  `no_show`, dispara notificações (`presence_confirmed`/`added_to_class`)
+  para quem foi confirmado/incluído, marca a sessão como `realizada` e
+  preenche `attendance_closed_at`. Todas as ações de escrita exigem sessão
+  na data corrente ou passada e ainda não fechada (seção 3 da spec).
+  Reabertura de chamada fechada fica em aberto (spec seção 8), não
+  implementada nesta subtarefa.
+  > Migration adicional: policy de insert em `notifications` para staff
+  > (`school_id = current_school_id()`) — só existia select/update
+  > (Fase 9.2), e quem cria a notificação é o professor/admin, não o
+  > aluno.
+  > Verificado end-to-end contra o Supabase compartilhado (com a conta
+  > demo `admin@nexusdojo.dev` — o `professor@nexusdojo.dev` citado no
+  > `DECISIONS.md` não existe neste ambiente compartilhado, só o admin):
+  > staff confirma sinalização, inclui aluno manualmente, insere
+  > notificações e fecha a sessão; aluno só enxerga a própria
+  > notificação (`presence_confirmed`), não a do outro aluno
+  > (`added_to_class`) — RLS isolando corretamente.
 
 - [ ] **9.6 — Tela Agenda do aluno**
   Toggle Minhas/Todas, seletor de dias da semana, cards com chips
