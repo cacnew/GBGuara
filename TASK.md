@@ -589,10 +589,21 @@ pré-geradas para o ano inteiro.
   > a UI atualiza via `router.refresh()` → cancelar funciona
   > simetricamente. Sem erros de console.
 
-- [ ] **9.7 — Tela Chamada do professor**
-  Nova versão convivendo com `app/attendance/[sessionId]/attendance-client.tsx`
-  atual: sinalizados, confirmar, adicionar manual, fechar chamada (seção
-  5.1 da spec).
+- [x] **9.7 — Tela Chamada do professor**
+  `app/attendance/[sessionId]/roll-call/{page,roll-call-client}.tsx`: tela
+  nova, paralela à `attendance-client.tsx` atual (não a substitui — link
+  "Chamada com sinalização" adicionado na tela antiga para acesso).
+  Lista sinalizados com botão confirmar, lista presentes (confirmados +
+  incluídos manualmente) com "Desfazer" para quem foi confirmado, busca
+  de aluno para inclusão manual (reaproveita `StudentSearch`), botão
+  fechar chamada. Usa as APIs da Fase 9.5 (`modules/attendance/roll-call.ts`).
+  Confirmado ponta a ponta com Playwright (login admin → tela de chamada
+  → confirmar sinalizado → incluir aluno manualmente → fechar chamada):
+  banco de dados confere 100% (status `confirmed`/`added_by_instructor`,
+  sessão marcada `realizada` com `attendance_closed_at`, notificações
+  `presence_confirmed`/`added_to_class` geradas corretamente); tela final
+  mostra "Presentes (2)" e "Chamada fechada" corretamente. Sem erros de
+  console.
 
 - [ ] **9.8 — Painel e histórico do aluno**
   Calendário de treinos, gráfico de barras jan-dez, evolução de faixas,

@@ -49,12 +49,20 @@ export default async function AttendancePage({
             {formatDateOnly(session.date)}
           </p>
         </div>
-        <Link
-          href={backHref}
-          className={cn(buttonVariants({ size: "sm" }), "shrink-0")}
-        >
-          Concluir chamada
-        </Link>
+        <div className="flex shrink-0 gap-2">
+          <Link
+            href={`/attendance/${session.id}/roll-call`}
+            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+          >
+            Chamada com sinalização
+          </Link>
+          <Link
+            href={backHref}
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Concluir chamada
+          </Link>
+        </div>
       </div>
       <AttendanceClient
         classSessionId={session.id}
