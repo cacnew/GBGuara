@@ -25,18 +25,20 @@ export default function LoginPage() {
   async function onSubmit(data: LoginInput) {
     setIsSubmitting(true);
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword(data);
+    const { data: signInData, error } = await supabase.auth.signInWithPassword(data);
 
-    if (error) {
+    if (error || !signInData.user) {
       setIsSubmitting(false);
       toast.error("E-mail ou senha inválidos");
       return;
     }
 
-    const destination = await resolveLoginDestination();
+    const destination = await resolveLoginDestination(signInData.session.access_token);
     setIsSubmitting(false);
+    // Não chamar router.refresh() logo em seguida: cancela a transição
+    // client-side pendente do push (reproduzido nesta sessão — a URL
+    // nunca chegava a mudar, mesmo com o destino resolvido corretamente).
     router.push(destination);
-    router.refresh();
   }
 
   return (

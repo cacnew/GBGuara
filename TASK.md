@@ -563,9 +563,31 @@ pré-geradas para o ano inteiro.
   > notificação (`presence_confirmed`), não a do outro aluno
   > (`added_to_class`) — RLS isolando corretamente.
 
-- [ ] **9.6 — Tela Agenda do aluno**
-  Toggle Minhas/Todas, seletor de dias da semana, cards com chips
-  Alunos/Sexo/Faixa/Graus, ação sinalizar/cancelar (seção 4.1 da spec).
+- [x] **9.6 — Tela Agenda do aluno**
+  `app/(student)/layout.tsx` (novo route group, `requireStudent()` +
+  `AppShell role="student"`) e `app/(student)/aluno/{page,agenda-client}.tsx`:
+  seletor de dias Seg-Dom (com indicador nos dias com aula), toggle
+  Minhas/Todas, cards com chips Alunos/Sexo/Faixa/Graus, botão
+  sinalizar/cancelar chamando `signalAttendance`/`cancelSignal` (Fase
+  9.4). `STUDENT_NAV` novo em `nav-config.ts`; `AppShell` aceita role
+  `"student"`.
+  > Bugs reais encontrados e corrigidos durante teste em navegador
+  > (Playwright + dev server, login/agenda/sinalizar/cancelar ponta a
+  > ponta com a conta demo `aluno@nexusdojo.dev`):
+  > 1. `class_groups`, `class_sessions`, `teachers` e `belts` não tinham
+  >    NENHUMA policy de select para aluno (só para staff) — a agenda
+  >    aparecia sempre vazia, RLS bloqueando silenciosamente. Corrigido
+  >    com migration aditiva (`current_student_school_id()` + policies de
+  >    select nas 4 tabelas — dados de catálogo, não sensíveis).
+  > 2. Na página de login, chamar `router.refresh()` logo após
+  >    `router.push()` cancelava a transição client-side pendente (o
+  >    destino resolvia certo mas a URL nunca mudava). Corrigido
+  >    removendo o `refresh()` redundante ali.
+  > Confirmado funcionando de ponta a ponta: login → redireciona para
+  > `/aluno` → agenda mostra turmas certas por dia (com contagem de
+  > cards batendo com `week_days` de cada turma) → sinalizar persiste e
+  > a UI atualiza via `router.refresh()` → cancelar funciona
+  > simetricamente. Sem erros de console.
 
 - [ ] **9.7 — Tela Chamada do professor**
   Nova versão convivendo com `app/attendance/[sessionId]/attendance-client.tsx`

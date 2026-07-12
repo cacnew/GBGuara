@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  CalendarCheck,
   CalendarDays,
   ClipboardList,
   GraduationCap,
@@ -91,4 +92,10 @@ export const TEACHER_NAV: NavGroup[] = [
       { label: "Historico de chamadas", href: "/professor/sessions" },
     ],
   },
+];
+
+// Módulo do aluno (Fase 9) — itens adicionados conforme cada subtarefa
+// ganha tela própria (só "Agenda" existe até a 9.6).
+export const STUDENT_NAV: NavGroup[] = [
+  { label: "Agenda", href: "/aluno", icon: CalendarCheck },
 ];

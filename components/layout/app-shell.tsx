@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NavItems } from "./nav-items";
-import { ADMIN_NAV, TEACHER_NAV } from "./nav-config";
+import { ADMIN_NAV, TEACHER_NAV, STUDENT_NAV } from "./nav-config";
 import { LogoutButton } from "./logout-button";
 
 const SIDEBAR_COLLAPSED_KEY = "nexusdojo-sidebar-collapsed";
@@ -32,11 +32,12 @@ export function AppShell({
   userName,
   children,
 }: {
-  role: "admin" | "teacher";
+  role: "admin" | "teacher" | "student";
   userName: string;
   children: React.ReactNode;
 }) {
-  const groups = role === "admin" ? ADMIN_NAV : TEACHER_NAV;
+  const groups =
+    role === "admin" ? ADMIN_NAV : role === "teacher" ? TEACHER_NAV : STUDENT_NAV;
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
