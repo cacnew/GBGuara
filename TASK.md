@@ -625,8 +625,22 @@ pré-geradas para o ano inteiro.
   Dados de demonstração mantidos no ambiente compartilhado (enriquecem a
   conta demo do aluno).
 
-- [ ] **9.9 — Minha Academia**
-  Tabs Instrutores/Alunos/Aulas com busca (seção 4.4 da spec).
+- [x] **9.9 — Minha Academia**
+  `modules/students/academy.ts` (`getAcademyData`) +
+  `app/(student)/aluno/academia/{page,academia-client}.tsx`: tabs
+  Instrutores/Alunos/Aulas com busca (filtro client-side).
+  > Decisão de segurança: `students` guarda dados sensíveis (CPF,
+  > telefone, endereço, notas médicas) que nunca podem vazar para outro
+  > aluno — em vez de abrir select geral na tabela para aluno, criei a
+  > view `student_directory` (migration nova) expondo só
+  > id/name/photo_url/status/current_belt_id/current_degree, escopada
+  > por escola via `current_school_id()`/`current_student_school_id()`.
+  > Verificado: aluno enxerga outros alunos só com essas colunas
+  > (`select cpf` na view retorna "coluna não existe"), e a tabela
+  > `students` continua restrita à própria linha para o aluno.
+  Confirmado com Playwright: 3 tabs renderizam corretamente (4
+  instrutores, ~52 alunos, ~23 turmas ativas), busca filtra certo em
+  cada aba. Sem erros de console.
 
 - [ ] **9.10 — Notificações e Perfil do aluno**
   Feed de notificações, disparo nos eventos de confirmação/inclusão, tela

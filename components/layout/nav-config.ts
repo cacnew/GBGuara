@@ -95,8 +95,9 @@ export const TEACHER_NAV: NavGroup[] = [
 ];
 
 // Módulo do aluno (Fase 9) — itens adicionados conforme cada subtarefa
-// ganha tela própria (Agenda na 9.6, Painel na 9.8).
+// ganha tela própria (Agenda na 9.6, Painel na 9.8, Minha Academia na 9.9).
 export const STUDENT_NAV: NavGroup[] = [
   { label: "Agenda", href: "/aluno", icon: CalendarCheck },
   { label: "Painel", href: "/aluno/painel", icon: LayoutDashboard },
+  { label: "Minha Academia", href: "/aluno/academia", icon: Users },
 ];

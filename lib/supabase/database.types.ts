@@ -1933,6 +1933,18 @@ export type Database = {
           },
         ]
       }
+      student_directory: {
+        Row: {
+          current_belt_id: string | null
+          current_degree: number | null
+          id: string | null
+          name: string | null
+          photo_url: string | null
+          school_id: string | null
+          status: string | null
+        }
+        Relationships: []
+      }
       todays_class_groups: {
         Row: {
           created_at: string | null
