@@ -605,10 +605,25 @@ pré-geradas para o ano inteiro.
   mostra "Presentes (2)" e "Chamada fechada" corretamente. Sem erros de
   console.
 
-- [ ] **9.8 — Painel e histórico do aluno**
-  Calendário de treinos, gráfico de barras jan-dez, evolução de faixas,
-  alimentados só por presenças `confirmed`/`added_by_instructor` (seção
-  4.2/4.3 da spec).
+- [x] **9.8 — Painel e histórico do aluno**
+  `modules/students/dashboard.ts` (`getStudentDashboard`) +
+  `app/(student)/aluno/painel/{page,painel-client}.tsx`: gráfico de
+  barras jan-dez (série única, cor da marca, mês atual em destaque,
+  clicável para trocar o mês em foco), evolução das faixas (progressão
+  completa do belt system, faixas alcançadas destacadas, atual com
+  grau), calendário do mês selecionado com marcação nos dias treinados,
+  histórico de aulas do mês (turma, horário, instrutor). Tudo alimentado
+  só por presenças `confirmed`/`added_by_instructor` — sinalização sem
+  confirmação e cancelamentos não contam. Nav "Painel" adicionado ao
+  `STUDENT_NAV`.
+  Confirmado com Playwright + dados reais semeados (5 presenças
+  confirmadas em datas espalhadas + faixa Azul/grau 2 atribuída à conta
+  demo `aluno@nexusdojo.dev`, que ainda não tinha faixa definida):
+  contagem mensal bateu exatamente com as datas semeadas, clique numa
+  barra troca o mês do calendário/histórico corretamente, faixas
+  alcançadas x não alcançadas exibidas certo. Sem erros de console.
+  Dados de demonstração mantidos no ambiente compartilhado (enriquecem a
+  conta demo do aluno).
 
 - [ ] **9.9 — Minha Academia**
   Tabs Instrutores/Alunos/Aulas com busca (seção 4.4 da spec).
