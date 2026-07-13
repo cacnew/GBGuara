@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
     "db:types": "supabase gen types typescript --local > lib/supabase/database.types.ts"
   },
   "dependencies": {
@@ -39,6 +40,7 @@
     "eslint-config-next": "16.2.10",
     "supabase": "^2.109.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }

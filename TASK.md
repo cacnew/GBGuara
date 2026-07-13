@@ -665,9 +665,44 @@ pré-geradas para o ano inteiro.
   sign-in com ela funciona -> restaurada para a senha padrão da conta
   demo). Sem erros de console.
 
-- [ ] **9.11 — Testes das regras de negócio**
-  Lotação, elegibilidade, dupla sinalização, cancelamento, inclusão
-  manual, no_show (seção 3 da spec).
+- [x] **9.11 — Testes das regras de negócio**
+  Projeto não tinha nenhum runner de teste — adicionado `vitest`
+  (`npm test`).
+  - Lógica pura extraída para ser testável sem banco: `modules/students/
+    eligibility.ts` (`checkEligibility`, já existia embutido em
+    `agenda.ts`) e `modules/students/signal-rules.ts`
+    (`checkSignalWindow`, `hasTimeOverlap`, `hasAvailableCapacity`,
+    `weekdayOf`). `agenda.ts` refatorado para importar em vez de duplicar
+    — sem mudança de comportamento. 23 testes unitários cobrindo
+    elegibilidade (sexo/faixa/grau, fail-closed em belt_system_id
+    diferente), janela de sinalização (7 dias/24h, limites exatos),
+    conflito de horário, capacidade.
+  - `tests/integration/attendance-rules.test.ts`: 5 testes de integração
+    contra o Supabase compartilhado (dupla sinalização via unique
+    constraint, RLS de insert/update do aluno, cancelamento soft,
+    inclusão manual, consolidação no_show) — as regras que vivem na
+    camada de RLS/banco, não em TS puro.
+  > **2 bugs reais encontrados e corrigidos pelos testes:**
+  > 1. `checkSignalWindow` interpretava o horário da aula no fuso LOCAL
+  >    do processo (string de data sem `Z`) em vez de UTC, enquanto `now`
+  >    é um instante absoluto — desvio sistemático de horas na janela de
+  >    sinalização se o servidor não rodar em UTC (reproduzido nesta
+  >    máquina, America/Sao_Paulo). Corrigido adicionando `Z` explícito,
+  >    mesma convenção de `weekdayOf`.
+  >  2. **Bug sério de produção**: a policy de update do aluno em
+  >    `attendances` (Fase 9.4) só permitia mexer na linha quando o
+  >    status ATUAL já era `signaled` — bloqueando silenciosamente a
+  >    reativação `cancelled` -> `signaled` que `signalAttendance`
+  >    depende (aluno cancela e sinaliza de novo na mesma sessão). Como
+  >    RLS filtra linhas sem gerar erro em UPDATE, `signalAttendance`
+  >    respondia sucesso sem realmente reativar nada — o aluno via a UI
+  >    "funcionar" mas a sinalização continuava cancelada no banco.
+  >    Corrigido alargando o `using` da policy para aceitar `signaled` e
+  >    `cancelled` (migration `20260713100000`). Confirmado corrigido com
+  >    Playwright: ciclo completo sinalizar → cancelar → sinalizar de
+  >    novo funcionando de ponta a ponta na UI real.
+  Com a 9.11, a Fase 9 (Módulo do Aluno, `modules/modulo_aluno.md`) está
+  completa.
 
 ---
 

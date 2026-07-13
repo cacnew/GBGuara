@@ -3,15 +3,14 @@
 import { requireStudent } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateClassSession } from "@/modules/classes/session-materialization";
-
-// Regras de negócio confirmadas com o usuário (seção 3 e seção 8 —
-// "pontos em aberto" — de modules/modulo_aluno.md): aluno sinaliza no
-// máximo 7 dias antes da aula, e ainda pode sinalizar até 24h depois do
-// horário de início (tolerância para quem esquece de sinalizar antes).
-const MAX_ADVANCE_DAYS = 7;
-const POST_START_TOLERANCE_HOURS = 24;
-
-const OCCUPYING_STATUSES = ["signaled", "confirmed", "added_by_instructor"];
+import { checkEligibility } from "@/modules/students/eligibility";
+import {
+  OCCUPYING_STATUSES,
+  checkSignalWindow,
+  hasAvailableCapacity,
+  hasTimeOverlap,
+  weekdayOf,
+} from "@/modules/students/signal-rules";
 
 export type AgendaClass = {
   classGroupId: string;
@@ -32,56 +31,6 @@ export type AgendaClass = {
 };
 
 export type SignalResult = { error?: string };
-
-function weekdayOf(date: string): number {
-  // `date` é YYYY-MM-DD; usa UTC para não deixar o fuso do servidor
-  // deslocar o dia da semana. week_days segue a mesma convenção do
-  // Date#getUTCDay (0=domingo … 6=sábado), confirmado contra os dados de
-  // seed (seg/qua/sex => [1,3,5]).
-  return new Date(`${date}T00:00:00Z`).getUTCDay();
-}
-
-type MinBeltInfo = { ordering: number; belt_system_id: string } | null;
-type StudentEligibility = {
-  sex: string | null;
-  current_degree: number;
-  belts: { ordering: number; belt_system_id: string } | null;
-};
-
-function checkEligibility(
-  classGroup: {
-    sex_restriction: string | null;
-    min_belt_id: string | null;
-    min_degree: number | null;
-    belts: MinBeltInfo;
-  },
-  student: StudentEligibility,
-): { eligible: boolean; reason: string | null } {
-  if (classGroup.sex_restriction && student.sex !== classGroup.sex_restriction) {
-    return { eligible: false, reason: "Restrito por sexo" };
-  }
-
-  if (classGroup.min_belt_id) {
-    const minBelt = classGroup.belts;
-    const studentBelt = student.belts;
-
-    if (!minBelt || !studentBelt || studentBelt.belt_system_id !== minBelt.belt_system_id) {
-      return { eligible: false, reason: "Faixa mínima não atendida" };
-    }
-    if (studentBelt.ordering < minBelt.ordering) {
-      return { eligible: false, reason: "Faixa mínima não atendida" };
-    }
-    if (
-      studentBelt.ordering === minBelt.ordering &&
-      classGroup.min_degree != null &&
-      student.current_degree < classGroup.min_degree
-    ) {
-      return { eligible: false, reason: "Grau mínimo não atendido" };
-    }
-  }
-
-  return { eligible: true, reason: null };
-}
 
 /**
  * Agenda do aluno para um dia (seção 4.1 da spec): turmas que rodam nesse
@@ -206,16 +155,9 @@ export async function signalAttendance(
     return { error: "Fora da vigência da turma" };
   }
 
-  const sessionStart = new Date(`${date}T${classGroup.start_time}`);
-  const now = new Date();
-  const maxAdvanceMs = MAX_ADVANCE_DAYS * 24 * 60 * 60 * 1000;
-  const toleranceMs = POST_START_TOLERANCE_HOURS * 60 * 60 * 1000;
-
-  if (sessionStart.getTime() - now.getTime() > maxAdvanceMs) {
-    return { error: `Só é possível sinalizar até ${MAX_ADVANCE_DAYS} dias antes` };
-  }
-  if (now.getTime() - sessionStart.getTime() > toleranceMs) {
-    return { error: "Prazo para sinalizar essa aula já passou" };
+  const windowCheck = checkSignalWindow(date, classGroup.start_time, new Date());
+  if (!windowCheck.allowed) {
+    return { error: windowCheck.reason ?? "Fora da janela de sinalização" };
   }
 
   const { data: existingSession } = await supabase
@@ -262,7 +204,7 @@ export async function signalAttendance(
       const other = sameDaySessions?.find((s) => s.id === a.class_session_id)
         ?.class_groups;
       if (!other) return false;
-      return other.start_time < classGroup.end_time && classGroup.start_time < other.end_time;
+      return hasTimeOverlap(classGroup.start_time, classGroup.end_time, other.start_time, other.end_time);
     });
 
     if (overlaps) {
@@ -281,16 +223,14 @@ export async function signalAttendance(
     return { error: materialized.error ?? "Não foi possível abrir a sessão" };
   }
 
-  if (classGroup.capacity != null) {
-    const { count } = await supabase
-      .from("attendances")
-      .select("id", { count: "exact", head: true })
-      .eq("class_session_id", materialized.sessionId)
-      .in("status", OCCUPYING_STATUSES);
+  const { count } = await supabase
+    .from("attendances")
+    .select("id", { count: "exact", head: true })
+    .eq("class_session_id", materialized.sessionId)
+    .in("status", OCCUPYING_STATUSES);
 
-    if ((count ?? 0) >= classGroup.capacity) {
-      return { error: "Turma lotada" };
-    }
+  if (!hasAvailableCapacity(count ?? 0, classGroup.capacity)) {
+    return { error: "Turma lotada" };
   }
 
   const { data: existing } = await supabase
