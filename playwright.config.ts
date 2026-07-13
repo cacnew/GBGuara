@@ -23,10 +23,19 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
+  /* Ambiente local roda em disco de rede + Supabase remoto compartilhado, então requests
+   * podem levar vários segundos; timeouts default do Playwright são curtos demais aqui. */
+  timeout: 120000,
+  expect: {
+    timeout: 15000,
+  },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
     baseURL: 'http://localhost:3000',
+
+    actionTimeout: 20000,
+    navigationTimeout: 60000,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
