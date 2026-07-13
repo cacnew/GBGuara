@@ -642,9 +642,28 @@ pré-geradas para o ano inteiro.
   instrutores, ~52 alunos, ~23 turmas ativas), busca filtra certo em
   cada aba. Sem erros de console.
 
-- [ ] **9.10 — Notificações e Perfil do aluno**
-  Feed de notificações, disparo nos eventos de confirmação/inclusão, tela
-  de perfil (seção 4.5/4.6 da spec).
+- [x] **9.10 — Notificações e Perfil do aluno**
+  `modules/students/notifications.ts` +
+  `app/(student)/aluno/notificacoes/{page,notifications-client}.tsx`:
+  feed cronológico (título por tipo, turma/data/hora, timestamp,
+  indicador de não lida), botão "marcar todas como lidas" (só aparece
+  quando há não lidas). Disparo já existia desde a Fase 9.5
+  (`closeRollCall`), não precisou de mudança.
+  `app/(student)/aluno/perfil/{page,change-password-form}.tsx`: dados
+  cadastrais (nome, e-mail, telefone, faixa/grau, matrícula desde),
+  alterar senha (`supabase.auth.updateUser`), sair (reaproveita
+  `LogoutButton`).
+  > Escopo reduzido conscientemente vs. seção 4.6 da spec: "mudar de
+  > academia", "trocar de conta" e "idioma" não se aplicam (uma
+  > escola/idioma só neste sistema); "excluir conta" e "atualizar token
+  > de push" ficam fora por exigirem fluxo próprio (aprovação
+  > administrativa; infra de push ainda não existe — spec seção 8 já
+  > lista isso como ponto em aberto).
+  Confirmado com Playwright: feed mostra as 2 notificações semeadas com
+  título/descrição corretos, "marcar todas como lidas" funciona e some
+  depois; troca de senha testada de ponta a ponta (senha nova ->
+  sign-in com ela funciona -> restaurada para a senha padrão da conta
+  demo). Sem erros de console.
 
 - [ ] **9.11 — Testes das regras de negócio**
   Lotação, elegibilidade, dupla sinalização, cancelamento, inclusão
