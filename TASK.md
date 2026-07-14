@@ -708,8 +708,8 @@ pré-geradas para o ano inteiro.
 
 ## Fora de escopo até novo aviso (não criar subtarefas para isso ainda)
 
-Pagamento online, Pix automático, boleto, cartão online, integração Asaas,
-régua automática de cobrança, check-in por QR
+Pagamento online via gateway (cartão online, boleto com gateway real,
+integração Asaas), régua automática de cobrança, check-in por QR
 Code, currículo técnico, avaliação qualitativa, campeonatos/eventos/
 seminários, multiunidade com telas próprias, IA, catraca física,
 marketplace, white label, app nativo — ver seção 19 do
@@ -718,6 +718,9 @@ formalmente o início do MVP 2/MVP 3.
 
 > "Área do aluno/responsável" foi promovida e removida desta lista em
 > 2026-07-11 — ver Fase 9 acima.
+> "Pix automático" foi promovido e removido desta lista em 2026-07-14 —
+> geração local de Pix copia-e-cola (EMV) + QR Code, sem gateway, ver
+> Fase 10.6 abaixo.
  
 ---
 
@@ -752,3 +755,73 @@ forem uma subtarefa numerada formal.
   ficar preso dentro de um fluxo funcional.
 - **Design system atual:** a direcao visual vigente passou a ser o arquivo
   `DESIGN-pinterest.md`. Nao reintroduzir o design antigo sem aprovacao.
+
+---
+
+## Fase 10 — Módulo do Aluno 2 (admin: reset senha, financeiro, foto, dossiê)
+
+Baseado em `modules/modulo_aluno2.md`. Ordem de execução segue a sugestão do
+próprio arquivo (TAREFA 1, 2, 3, 6, 4→5, 7). Decisão tomada com o usuário
+em 2026-07-14: TAREFA 5 (Pix copia-e-cola/QR Code gerado localmente) agora
+está em escopo; boleto com gateway real continua fora de escopo (só
+estrutura preparada, ver seção "Fora de escopo" acima). Execução subtarefa
+por subtarefa, com commit/push e validação do usuário entre cada uma
+(protocolo padrão do `CLAUDE.md`).
+
+- [ ] **10.1 (TAREFA 1) — Reset de senha de alunos pelo admin**
+  Migration: `students.must_change_password` (boolean, default false).
+  Ação admin `resetStudentPassword` (mesmo padrão de `createStudentLogin`:
+  `createAdminClient()` + `admin.auth.admin.updateUserById`) gera senha
+  temporária aleatória, exibida uma única vez em modal de confirmação (nome
+  do aluno visível), marca `must_change_password=true` e grava
+  `audit_logs`. Aluno com a flag ativa é redirecionado para tela obrigatória
+  de troca de senha antes de acessar qualquer outra rota `/aluno/*`.
+  Endpoint restrito a `requireRole("admin")`.
+
+- [ ] **10.2 (TAREFA 2) — Data e dia da semana no grid de aulas**
+  `academia-client.tsx` (aba "Aulas") já usa `formatDateOnly`, mas cobre
+  `class_groups.start_date/end_date` (vigência da turma), não a data de
+  cada ocorrência de aula. Ajustar a exibição para o requisito literal da
+  tarefa (data + dia da semana por extenso pt-BR, ex.
+  "14/07/2026 — Segunda-feira") no grid relevante do aluno.
+
+- [ ] **10.3 (TAREFA 3) — Padronizar visual das faixas em /aluno**
+  Migrar `painel-client.tsx` (timeline "Evolução das faixas") e
+  `academia-client.tsx` (aba Alunos) do dot manual
+  (`style={{backgroundColor}}`) para `BeltPreview`/`BeltWithPreview`
+  (`components/belts/belt-preview.tsx`), já usado consistentemente no
+  admin/professor. Sem duplicação de código de faixa.
+
+- [ ] **10.4 (TAREFA 6) — Foto do aluno (upload em perfil e cadastro admin)**
+  Reusar `AvatarUpload` (`components/forms/avatar-upload.tsx`, bucket
+  `avatars` já existe da Fase 8.1): (a) wirar o widget no formulário de
+  edição de aluno no admin (`app/(admin)/students/[id]/edit/form.tsx` hoje
+  só persiste a URL, sem o componente de upload); (b) upload self-service
+  em `app/(student)/aluno/perfil`. Fallback com `AvatarInitials` onde ainda
+  não existir.
+
+- [ ] **10.5 (TAREFA 4) — Área financeira do aluno**
+  Não existe hoje. Reusar schema já pronto (`contracts`,
+  `contract_installments`, `financial_movements`) e a lógica de
+  `financial-queries.ts`/`financial-section.tsx` do admin como referência,
+  adaptando para o aluno (só leitura: plano atual, situação, parcelas com
+  badge por status, próximo vencimento em destaque). Botão "Pagar" nas
+  parcelas pendentes/vencidas exibe os dados de pagamento enviados pelo
+  admin (vem da 10.6) — aluno não cria/edita cobranças.
+
+- [ ] **10.6 (TAREFA 5) — Gestão de cobranças pelo admin (Pix, QR Code)**
+  Novo módulo financeiro admin: ação "Enviar cobrança" por parcela (gera
+  payload Pix copia-e-cola EMV + QR Code localmente, campo de chave Pix da
+  escola; estrutura preparada para boleto sem integração real). Cobrança
+  enviada fica visível na tela da 10.5 e gera notificação (reusa tabela
+  `notifications`, novo `type: "charge_sent"`). Ação "Confirmar pagamento"
+  (baixa manual) — avaliar reuso/extensão de
+  `modules/finance/payment-actions.ts` já existente. Dashboard simples de
+  parcelas pagas/pendentes/vencidas do mês com filtro por aluno (avaliar
+  reaproveitar `/finance/dashboard`).
+
+- [ ] **10.7 (TAREFA 7) — Dossiê do aluno**
+  Página consolidando dados cadastrais, histórico de graduações (componente
+  da 10.3), histórico financeiro (10.5/10.6), histórico de presenças e
+  observações internas (admin/professor only, novo campo). Acessível pelo
+  perfil do aluno e pelo detalhe do aluno no admin.
