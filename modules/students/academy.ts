@@ -27,6 +27,7 @@ export type ClassCatalogEntry = {
   status: string;
   startDate: string | null;
   endDate: string | null;
+  weekDays: number[];
 };
 
 export type AcademyData = {
@@ -53,9 +54,11 @@ export async function getAcademyData(): Promise<AcademyData> {
       .order("name"),
     supabase
       .from("class_groups")
-      .select("id, name, start_time, end_time, status, start_date, end_date, teachers(name)")
+      .select(
+        "id, name, start_time, end_time, status, start_date, end_date, week_days, teachers(name)",
+      )
       .eq("status", "active")
-      .order("name"),
+      .order("start_time"),
   ]);
 
   const beltIds = [...new Set((directory ?? []).map((s) => s.current_belt_id).filter((id): id is string => Boolean(id)))];
@@ -82,15 +85,24 @@ export async function getAcademyData(): Promise<AcademyData> {
         currentDegree: s.current_degree ?? 0,
       };
     }),
-    classes: (classGroups ?? []).map((c) => ({
-      id: c.id,
-      name: c.name,
-      startTime: c.start_time,
-      endTime: c.end_time,
-      teacherName: c.teachers?.name ?? null,
-      status: c.status,
-      startDate: c.start_date,
-      endDate: c.end_date,
-    })),
+    classes: (classGroups ?? [])
+      .map((c) => ({
+        id: c.id,
+        name: c.name,
+        startTime: c.start_time,
+        endTime: c.end_time,
+        teacherName: c.teachers?.name ?? null,
+        status: c.status,
+        startDate: c.start_date,
+        endDate: c.end_date,
+        weekDays: c.week_days ?? [],
+      }))
+      // ordenação cronológica da semana: primeiro dia em que a turma ocorre, depois horário.
+      .sort((a, b) => {
+        const firstDayA = Math.min(...(a.weekDays.length ? a.weekDays : [7]));
+        const firstDayB = Math.min(...(b.weekDays.length ? b.weekDays : [7]));
+        if (firstDayA !== firstDayB) return firstDayA - firstDayB;
+        return a.startTime.localeCompare(b.startTime);
+      }),
   };
 }

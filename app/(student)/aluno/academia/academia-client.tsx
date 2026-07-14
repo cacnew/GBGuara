@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { formatDateOnly } from "@/lib/dates/format";
+import { formatDateOnly, formatWeekDays } from "@/lib/dates/format";
 import type { AcademyData } from "@/modules/students/academy";
 
 type Tab = "instrutores" | "alunos" | "aulas";
@@ -123,6 +123,9 @@ export function AcademyClient({ data }: { data: AcademyData }) {
                   {c.status === "active" ? "Active" : c.status}
                 </span>
               </div>
+              {c.weekDays.length > 0 && (
+                <p className="text-sm font-semibold text-primary">{formatWeekDays(c.weekDays)}</p>
+              )}
               <p className="text-xs text-muted-foreground">
                 {c.startTime.slice(0, 5)} até {c.endTime.slice(0, 5)}
                 {c.teacherName ? ` · ${c.teacherName}` : ""}

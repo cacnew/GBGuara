@@ -804,12 +804,24 @@ por subtarefa, com commit/push e validação do usuário entre cada uma
   tela obrigatória → definir nova senha redireciona para `/aluno` e limpa
   a flag → `audit_logs` confirma o registro. Sem erros de console.
 
-- [ ] **10.2 (TAREFA 2) — Data e dia da semana no grid de aulas**
-  `academia-client.tsx` (aba "Aulas") já usa `formatDateOnly`, mas cobre
-  `class_groups.start_date/end_date` (vigência da turma), não a data de
-  cada ocorrência de aula. Ajustar a exibição para o requisito literal da
-  tarefa (data + dia da semana por extenso pt-BR, ex.
-  "14/07/2026 — Segunda-feira") no grid relevante do aluno.
+- [x] **10.2 (TAREFA 2) — Data e dia da semana no grid de aulas**
+  Decisão tomada com o usuário: cada linha da aba "Aulas" de
+  `/aluno/academia` é uma turma **recorrente** (`class_groups`), não uma
+  aula com data única — então "data e dia da semana" virou "dia(s) da
+  semana em que a turma ocorre", calculado a partir de
+  `class_groups.week_days` (nunca hardcoded), não a expansão em
+  ocorrências datadas (fora de escopo aqui).
+  `lib/dates/format.ts` ganhou `formatWeekDays(weekDays: number[])`
+  (rótulos pt-BR por extenso, ex. "Segunda-feira, Quarta-feira").
+  `modules/students/academy.ts` (`getAcademyData`) passou a selecionar
+  `week_days` e expor em `ClassCatalogEntry.weekDays`; ordenação mudou de
+  alfabética por nome para cronológica (primeiro dia da semana em que a
+  turma ocorre, depois horário de início) — mais legível como grade de
+  horários. `academia-client.tsx` exibe os dias da semana em destaque
+  (cor primária) entre o nome da turma e o horário.
+  Confirmado com Playwright: aba Aulas renderiza, por exemplo,
+  "Jiu Jitsu GB2/GB3 — Segunda-feira, Quarta-feira — 07:00 até 08:00 ·
+  Professor Rafael Mendes". Typecheck e lint limpos.
 
 - [ ] **10.3 (TAREFA 3) — Padronizar visual das faixas em /aluno**
   Migrar `painel-client.tsx` (timeline "Evolução das faixas") e
