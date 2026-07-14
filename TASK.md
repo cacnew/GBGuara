@@ -768,15 +768,41 @@ estrutura preparada, ver seção "Fora de escopo" acima). Execução subtarefa
 por subtarefa, com commit/push e validação do usuário entre cada uma
 (protocolo padrão do `CLAUDE.md`).
 
-- [ ] **10.1 (TAREFA 1) — Reset de senha de alunos pelo admin**
-  Migration: `students.must_change_password` (boolean, default false).
-  Ação admin `resetStudentPassword` (mesmo padrão de `createStudentLogin`:
-  `createAdminClient()` + `admin.auth.admin.updateUserById`) gera senha
-  temporária aleatória, exibida uma única vez em modal de confirmação (nome
-  do aluno visível), marca `must_change_password=true` e grava
-  `audit_logs`. Aluno com a flag ativa é redirecionado para tela obrigatória
-  de troca de senha antes de acessar qualquer outra rota `/aluno/*`.
-  Endpoint restrito a `requireRole("admin")`.
+- [x] **10.1 (TAREFA 1) — Reset de senha de alunos pelo admin**
+  Migration `20260714120000_add_student_must_change_password.sql`:
+  `students.must_change_password` (boolean, default false), aplicada no
+  Supabase compartilhado (`nexusdojo-dev`).
+  `app/(admin)/students/[id]/reset-password/actions.ts`
+  (`resetStudentPassword`, mesmo padrão de `createStudentLogin`:
+  `requireRole("admin")` + `createAdminClient()` +
+  `admin.auth.admin.updateUserById`) gera senha temporária aleatória
+  (12 chars, charset sem ambíguos), marca `must_change_password=true` e
+  grava `audit_logs` (`action: "student_password_reset"`).
+  `reset-password-button.tsx` usa um novo `components/ui/confirm-dialog.tsx`
+  (modal genérico reutilizável, não existia nenhum no projeto) — nome do
+  aluno visível na confirmação, senha temporária exibida uma única vez com
+  botão copiar. Botão só aparece na ficha do aluno
+  (`app/(admin)/students/[id]/edit/page.tsx`) quando já existe login.
+  Enforcement: `getCurrentStudentProfile` passou a expor
+  `mustChangePassword`; `app/(student)/layout.tsx` redireciona para
+  `/aluno/nova-senha` enquanto a flag estiver ativa (bloqueia qualquer
+  outra rota `/aluno/*`); página nova em
+  `app/(student-forced)/aluno/nova-senha` (route group próprio, fora do
+  `(student)`, para não herdar o próprio redirect) reaproveita
+  `ChangePasswordForm` (ganhou prop `onSuccess` opcional) e
+  `modules/students/account-actions.ts` (`clearMustChangePassword`) limpa
+  a flag após a troca.
+  `database.types.ts` recebeu o mesmo patch manual cirúrgico das Fases
+  9.1/9.2 (`must_change_password` em Row/Insert/Update de `students`) —
+  regen completo via `db:types` segue pendente de Docker/token de
+  management API.
+  Confirmado de ponta a ponta com Playwright (`e2e/reset-password.spec.ts`,
+  novo teste permanente): admin reseta senha → modal mostra senha
+  temporária → flag `true` no banco → login do aluno com a senha antiga
+  falha → login com a senha temporária força redirect para
+  `/aluno/nova-senha` → tentativa de acessar `/aluno` permanece preso na
+  tela obrigatória → definir nova senha redireciona para `/aluno` e limpa
+  a flag → `audit_logs` confirma o registro. Sem erros de console.
 
 - [ ] **10.2 (TAREFA 2) — Data e dia da semana no grid de aulas**
   `academia-client.tsx` (aba "Aulas") já usa `formatDateOnly`, mas cobre

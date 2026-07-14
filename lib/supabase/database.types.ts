@@ -1559,6 +1559,7 @@ export type Database = {
           medical_certificate_expires_at: string | null
           medical_certificate_url: string | null
           medical_notes: string | null
+          must_change_password: boolean
           name: string
           notes: string | null
           phone: string | null
@@ -1589,6 +1590,7 @@ export type Database = {
           medical_certificate_expires_at?: string | null
           medical_certificate_url?: string | null
           medical_notes?: string | null
+          must_change_password?: boolean
           name: string
           notes?: string | null
           phone?: string | null
@@ -1619,6 +1621,7 @@ export type Database = {
           medical_certificate_expires_at?: string | null
           medical_certificate_url?: string | null
           medical_notes?: string | null
+          must_change_password?: boolean
           name?: string
           notes?: string | null
           phone?: string | null

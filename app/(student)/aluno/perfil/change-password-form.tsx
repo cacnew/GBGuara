@@ -13,7 +13,13 @@ import {
   type ChangePasswordInput,
 } from "@/lib/validations/change-password";
 
-export function ChangePasswordForm() {
+export function ChangePasswordForm({
+  onSuccess,
+  submitLabel = "Alterar senha",
+}: {
+  onSuccess?: () => void | Promise<void>;
+  submitLabel?: string;
+} = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
@@ -26,15 +32,17 @@ export function ChangePasswordForm() {
     setIsSubmitting(true);
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password: data.password });
-    setIsSubmitting(false);
 
     if (error) {
+      setIsSubmitting(false);
       toast.error(error.message);
       return;
     }
 
     toast.success("Senha alterada com sucesso.");
     reset();
+    await onSuccess?.();
+    setIsSubmitting(false);
   }
 
   return (
@@ -59,7 +67,7 @@ export function ChangePasswordForm() {
       </div>
 
       <Button type="submit" disabled={isSubmitting} className="w-full">
-        {isSubmitting ? "Salvando..." : "Alterar senha"}
+        {isSubmitting ? "Salvando..." : submitLabel}
       </Button>
     </form>
   );

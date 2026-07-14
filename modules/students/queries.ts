@@ -7,6 +7,7 @@ export type CurrentStudentProfile = {
   name: string;
   email: string | null;
   status: "ativo" | "inativo" | "pausado" | "cancelado" | "inadimplente";
+  mustChangePassword: boolean;
 };
 
 export async function getCurrentStudentProfile(): Promise<CurrentStudentProfile | null> {
@@ -19,7 +20,7 @@ export async function getCurrentStudentProfile(): Promise<CurrentStudentProfile 
 
   const { data } = await supabase
     .from("students")
-    .select("id, school_id, unit_id, name, email, status")
+    .select("id, school_id, unit_id, name, email, status, must_change_password")
     .eq("auth_user_id", user.id)
     .single();
 
@@ -32,5 +33,6 @@ export async function getCurrentStudentProfile(): Promise<CurrentStudentProfile 
     name: data.name,
     email: data.email,
     status: data.status as CurrentStudentProfile["status"],
+    mustChangePassword: data.must_change_password,
   };
 }

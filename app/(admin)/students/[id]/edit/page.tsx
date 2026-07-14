@@ -17,6 +17,7 @@ import {
   type GraduationHistoryRow,
 } from "./graduation-section";
 import { StudentEditTabs } from "./student-edit-tabs";
+import { ResetPasswordButton } from "../reset-password/reset-password-button";
 
 export default async function EditStudentPage({
   params,
@@ -137,6 +138,9 @@ export default async function EditStudentPage({
           >
             {student.auth_user_id ? "Login criado" : "Criar login"}
           </Link>
+          {student.auth_user_id && (
+            <ResetPasswordButton studentId={student.id} studentName={student.name} />
+          )}
         </div>
       </div>
       <StudentEditTabs
