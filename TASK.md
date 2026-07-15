@@ -927,8 +927,47 @@ por subtarefa, com commit/push e validação do usuário entre cada uma
   cobranças marca a parcela como paga (conferido direto no banco: status
   `paid`, `payment_method: "pix"`, data correta). Sem erros de console.
 
-- [ ] **10.7 (TAREFA 7) — Dossiê do aluno**
-  Página consolidando dados cadastrais, histórico de graduações (componente
-  da 10.3), histórico financeiro (10.5/10.6), histórico de presenças e
-  observações internas (admin/professor only, novo campo). Acessível pelo
-  perfil do aluno e pelo detalhe do aluno no admin.
+- [x] **10.7 (TAREFA 7) — Dossiê do aluno**
+  `app/(admin)/students/[id]/dossie/page.tsx` (novo, link "Ver dossiê" na
+  ficha do aluno): consolida dados cadastrais, responsáveis, histórico de
+  graduações (`BeltWithPreview`, padrão da 10.3), resumo financeiro
+  (reaproveita `getStudentFinancialSummary` do módulo financeiro existente,
+  sem duplicar a query) e histórico de presença (reaproveita o componente
+  `AttendanceHistory` já existente).
+  `app/(student)/aluno/dossie/page.tsx` (novo, link "Ver meu dossiê" em
+  `/aluno/perfil`): mesma ideia, só leitura, para o próprio aluno —
+  reaproveita `getStudentDashboard` (faixas + presenças, Fase 9.8) e
+  `getStudentFinance` (Fase 10.5) sem nenhuma query nova.
+  Observações internas (admin/professor only, peça nova de fato): tabela
+  `student_internal_notes` (migration `20260715130000...`) sem NENHUMA
+  policy de select para aluno — mesmo padrão defensivo de
+  `student_financial_exemptions` — para garantir que o dado nunca vaza
+  independente de mudanças futuras nas telas. `modules/students/
+  internal-notes.ts` (`getInternalNotes`/`addInternalNote`, usando
+  `requireUser()` para aceitar admin OU professor, conforme pedido) +
+  `components/students/internal-notes-section.tsx` (componente
+  compartilhado), usado tanto no dossiê do admin quanto na página já
+  existente do aluno para o professor (`app/(teacher)/professor/students/
+  [id]/page.tsx`) — professor também pode ler/adicionar observações,
+  mesmo sem uma rota de "dossiê" própria dele (já tinha uma ficha
+  equivalente).
+  Verificação: confirmado com Playwright que o dossiê do admin renderiza
+  corretamente com dados reais (cadastro, responsáveis, financeiro,
+  histórico de presença) e que adicionar uma observação persiste
+  corretamente (conferido direto no banco: autor/escola/aluno/texto
+  corretos). RLS testada diretamente com um client autenticado como o
+  aluno (`aluno@nexusdojo.dev`): `select * from student_internal_notes`
+  retorna 0 linhas — a observação de teste nunca fica visível para o
+  aluno. A rota `/aluno/dossie` foi confirmada compilando e respondendo
+  (redirect correto para usuário não autenticado); a verificação visual
+  completa do lado do aluno logado ficou limitada por instabilidade do
+  ambiente de desenvolvimento nesta sessão (filesystem/rede
+  intermitentemente muito lentos, com timeouts mesmo após reiniciar o
+  dev server) — o conteúdo dessa página reaproveita funções
+  (`getStudentDashboard`, `getStudentFinance`) já validadas
+  end-to-end nas Fases 9.8/10.5, então o risco residual é baixo, mas fica
+  registrado que essa página específica não teve confirmação visual
+  completa nesta sessão. Dados de teste (contrato fictício e observação)
+  removidos do ambiente compartilhado depois da validação.
+  Com a 10.7, a Fase 10 (Módulo do Aluno 2, `modules/modulo_aluno2.md`)
+  está completa.

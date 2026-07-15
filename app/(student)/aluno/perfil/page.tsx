@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { requireStudent } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateOnly } from "@/lib/dates/format";
 import { LogoutButton } from "@/components/layout/logout-button";
+import { buttonVariants } from "@/components/ui/button";
 import { ChangePasswordForm } from "./change-password-form";
 import { ProfilePhoto } from "./profile-photo";
 
@@ -53,6 +55,12 @@ export default async function StudentProfilePage() {
             {student?.enrollment_date ? formatDateOnly(student.enrollment_date) : "—"}
           </span>
         </div>
+      </section>
+
+      <section className="max-w-sm">
+        <Link href="/aluno/dossie" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+          Ver meu dossiê
+        </Link>
       </section>
 
       <section className="max-w-sm space-y-3">

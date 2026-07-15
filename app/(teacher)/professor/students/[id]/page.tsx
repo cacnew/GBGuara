@@ -7,6 +7,8 @@ import { requireUser } from "@/lib/permissions";
 import { formatDateOnly } from "@/lib/dates/format";
 import { createClient } from "@/lib/supabase/server";
 import { GraduationSuggestionForm } from "./graduation-suggestion-form";
+import { InternalNotesSection } from "@/components/students/internal-notes-section";
+import { getInternalNotes } from "@/modules/students/internal-notes";
 
 function calculateAge(birthDate: string | null) {
   if (!birthDate) return null;
@@ -99,6 +101,8 @@ export default async function TeacherStudentPage({
     .eq("student_id", student.id)
     .eq("status", "pending")
     .maybeSingle();
+
+  const internalNotes = await getInternalNotes(student.id);
 
   const age = calculateAge(student.birth_date);
   const recentNotes = (attendanceRows ?? [])
@@ -257,6 +261,8 @@ export default async function TeacherStudentPage({
             defaultDegree={student.current_degree}
             hasPendingSuggestion={Boolean(pendingSuggestion)}
           />
+
+          <InternalNotesSection studentId={student.id} notes={internalNotes} />
         </aside>
       </div>
     </div>

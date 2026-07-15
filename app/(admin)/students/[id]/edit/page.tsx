@@ -127,6 +127,12 @@ export default async function EditStudentPage({
         <div className="flex gap-2">
           <BackLink href="/students" />
           <Link
+            href={`/students/${student.id}/dossie`}
+            className={buttonVariants({ size: "sm", variant: "outline" })}
+          >
+            Ver dossiê
+          </Link>
+          <Link
             href={`/students/${student.id}/contract/new`}
             className={buttonVariants({ size: "sm" })}
           >

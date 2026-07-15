@@ -1602,6 +1602,55 @@ export type Database = {
           },
         ]
       }
+      student_internal_notes: {
+        Row: {
+          author_user_id: string | null
+          created_at: string
+          id: string
+          note: string
+          school_id: string
+          student_id: string
+        }
+        Insert: {
+          author_user_id?: string | null
+          created_at?: string
+          id?: string
+          note: string
+          school_id: string
+          student_id: string
+        }
+        Update: {
+          author_user_id?: string | null
+          created_at?: string
+          id?: string
+          note?: string
+          school_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_internal_notes_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_internal_notes_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_internal_notes_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           address: string | null
