@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import { BeltPreview } from "@/components/belts/belt-preview";
 import { formatDateOnly } from "@/lib/dates/format";
 import type { StudentDashboard } from "@/modules/students/dashboard";
 
@@ -107,10 +108,7 @@ export function PainelClient({
                     : "bg-transparent text-muted-foreground ring-border",
               )}
             >
-              <span
-                className="size-2.5 rounded-full border border-border"
-                style={{ backgroundColor: belt.colorHex ?? undefined }}
-              />
+              <BeltPreview name={belt.name} className="h-4 w-12" />
               {belt.name}
               {belt.isCurrent && ` · grau ${dashboard.currentDegree}`}
             </span>

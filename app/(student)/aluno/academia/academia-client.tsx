@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import { BeltWithPreview } from "@/components/belts/belt-preview";
 import { formatDateOnly, formatWeekDays } from "@/lib/dates/format";
 import type { AcademyData } from "@/modules/students/academy";
 
@@ -96,12 +97,8 @@ export function AcademyClient({ data }: { data: AcademyData }) {
               <div>
                 <p className="font-medium">{s.name}</p>
                 {s.beltName && (
-                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <span
-                      className="inline-block size-2.5 rounded-full border border-border"
-                      style={{ backgroundColor: s.beltColorHex ?? undefined }}
-                    />
-                    {s.beltName} · grau {s.currentDegree}
+                  <p className="text-xs text-muted-foreground">
+                    <BeltWithPreview name={s.beltName} degree={s.currentDegree} />
                   </p>
                 )}
               </div>

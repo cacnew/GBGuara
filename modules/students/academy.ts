@@ -14,7 +14,6 @@ export type StudentDirectoryEntry = {
   name: string;
   photoUrl: string | null;
   beltName: string | null;
-  beltColorHex: string | null;
   currentDegree: number;
 };
 
@@ -64,7 +63,7 @@ export async function getAcademyData(): Promise<AcademyData> {
   const beltIds = [...new Set((directory ?? []).map((s) => s.current_belt_id).filter((id): id is string => Boolean(id)))];
   const { data: belts } =
     beltIds.length > 0
-      ? await supabase.from("belts").select("id, name, color_hex").in("id", beltIds)
+      ? await supabase.from("belts").select("id, name").in("id", beltIds)
       : { data: [] };
   const beltById = new Map((belts ?? []).map((b) => [b.id, b]));
 
@@ -81,7 +80,6 @@ export async function getAcademyData(): Promise<AcademyData> {
         name: s.name ?? "",
         photoUrl: s.photo_url,
         beltName: belt?.name ?? null,
-        beltColorHex: belt?.color_hex ?? null,
         currentDegree: s.current_degree ?? 0,
       };
     }),

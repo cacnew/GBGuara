@@ -823,12 +823,18 @@ por subtarefa, com commit/push e validação do usuário entre cada uma
   "Jiu Jitsu GB2/GB3 — Segunda-feira, Quarta-feira — 07:00 até 08:00 ·
   Professor Rafael Mendes". Typecheck e lint limpos.
 
-- [ ] **10.3 (TAREFA 3) — Padronizar visual das faixas em /aluno**
-  Migrar `painel-client.tsx` (timeline "Evolução das faixas") e
+- [x] **10.3 (TAREFA 3) — Padronizar visual das faixas em /aluno**
+  Migrado `painel-client.tsx` (timeline "Evolução das faixas") e
   `academia-client.tsx` (aba Alunos) do dot manual
   (`style={{backgroundColor}}`) para `BeltPreview`/`BeltWithPreview`
   (`components/belts/belt-preview.tsx`), já usado consistentemente no
-  admin/professor. Sem duplicação de código de faixa.
+  admin/professor. Campos `colorHex`/`beltColorHex` removidos de
+  `modules/students/dashboard.ts` e `modules/students/academy.ts` (ficaram
+  sem uso — a cor agora é derivada do nome da faixa pelo próprio
+  `BeltPreview`, mesma fonte de verdade do admin). Confirmado com
+  Playwright (script temporário, removido após validação): `/aluno/painel`
+  e `/aluno/academia` (aba Alunos) renderizam as faixas com a mesma peça
+  visual do admin, sem erros de console.
 
 - [ ] **10.4 (TAREFA 6) — Foto do aluno (upload em perfil e cadastro admin)**
   Reusar `AvatarUpload` (`components/forms/avatar-upload.tsx`, bucket

@@ -8,7 +8,6 @@ const COUNTED_STATUSES = ["confirmed", "added_by_instructor"];
 export type BeltTimelineEntry = {
   id: string;
   name: string;
-  colorHex: string | null;
   ordering: number;
   isCurrent: boolean;
   achieved: boolean;
@@ -50,7 +49,7 @@ export async function getStudentDashboard(year: number): Promise<StudentDashboar
   if (student?.belts?.belt_system_id) {
     const { data: belts } = await supabase
       .from("belts")
-      .select("id, name, color_hex, ordering")
+      .select("id, name, ordering")
       .eq("belt_system_id", student.belts.belt_system_id)
       .order("ordering");
 
@@ -58,7 +57,6 @@ export async function getStudentDashboard(year: number): Promise<StudentDashboar
     beltTimeline = (belts ?? []).map((b) => ({
       id: b.id,
       name: b.name,
-      colorHex: b.color_hex,
       ordering: b.ordering,
       isCurrent: b.id === student.current_belt_id,
       achieved: b.ordering <= currentOrdering,
