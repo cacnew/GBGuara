@@ -893,16 +893,39 @@ por subtarefa, com commit/push e validação do usuário entre cada uma
   da validação (diferente da foto de perfil da 10.4, dado financeiro
   fabricado não é demo útil para manter). Sem erros de console.
 
-- [ ] **10.6 (TAREFA 5) — Gestão de cobranças pelo admin (Pix, QR Code)**
-  Novo módulo financeiro admin: ação "Enviar cobrança" por parcela (gera
-  payload Pix copia-e-cola EMV + QR Code localmente, campo de chave Pix da
-  escola; estrutura preparada para boleto sem integração real). Cobrança
-  enviada fica visível na tela da 10.5 e gera notificação (reusa tabela
-  `notifications`, novo `type: "charge_sent"`). Ação "Confirmar pagamento"
-  (baixa manual) — avaliar reuso/extensão de
-  `modules/finance/payment-actions.ts` já existente. Dashboard simples de
-  parcelas pagas/pendentes/vencidas do mês com filtro por aluno (avaliar
-  reaproveitar `/finance/dashboard`).
+- [x] **10.6 (TAREFA 5) — Gestão de cobranças pelo admin (Pix, QR Code)**
+  Novo módulo `/finance/charges` (nav "Cobranças" em Financeiro): caixa de
+  configuração da chave Pix da escola (`schools.pix_key`, coluna nova),
+  cards simples de parcelas pagas/pendentes/vencidas do mês (com filtro de
+  mês/aluno, mesmo padrão de query de `finance/installments/page.tsx`) e
+  lista de parcelas do mês com ação "Enviar cobrança".
+  `lib/pix/emv.ts` (`buildPixPayload`): Pix copia-e-cola (BR Code/EMV)
+  montado localmente em TS puro (TLV + CRC16-CCITT), sem gateway.
+  `lib/pix/qr.ts`: QR Code gerado localmente a partir do payload via
+  `qrcode` (novo pacote, só encoding local, sem chamada externa) — usei
+  `QRCode.toString(..., { type: "svg" })` porque não depende de canvas,
+  funciona igual no server e no client.
+  `modules/finance/charge-actions.ts` (`sendPixCharge`, requireRole admin):
+  grava `installment_charges` (tabela nova, migration
+  `20260715120000_finance_charges.sql`) com o payload já montado, dispara
+  notificação `type: "charge_sent"` (reusa `notifications`, sem migration
+  de schema — `type` já era texto livre) e loga em `audit_logs`. Ação
+  "Confirmar pagamento" reaproveita `registerInstallmentPayment`
+  (`modules/finance/payment-actions.ts`) sem nenhuma alteração nele.
+  Fecha o loop com a 10.5: `modules/students/finance.ts` passou a buscar a
+  cobrança mais recente de cada parcela e gerar o mesmo QR Code a partir
+  do payload salvo; `finance-client.tsx` do aluno agora mostra o Pix real
+  no botão "Pagar" quando existe cobrança enviada (antes só mostrava
+  "aguardando"). `notifications-client.tsx` do aluno ganhou o título/
+  descrição do tipo `charge_sent` (parcela, valor, vencimento).
+  Confirmado com Playwright (scripts temporários com contrato de teste
+  semeado e removido depois da validação, mesmo padrão da 10.5): admin
+  configura a chave Pix → envia cobrança de uma parcela vencida → QR Code
+  e copia-e-cola aparecem na tela → aluno vê o mesmo QR/payload em
+  `/aluno/financeiro` ao clicar "Pagar" → notificação "Nova cobrança
+  disponível" aparece no feed do aluno → "Confirmar pagamento" na tela de
+  cobranças marca a parcela como paga (conferido direto no banco: status
+  `paid`, `payment_method: "pix"`, data correta). Sem erros de console.
 
 - [ ] **10.7 (TAREFA 7) — Dossiê do aluno**
   Página consolidando dados cadastrais, histórico de graduações (componente

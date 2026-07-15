@@ -1045,6 +1045,67 @@ export type Database = {
           },
         ]
       }
+      installment_charges: {
+        Row: {
+          amount: number
+          charge_type: string
+          contract_installment_id: string
+          created_at: string
+          id: string
+          pix_key: string | null
+          pix_payload: string | null
+          school_id: string
+          sent_at: string
+          sent_by: string | null
+        }
+        Insert: {
+          amount: number
+          charge_type?: string
+          contract_installment_id: string
+          created_at?: string
+          id?: string
+          pix_key?: string | null
+          pix_payload?: string | null
+          school_id: string
+          sent_at?: string
+          sent_by?: string | null
+        }
+        Update: {
+          amount?: number
+          charge_type?: string
+          contract_installment_id?: string
+          created_at?: string
+          id?: string
+          pix_key?: string | null
+          pix_payload?: string | null
+          school_id?: string
+          sent_at?: string
+          sent_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installment_charges_contract_installment_id_fkey"
+            columns: ["contract_installment_id"]
+            isOneToOne: false
+            referencedRelation: "contract_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installment_charges_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installment_charges_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           converted_student_id: string | null
@@ -1383,6 +1444,7 @@ export type Database = {
           id: string
           name: string
           phone: string | null
+          pix_key: string | null
           state: string | null
           status: string
           updated_at: string
@@ -1396,6 +1458,7 @@ export type Database = {
           id?: string
           name: string
           phone?: string | null
+          pix_key?: string | null
           state?: string | null
           status?: string
           updated_at?: string
@@ -1409,6 +1472,7 @@ export type Database = {
           id?: string
           name?: string
           phone?: string | null
+          pix_key?: string | null
           state?: string | null
           status?: string
           updated_at?: string

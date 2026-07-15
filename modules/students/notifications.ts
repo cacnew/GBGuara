@@ -8,6 +8,9 @@ export type NotificationPayload = {
   date?: string;
   startTime?: string;
   endTime?: string;
+  installmentNumber?: number;
+  amount?: number;
+  dueDate?: string;
 };
 
 export type StudentNotification = {

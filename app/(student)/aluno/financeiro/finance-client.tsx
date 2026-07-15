@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { formatDateOnly } from "@/lib/dates/format";
 import type { SituacaoFinanceira, StudentFinance } from "@/modules/students/finance";
 
@@ -148,12 +151,38 @@ export function FinanceClient({ finance }: { finance: StudentFinance }) {
                       </button>
                     )}
                     {chargeModalInstallmentId === installment.id && (
-                      <div className="mt-2 rounded-lg border border-dashed border-border bg-background p-3 text-xs text-muted-foreground">
-                        Aguardando o envio da cobrança pelo financeiro da academia.
-                        Fale com a secretaria para regularizar esta parcela.
+                      <div className="mt-2 rounded-lg border border-dashed border-border bg-background p-3 text-xs">
+                        {installment.charge ? (
+                          <div className="space-y-2">
+                            <p className="font-medium">Pix copia-e-cola</p>
+                            <div
+                              className="h-[180px] w-[180px]"
+                              dangerouslySetInnerHTML={{ __html: installment.charge.qrSvg }}
+                            />
+                            <div className="flex items-center gap-2">
+                              <Input readOnly value={installment.charge.pixPayload} className="text-xs" />
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(installment.charge!.pixPayload);
+                                  toast.success("Código copiado.");
+                                }}
+                              >
+                                Copiar
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground">
+                            Aguardando o envio da cobrança pelo financeiro da academia. Fale com
+                            a secretaria para regularizar esta parcela.
+                          </p>
+                        )}
                         <button
                           type="button"
-                          className="ml-2 text-primary hover:underline"
+                          className="mt-2 text-primary hover:underline"
                           onClick={() => setChargeModalInstallmentId(null)}
                         >
                           Fechar

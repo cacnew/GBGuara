@@ -12,7 +12,12 @@ import {
 const TITLE_BY_TYPE: Record<string, string> = {
   presence_confirmed: "Instrutor confirmou sua presença",
   added_to_class: "Instrutor adicionou você à aula",
+  charge_sent: "Nova cobrança disponível",
 };
+
+function formatMoney(value: number) {
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
 
 function formatTimestamp(iso: string): string {
   const [datePart, timePart] = iso.split("T");
@@ -74,9 +79,19 @@ export function NotificationsClient({
               {!n.readAt && <span className="size-2 shrink-0 rounded-full bg-primary" />}
             </div>
             <p className="text-muted-foreground">
-              {n.payload.className}
-              {n.payload.date ? ` · ${formatDateOnly(n.payload.date)}` : ""}
-              {n.payload.startTime ? ` às ${n.payload.startTime.slice(0, 5)}` : ""}
+              {n.type === "charge_sent" ? (
+                <>
+                  Parcela {n.payload.installmentNumber}
+                  {n.payload.amount !== undefined ? ` · ${formatMoney(n.payload.amount)}` : ""}
+                  {n.payload.dueDate ? ` · vencimento ${formatDateOnly(n.payload.dueDate)}` : ""}
+                </>
+              ) : (
+                <>
+                  {n.payload.className}
+                  {n.payload.date ? ` · ${formatDateOnly(n.payload.date)}` : ""}
+                  {n.payload.startTime ? ` às ${n.payload.startTime.slice(0, 5)}` : ""}
+                </>
+              )}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">{formatTimestamp(n.createdAt)}</p>
           </div>

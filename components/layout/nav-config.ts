@@ -67,6 +67,7 @@ export const ADMIN_NAV: NavGroup[] = [
       { label: "Tabelas de preco", href: "/finance/price-tables" },
       { label: "Planos", href: "/finance/plans" },
       { label: "Parcelas", href: "/finance/installments" },
+      { label: "Cobrancas", href: "/finance/charges" },
       { label: "Inadimplentes", href: "/finance/overdue" },
       { label: "Receita por periodo", href: "/finance/reports" },
     ],

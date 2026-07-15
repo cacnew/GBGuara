@@ -2,6 +2,7 @@
 
 import { requireStudent } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
+import { generatePixQrSvg } from "@/lib/pix/qr";
 
 export type StudentInstallment = {
   id: string;
@@ -12,6 +13,7 @@ export type StudentInstallment = {
   remainingAmount: number;
   status: string;
   isOverdue: boolean;
+  charge: { pixPayload: string; qrSvg: string; sentAt: string } | null;
 };
 
 export type StudentContract = {
@@ -97,17 +99,43 @@ export async function getStudentFinance(): Promise<StudentFinance> {
     .order("installment_number");
 
   const today = new Date().toISOString().slice(0, 10);
-  const installments: StudentInstallment[] = (installmentRows ?? []).map((row) => ({
-    id: row.id,
-    installmentNumber: row.installment_number,
-    dueDate: row.due_date,
-    amount: row.amount,
-    paidAmount: row.paid_amount,
-    remainingAmount: row.remaining_amount,
-    status: row.status,
-    isOverdue:
-      (row.status === "pending" || row.status === "partially_paid") && row.due_date < today,
-  }));
+  const installmentIds = (installmentRows ?? []).map((row) => row.id);
+  const { data: chargeRows } =
+    installmentIds.length > 0
+      ? await supabase
+          .from("installment_charges")
+          .select("contract_installment_id, pix_payload, sent_at")
+          .in("contract_installment_id", installmentIds)
+          .order("sent_at", { ascending: false })
+      : { data: [] };
+
+  const latestChargeByInstallment = new Map<string, { pix_payload: string | null; sent_at: string }>();
+  for (const charge of chargeRows ?? []) {
+    if (!latestChargeByInstallment.has(charge.contract_installment_id)) {
+      latestChargeByInstallment.set(charge.contract_installment_id, charge);
+    }
+  }
+
+  const installments: StudentInstallment[] = await Promise.all(
+    (installmentRows ?? []).map(async (row) => {
+      const charge = latestChargeByInstallment.get(row.id);
+      return {
+        id: row.id,
+        installmentNumber: row.installment_number,
+        dueDate: row.due_date,
+        amount: row.amount,
+        paidAmount: row.paid_amount,
+        remainingAmount: row.remaining_amount,
+        status: row.status,
+        isOverdue:
+          (row.status === "pending" || row.status === "partially_paid") && row.due_date < today,
+        charge:
+          charge?.pix_payload
+            ? { pixPayload: charge.pix_payload, qrSvg: await generatePixQrSvg(charge.pix_payload), sentAt: charge.sent_at }
+            : null,
+      };
+    }),
+  );
 
   const openInstallments = installments.filter(
     (i) => i.status === "pending" || i.status === "partially_paid",
