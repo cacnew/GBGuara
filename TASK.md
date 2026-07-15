@@ -863,14 +863,35 @@ por subtarefa, com commit/push e validação do usuário entre cada uma
   ambiente compartilhado (mesmo padrão de dados de demonstração já usado
   em fases anteriores).
 
-- [ ] **10.5 (TAREFA 4) — Área financeira do aluno**
-  Não existe hoje. Reusar schema já pronto (`contracts`,
-  `contract_installments`, `financial_movements`) e a lógica de
-  `financial-queries.ts`/`financial-section.tsx` do admin como referência,
-  adaptando para o aluno (só leitura: plano atual, situação, parcelas com
-  badge por status, próximo vencimento em destaque). Botão "Pagar" nas
-  parcelas pendentes/vencidas exibe os dados de pagamento enviados pelo
-  admin (vem da 10.6) — aluno não cria/edita cobranças.
+- [x] **10.5 (TAREFA 4) — Área financeira do aluno**
+  `modules/students/finance.ts` (`getStudentFinance`): mesma lógica de
+  `financial-queries.ts` do admin (situação financeira, valor em
+  aberto/vencido, total pago, próximo vencimento), mas escopada pela
+  própria sessão do aluno via `createClient()` (RLS), não admin client —
+  aluno só lê. Migration nova
+  (`20260715100000_student_finance_read_access.sql`, aplicada no Supabase
+  compartilhado): `contracts`/`contract_installments` já tinham select
+  para o aluno (Fase 9.1), mas faltava `plans`/`price_tables` (nome do
+  plano/tabela embutido no contrato — RLS de PostgREST também filtra a
+  tabela do embed) e `student_financial_exemptions` (própria isenção, para
+  não marcar aluno isento como inadimplente); todas as 3 novas policies
+  restritas à própria escola/registro do aluno.
+  `app/(student)/aluno/financeiro/{page,finance-client}.tsx`: cards de
+  situação (badge reaproveitando `StatusBadge`)/próximo vencimento/valor em
+  aberto/valor vencido, card do contrato atual, lista de parcelas com badge
+  por status. Botão "Pagar" nas parcelas pendentes/vencidas: como a 10.6
+  (gestão de cobranças) ainda não existe, mostra por enquanto "Aguardando
+  o envio da cobrança pelo financeiro" — será conectado ao Pix real na
+  10.6. Nav "Financeiro" adicionado ao `STUDENT_NAV`.
+  Confirmado com Playwright: (1) conta demo sem contrato mostra o estado
+  vazio corretamente; (2) contrato de teste semeado temporariamente (1
+  parcela paga, 1 vencida, 1 pendente futura) confirmou situação
+  "Inadimplente", valores em aberto/vencido corretos, nome do
+  plano/tabela de preço via embed (prova que as novas policies de RLS
+  funcionam), badges Paga/Vencida/Pendente corretos e botão "Pagar"
+  funcional — dados de teste removidos do ambiente compartilhado depois
+  da validação (diferente da foto de perfil da 10.4, dado financeiro
+  fabricado não é demo útil para manter). Sem erros de console.
 
 - [ ] **10.6 (TAREFA 5) — Gestão de cobranças pelo admin (Pix, QR Code)**
   Novo módulo financeiro admin: ação "Enviar cobrança" por parcela (gera
