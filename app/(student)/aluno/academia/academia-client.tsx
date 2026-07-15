@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import { AvatarInitials } from "@/components/ui/avatar-initials";
 import { BeltWithPreview } from "@/components/belts/belt-preview";
 import { formatDateOnly, formatWeekDays } from "@/lib/dates/format";
 import type { AcademyData } from "@/modules/students/academy";
@@ -13,18 +14,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "alunos", label: "Alunos" },
   { id: "aulas", label: "Aulas" },
 ];
-
-function Avatar({ name, photoUrl }: { name: string; photoUrl: string | null }) {
-  if (photoUrl) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={photoUrl} alt={name} className="size-10 shrink-0 rounded-full object-cover" />;
-  }
-  return (
-    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground">
-      {name.charAt(0).toUpperCase()}
-    </span>
-  );
-}
 
 export function AcademyClient({ data }: { data: AcademyData }) {
   const [tab, setTab] = useState<Tab>("instrutores");
@@ -79,7 +68,7 @@ export function AcademyClient({ data }: { data: AcademyData }) {
         <div className="space-y-2">
           {filteredInstructors.map((i) => (
             <div key={i.id} className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
-              <Avatar name={i.name} photoUrl={i.photoUrl} />
+              <AvatarInitials name={i.name} src={i.photoUrl} className="shrink-0" />
               <p className="font-medium">{i.name}</p>
             </div>
           ))}
@@ -93,7 +82,7 @@ export function AcademyClient({ data }: { data: AcademyData }) {
         <div className="space-y-2">
           {filteredStudents.map((s) => (
             <div key={s.id} className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
-              <Avatar name={s.name} photoUrl={s.photoUrl} />
+              <AvatarInitials name={s.name} src={s.photoUrl} className="shrink-0" />
               <div>
                 <p className="font-medium">{s.name}</p>
                 {s.beltName && (

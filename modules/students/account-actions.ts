@@ -12,3 +12,13 @@ export async function clearMustChangePassword(): Promise<void> {
     .update({ must_change_password: false })
     .eq("id", profile.id);
 }
+
+export async function updateStudentPhoto(photoUrl: string): Promise<void> {
+  const profile = await requireStudent();
+  const admin = createAdminClient();
+
+  await admin
+    .from("students")
+    .update({ photo_url: photoUrl })
+    .eq("id", profile.id);
+}

@@ -836,13 +836,32 @@ por subtarefa, com commit/push e validação do usuário entre cada uma
   e `/aluno/academia` (aba Alunos) renderizam as faixas com a mesma peça
   visual do admin, sem erros de console.
 
-- [ ] **10.4 (TAREFA 6) — Foto do aluno (upload em perfil e cadastro admin)**
-  Reusar `AvatarUpload` (`components/forms/avatar-upload.tsx`, bucket
-  `avatars` já existe da Fase 8.1): (a) wirar o widget no formulário de
-  edição de aluno no admin (`app/(admin)/students/[id]/edit/form.tsx` hoje
-  só persiste a URL, sem o componente de upload); (b) upload self-service
-  em `app/(student)/aluno/perfil`. Fallback com `AvatarInitials` onde ainda
-  não existir.
+- [x] **10.4 (TAREFA 6) — Foto do aluno (upload em perfil e cadastro admin)**
+  (a) já estava feito desde a Fase 8.1 — `app/(admin)/students/[id]/edit/form.tsx`
+  já usa `AvatarUpload`; a nota original do TASK.md estava desatualizada.
+  (b) upload self-service em `app/(student)/aluno/perfil`: novo
+  `profile-photo.tsx` (client) envolve `AvatarUpload` e chama a nova
+  server action `updateStudentPhoto` (`modules/students/account-actions.ts`,
+  mesmo padrão `requireStudent()` + `createAdminClient()` de
+  `clearMustChangePassword`, porque aluno não tem policy de update em
+  `students`). Migration nova
+  (`20260715090000_students_self_upload_avatar.sql`, aplicada no Supabase
+  compartilhado): o bucket `avatars` (Fase 8.1) só liberava insert/update
+  via `current_school_id()` (resolve por `users`, nulo numa sessão de
+  aluno) — adicionadas policies equivalentes usando
+  `current_student_school_id()`/`current_student_id()`, restritas ao
+  próprio arquivo do aluno (`storage.filename(name) like
+  student_id || '-%'`).
+  `academia-client.tsx` também passou a usar `AvatarInitials`
+  (`components/ui/avatar-initials.tsx`) em vez de um componente `Avatar`
+  local duplicado (mesmo fallback de iniciais, sem duplicação de código).
+  Confirmado com Playwright (script temporário, removido após validação):
+  login do aluno → `/aluno/perfil` → upload de imagem → toast "Foto
+  atualizada." → URL do Storage aparece no `<img>` → após reload da
+  página a foto persiste (confirma gravação no banco, não só estado
+  local). Sem erros de console. Foto de teste permanece na conta demo do
+  ambiente compartilhado (mesmo padrão de dados de demonstração já usado
+  em fases anteriores).
 
 - [ ] **10.5 (TAREFA 4) — Área financeira do aluno**
   Não existe hoje. Reusar schema já pronto (`contracts`,
