@@ -1,3 +1,5 @@
+import { PRESENT_STATUSES } from "../../lib/attendance/constants";
+
 // Regras de negócio confirmadas com o usuário (seção 3 e seção 8 —
 // "pontos em aberto" — de modules/modulo_aluno.md): aluno sinaliza no
 // máximo 7 dias antes da aula, e ainda pode sinalizar até 24h depois do
@@ -5,7 +7,11 @@
 export const MAX_ADVANCE_DAYS = 7;
 export const POST_START_TOLERANCE_HOURS = 24;
 
-export const OCCUPYING_STATUSES = ["signaled", "confirmed", "added_by_instructor"];
+// "signaled" cobre quem só sinalizou (ainda sem confirmação); os demais
+// vêm de PRESENT_STATUSES para também contar quem foi marcado presente
+// pela tela antiga do professor (status 'presente'), que ocupa vaga na
+// turma tanto quanto confirmed/added_by_instructor.
+export const OCCUPYING_STATUSES = ["signaled", ...PRESENT_STATUSES];
 
 export function weekdayOf(date: string): number {
   // `date` é YYYY-MM-DD; usa UTC para não deixar o fuso do servidor

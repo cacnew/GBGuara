@@ -31,7 +31,10 @@ export function RollCallClient({
 
   const signaled = attendances.filter((a) => a.status === "signaled");
   const present = attendances.filter(
-    (a) => a.status === "confirmed" || a.status === "added_by_instructor",
+    (a) =>
+      a.status === "confirmed" ||
+      a.status === "added_by_instructor" ||
+      a.status === "presente",
   );
   const excludeIds = attendances
     .filter((a) => a.status !== "cancelled")
@@ -195,7 +198,11 @@ export function RollCallClient({
               <div className="min-w-0">
                 <p className="truncate font-medium">{a.studentName}</p>
                 <p className="text-xs text-muted-foreground">
-                  {a.status === "added_by_instructor" ? "Incluído pelo professor" : "Confirmado"}
+                  {a.status === "added_by_instructor"
+                    ? "Incluído pelo professor"
+                    : a.status === "presente"
+                      ? "Marcado presente (chamada rápida)"
+                      : "Confirmado"}
                 </p>
               </div>
               {a.status === "confirmed" && (

@@ -5,6 +5,7 @@ import { formatDateOnly } from "@/lib/dates/format";
 import { buttonVariants } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
 import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
+import { PRESENT_STATUSES } from "@/lib/attendance/constants";
 
 const STATUS_LABEL: Record<string, string> = {
   agendada: "Agendada",
@@ -59,7 +60,7 @@ export default async function TeacherSessionsPage({
         .from("attendances")
         .select("class_session_id")
         .in("class_session_id", sessionIds)
-        .eq("status", "presente")
+        .in("status", PRESENT_STATUSES)
     : { data: [] };
 
   const attendanceCountBySession = new Map<string, number>();

@@ -2,8 +2,9 @@
 
 import { requireStudent } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
+import { PRESENT_STATUSES } from "@/lib/attendance/constants";
 
-const COUNTED_STATUSES = ["confirmed", "added_by_instructor"];
+const COUNTED_STATUSES: readonly string[] = PRESENT_STATUSES;
 
 export type BeltTimelineEntry = {
   id: string;
@@ -74,14 +75,20 @@ export async function getStudentDashboard(year: number): Promise<StudentDashboar
     .eq("student_id", profile.id)
     .in("status", COUNTED_STATUSES)
     .gte("class_sessions.date", yearStart)
-    .lte("class_sessions.date", yearEnd)
-    .order("date", { foreignTable: "class_sessions", ascending: false });
+    .lte("class_sessions.date", yearEnd);
+
+  // Ordenação por foreignTable não é confiável quando combinada com filtros
+  // na tabela embutida (class_sessions) — ordena no cliente para garantir a
+  // sequência cronológica correta do histórico exibido.
+  const sortedAttendances = (attendances ?? [])
+    .slice()
+    .sort((a, b) => (b.class_sessions?.date ?? "").localeCompare(a.class_sessions?.date ?? ""));
 
   const monthlyCounts = Array(12).fill(0);
   const trainedDates: string[] = [];
   const history: AttendanceHistoryEntry[] = [];
 
-  for (const a of attendances ?? []) {
+  for (const a of sortedAttendances) {
     const session = a.class_sessions;
     if (!session?.date) continue;
 

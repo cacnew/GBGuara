@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { PRESENT_STATUSES } from "@/lib/attendance/constants";
 
 export type OverdueListItem = {
   studentId: string;
@@ -88,6 +89,9 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   const sevenDaysAhead = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     .toISOString()
     .slice(0, 10);
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
 
   const [
     { count: activeStudents },
@@ -135,7 +139,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     supabase
       .from("attendances")
       .select("id, class_sessions!inner(date)", { count: "exact", head: true })
-      .eq("status", "presente")
+      .in("status", PRESENT_STATUSES)
       .gte("class_sessions.date", monthStart)
       .lt("class_sessions.date", monthEnd),
     supabase
@@ -157,13 +161,12 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     supabase
       .from("attendances")
       .select("student_id, class_sessions!inner(date)")
-      .eq("status", "presente"),
+      .in("status", PRESENT_STATUSES),
     supabase
       .from("attendances")
-      .select("id, student_id, students(name), class_sessions(date, class_groups(name))")
-      .eq("status", "presente")
-      .order("created_at", { ascending: false })
-      .limit(5),
+      .select("id, student_id, students(name), class_sessions!inner(date, class_groups(name))")
+      .in("status", PRESENT_STATUSES)
+      .gte("class_sessions.date", thirtyDaysAgo),
     supabase
       .from("graduation_history")
       .select("id, students(name), belts!new_belt_id(name), new_degree, graduation_date")
@@ -240,12 +243,18 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   const absentStudentsCount = allAbsentStudents.length;
   const absentStudents = allAbsentStudents.slice(0, 5);
 
-  const recentAttendances: RecentAttendance[] = (recentAttendanceRows ?? []).map((row) => ({
-    id: row.id,
-    studentName: row.students?.name ?? "-",
-    className: row.class_sessions?.class_groups?.name ?? "-",
-    date: row.class_sessions?.date ?? "-",
-  }));
+  // Ordenação por foreignTable não é confiável combinada com filtro na
+  // tabela embutida — ordena no cliente e só então corta as 5 mais recentes.
+  const recentAttendances: RecentAttendance[] = (recentAttendanceRows ?? [])
+    .slice()
+    .sort((a, b) => (b.class_sessions?.date ?? "").localeCompare(a.class_sessions?.date ?? ""))
+    .slice(0, 5)
+    .map((row) => ({
+      id: row.id,
+      studentName: row.students?.name ?? "-",
+      className: row.class_sessions?.class_groups?.name ?? "-",
+      date: row.class_sessions?.date ?? "-",
+    }));
 
   const recentGraduations: RecentGraduation[] = (recentGraduationRows ?? []).map((row) => ({
     id: row.id,

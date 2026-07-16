@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GraduationSuggestionForm } from "./graduation-suggestion-form";
 import { InternalNotesSection } from "@/components/students/internal-notes-section";
 import { getInternalNotes } from "@/modules/students/internal-notes";
+import { PRESENT_STATUSES } from "@/lib/attendance/constants";
 
 function calculateAge(birthDate: string | null) {
   if (!birthDate) return null;
@@ -60,15 +61,21 @@ export default async function TeacherStudentPage({
     student.last_graduation_date ?? student.enrollment_date;
   const currentModalityId = student.belts?.belt_systems?.modality_id ?? null;
 
-  const { data: attendanceRows } = await supabase
+  const { data: attendanceRowsRaw } = await supabase
     .from("attendances")
     .select(
       "id, student_notes, created_at, class_sessions!inner(id, date, lesson_content, class_groups!inner(name, modality_id))",
     )
     .eq("student_id", student.id)
-    .eq("status", "presente")
-    .order("created_at", { ascending: false })
-    .limit(30);
+    .in("status", PRESENT_STATUSES);
+
+  // Ordenação por foreignTable não é confiável quando combinada com LIMIT —
+  // ordena no cliente (volume por aluno é pequeno) e só então corta as 30
+  // mais recentes, para não perder linhas relevantes para a graduação.
+  const attendanceRows = (attendanceRowsRaw ?? [])
+    .slice()
+    .sort((a, b) => (b.class_sessions?.date ?? "").localeCompare(a.class_sessions?.date ?? ""))
+    .slice(0, 30);
 
   const lastAttendance = attendanceRows?.[0]?.class_sessions?.date ?? null;
   const graduationAttendanceDates = new Set(

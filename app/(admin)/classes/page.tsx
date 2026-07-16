@@ -6,6 +6,7 @@ import { WEEK_DAYS } from "@/lib/validations/class-group";
 import { Pagination } from "@/components/ui/pagination";
 import { PAGE_SIZE, getRange, parsePage } from "@/lib/pagination";
 import { createClient } from "@/lib/supabase/server";
+import { PRESENT_STATUSES } from "@/lib/attendance/constants";
 
 const DAY_LABEL = Object.fromEntries(
   WEEK_DAYS.map((day) => [Number(day.value), day.label.slice(0, 3)]),
@@ -64,7 +65,7 @@ export default async function ClassGroupsPage({
     supabase
       .from("attendances")
       .select("student_id, class_sessions!inner(class_group_id)")
-      .eq("status", "presente"),
+      .in("status", PRESENT_STATUSES),
   ]);
 
   const studentsByClass = new Map<string, Set<string>>();

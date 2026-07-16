@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { PRESENT_STATUSES } from "@/lib/attendance/constants";
 
 export type RecentSession = { id: string; className: string; date: string };
 export type RecentStudent = { id: string; name: string; enrollmentDate: string };
@@ -185,7 +186,7 @@ export async function getTeacherDashboardData(email: string): Promise<TeacherDas
         .from("attendances")
         .select("student_id, class_sessions!inner(date)")
         .in("student_id", studentIds)
-        .eq("status", "presente")
+        .in("status", PRESENT_STATUSES)
     : { data: [] };
 
   const lastAttendanceByStudent = new Map<string, string>();

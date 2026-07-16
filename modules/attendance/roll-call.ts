@@ -2,6 +2,7 @@
 
 import { requireUser } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
+import { PRESENT_STATUSES } from "@/lib/attendance/constants";
 
 export type RollCallAttendance = {
   attendanceId: string;
@@ -167,7 +168,7 @@ export async function addStudentManually(
   const now = new Date().toISOString();
 
   if (existing) {
-    if (existing.status === "confirmed" || existing.status === "added_by_instructor") {
+    if ((PRESENT_STATUSES as readonly string[]).includes(existing.status)) {
       return { error: "Aluno já está presente nessa aula" };
     }
 

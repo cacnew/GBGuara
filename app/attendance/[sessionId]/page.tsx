@@ -6,6 +6,7 @@ import { formatDateOnly } from "@/lib/dates/format";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AttendanceClient, type PresentStudent } from "./attendance-client";
+import { PRESENT_STATUSES } from "@/lib/attendance/constants";
 
 export default async function AttendancePage({
   params,
@@ -28,7 +29,8 @@ export default async function AttendancePage({
   const { data: attendances } = await supabase
     .from("attendances")
     .select("id, student_id, student_notes, students(name)")
-    .eq("class_session_id", sessionId);
+    .eq("class_session_id", sessionId)
+    .in("status", PRESENT_STATUSES);
 
   const initialPresent: PresentStudent[] = (attendances ?? []).map((a) => ({
     attendanceId: a.id,

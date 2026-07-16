@@ -1012,3 +1012,100 @@ server actions, já que estas exigem sessão admin autenticada):
   sem erros de console): 51 contratos ativos, 19 alunos inadimplentes,
   receita prevista de julho/2026 R$ 7.084,44, recebida R$ 2.561,51.
   Commit `95a9558`.
+
+---
+
+## Correção de coerência do módulo de presença (2026-07-16)
+
+Fora do roadmap numerado — a pedido do usuário, auditoria completa dos 3
+fluxos de origem de presença (aluno sinaliza, professor marca direto na
+tela antiga, professor/admin inclui manualmente na chamada nova) contra
+todas as telas de visualização, em todos os perfis (aluno/professor/admin).
+
+**Causa raiz:** o modelo de status foi estendido aditivamente na Fase 9
+(`signaled/confirmed/added_by_instructor/no_show/cancelled` convivendo com
+o `presente` da Fase 4), mas várias queries de leitura continuaram
+filtrando só um dos dois conjuntos de status, então presença registrada por
+um fluxo ficava invisível em telas que só reconheciam o outro.
+
+Nova constante única `lib/attendance/constants.ts` (`PRESENT_STATUSES`,
+`ATTENDANCE_STATUS_LABELS`) para evitar essa divergência se repetir.
+**11 pontos corrigidos** para usar `PRESENT_STATUSES` (ou incluir
+`'presente'`/ser reconhecidos pelo outro fluxo):
+- `app/(admin)/dashboard/queries.ts` (attendancesMonth, absentStudents,
+  recentAttendances) e `app/(teacher)/professor/queries.ts`
+  (attentionStudents/lastAttendanceByStudent) só contavam `'presente'`.
+- `app/(admin)/classes/sessions/page.tsx` e
+  `app/(teacher)/professor/sessions/page.tsx` (histórico de chamadas,
+  coluna "Presentes") — idem.
+- `app/(admin)/classes/page.tsx` (ocupação de turma) e
+  `app/(teacher)/professor/students/[id]/page.tsx` (última presença +
+  indicador de presenças desde a graduação, Fase 6.3) — idem.
+- `modules/students/dashboard.ts` (`COUNTED_STATUSES`, painel do aluno) e
+  `modules/students/signal-rules.ts` (`OCCUPYING_STATUSES`, agenda/
+  ocupação/conflito de horário) faziam o inverso: não contavam
+  `'presente'`.
+- `app/attendance/[sessionId]/page.tsx` (tela de chamada antiga) não
+  filtrava status — mostrava sinalização não confirmada como "presente".
+  `modules/attendance/actions.ts` (`markPresent`) quebrava com erro
+  confuso ("já está presente") se o aluno já tinha se sinalizado —
+  agora reaproveita a linha existente; `markPresent`/`removeAttendance`
+  passaram a respeitar `attendance_closed_at` (só a chamada nova
+  respeitava antes).
+  `app/attendance/[sessionId]/roll-call/roll-call-client.tsx` (chamada
+  nova) não reconhecia `'presente'` na coluna "Presentes";
+  `modules/attendance/roll-call.ts` (`addStudentManually`) idem no check
+  de "já está presente".
+- `app/(admin)/students/[id]/edit/attendance-history.tsx` (histórico de
+  presença na ficha/dossiê do aluno) mostrava os status novos em inglês
+  cru — usa `ATTENDANCE_STATUS_LABELS` agora.
+
+**Bug adicional achado testando os fluxos ao vivo:** "Última presença" (e
+as listas "Últimas presenças"/"Últimas presenças recentes") em
+`app/(teacher)/professor/students/[id]/page.tsx`,
+`app/(admin)/students/[id]/edit/attendance-history.tsx` e
+`app/(admin)/dashboard/queries.ts` ordenavam por `created_at` (quando a
+linha foi inserida no banco) em vez da data real da aula
+(`class_sessions.date`) — com dados históricos inseridos em lote (seed),
+isso mostrava datas erradas/fora de ordem mesmo com presença do dia atual
+na lista. `.order(foreignTable)` do PostgREST se mostrou não confiável
+combinado com `.limit()`/filtro na tabela embutida (confirmado testando a
+query isolada) — corrigido ordenando no cliente (JS) em vez de depender do
+banco, nos 3 pontos acima e em `modules/students/dashboard.ts` (histórico
+do painel do aluno, por consistência, embora sem `.limit()` o impacto ali
+fosse só cosmético).
+
+Novo script `scripts/seed-attendance.mjs`: gera sessões e presenças
+cobrindo os 3 fluxos de origem nas últimas 8 semanas (734 presenças, 405
+sessões — 307 fechadas/realizada, 98 abertas), com personas de frequência
+por aluno (alta/média/baixa, esta última garantindo alunos "ausentes há
+15+ dias") para popular dashboards, histórico de chamadas, painel e ficha
+do aluno sem telas vazias. A conta demo (`aluno@nexusdojo.dev`) foi
+deixada de fora da geração em massa de propósito, reservada para teste ao
+vivo dos fluxos reais via Playwright.
+
+Validação end-to-end com Playwright, os 3 perfis (login
+`admin@nexusdojo.dev`, `rafael.mendes@demo.nexusdojo.dev` — confirmado que
+os logins de professor já existentes usam a mesma senha padrão
+`TestSenha123!` — e `aluno@nexusdojo.dev`): aluno sinalizou uma turma real
+de hoje → confirmado via chamada nova → chamada fechada → notificação
+"Instrutor confirmou sua presença" gerada corretamente → painel do aluno
+(gráfico mensal + calendário) e histórico atualizados → dashboard e ficha
+do aluno no admin refletindo a mudança. Sinalizações concorrentes não
+confirmadas viraram `no_show` corretamente ao fechar a chamada. Sem erros
+de console em nenhuma tela testada.
+
+`tsc --noEmit`, `npm run lint` e `npm test` (28 testes unitários) limpos.
+Nota: um import via alias `@/` introduzido em `signal-rules.ts` quebrou os
+testes (vitest não resolve esse alias, módulo é mantido livre de
+dependências de build de propósito para ser testável sem framework) —
+corrigido para import relativo.
+
+> Achado fora de escopo, não corrigido: o widget "Pagamentos recentes" do
+> dashboard admin (`app/(admin)/dashboard/queries.ts`, `recentPaymentRows`)
+> tem o mesmo tipo de bug (ordena `financial_movements` por `created_at`)
+> e hoje mostra o mesmo aluno várias vezes seguidas — originado no seed
+> financeiro de uma sessão anterior (Fase "Dados de demonstração
+> financeira"). Não é presença, por isso ficou fora desta correção; considerar
+> corrigir com o mesmo padrão (ordenar no cliente por `movement_date`) numa
+> próxima sessão.

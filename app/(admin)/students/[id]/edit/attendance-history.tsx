@@ -1,23 +1,24 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatDateOnly } from "@/lib/dates/format";
+import { ATTENDANCE_STATUS_LABELS } from "@/lib/attendance/constants";
 
 export async function AttendanceHistory({ studentId }: { studentId: string }) {
   const supabase = await createClient();
 
-  const { data: attendances } = await supabase
+  const { data: attendancesRaw } = await supabase
     .from("attendances")
     .select(
-      "id, status, created_at, class_sessions(date, class_groups(name)), users!registered_by_user_id(name)",
+      "id, status, created_at, class_sessions!inner(date, class_groups(name)), users!registered_by_user_id(name)",
     )
-    .eq("student_id", studentId)
-    .order("created_at", { ascending: false })
-    .limit(50);
+    .eq("student_id", studentId);
 
-  const STATUS_LABEL: Record<string, string> = {
-    presente: "Presente",
-    falta: "Falta",
-    falta_justificada: "Falta justificada",
-  };
+  // Ordenação por foreignTable não é confiável quando combinada com LIMIT —
+  // ordena no cliente (volume por aluno é pequeno) e só então corta as 50
+  // mais recentes.
+  const attendances = (attendancesRaw ?? [])
+    .slice()
+    .sort((a, b) => (b.class_sessions?.date ?? "").localeCompare(a.class_sessions?.date ?? ""))
+    .slice(0, 50);
 
   return (
     <div className="w-full max-w-sm space-y-3">
@@ -38,8 +39,8 @@ export async function AttendanceHistory({ studentId }: { studentId: string }) {
               {a.class_sessions?.date
                 ? formatDateOnly(a.class_sessions.date)
                 : "-"}{" "}
-              · {STATUS_LABEL[a.status] ?? a.status} · registrado por{" "}
-              {a.users?.name ?? "-"}
+              · {ATTENDANCE_STATUS_LABELS[a.status] ?? a.status} ·{" "}
+              {a.users?.name ? `registrado por ${a.users.name}` : "sinalização do aluno"}
             </p>
           </div>
         ))}
