@@ -1101,11 +1101,11 @@ testes (vitest não resolve esse alias, módulo é mantido livre de
 dependências de build de propósito para ser testável sem framework) —
 corrigido para import relativo.
 
-> Achado fora de escopo, não corrigido: o widget "Pagamentos recentes" do
-> dashboard admin (`app/(admin)/dashboard/queries.ts`, `recentPaymentRows`)
-> tem o mesmo tipo de bug (ordena `financial_movements` por `created_at`)
-> e hoje mostra o mesmo aluno várias vezes seguidas — originado no seed
-> financeiro de uma sessão anterior (Fase "Dados de demonstração
-> financeira"). Não é presença, por isso ficou fora desta correção; considerar
-> corrigir com o mesmo padrão (ordenar no cliente por `movement_date`) numa
-> próxima sessão.
+> **Atualização (mesmo dia):** o achado acima ("Pagamentos recentes"
+> mostrando o mesmo aluno várias vezes) foi corrigido a pedido do usuário.
+> Diferente dos casos de presença, `movement_date` é coluna da própria
+> tabela `financial_movements` (não embutida via join), então bastou trocar
+> `.order("created_at", ...)` por `.order("movement_date", { ascending:
+> false })` diretamente na query — sem precisar de ordenação no cliente.
+> Verificado direto no banco e via Playwright (dashboard admin): 5 alunos
+> diferentes, em ordem cronológica correta, sem erros de console.

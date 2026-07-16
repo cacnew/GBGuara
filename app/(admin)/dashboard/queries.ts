@@ -180,7 +180,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       .from("financial_movements")
       .select("id, amount, movement_date, students(name)")
       .eq("type", "income")
-      .order("created_at", { ascending: false })
+      .order("movement_date", { ascending: false })
       .limit(5),
     supabase
       .from("birthday_students")
