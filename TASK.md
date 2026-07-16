@@ -971,3 +971,44 @@ por subtarefa, com commit/push e validação do usuário entre cada uma
   removidos do ambiente compartilhado depois da validação.
   Com a 10.7, a Fase 10 (Módulo do Aluno 2, `modules/modulo_aluno2.md`)
   está completa.
+
+---
+
+## Dados de demonstração financeira (gerado em 2026-07-15)
+
+Fora do roadmap numerado — geração de dados sob pedido do usuário para
+popular o ambiente compartilhado (`nexusdojo-dev`) com um cenário
+financeiro realista para demonstração/teste visual, não como subtarefa de
+produto. Diferente dos dados de teste das Fases 10.5/10.6/10.7 (criados e
+removidos na mesma sessão), estes dados **permanecem** no ambiente
+compartilhado, no mesmo espírito dos seeds de demonstração da 7.5.
+
+Dois scripts novos em `scripts/` (Node, usam `SUPABASE_SERVICE_ROLE_KEY` de
+`.env.local`, reimplementam a escrita direta no banco em vez de chamar as
+server actions, já que estas exigem sessão admin autenticada):
+
+- `seed-student-finance.mjs`: cria/recria um contrato de teste para a conta
+  demo `aluno@nexusdojo.dev` (1 parcela paga, 1 vencida, 1 pendente futura).
+- `seed-full-finance.mjs`: cria 12 planos em "Tabela Padrão 2026"
+  (3 níveis de acesso — 2x/semana R$ 220, 3x/semana R$ 260, Acesso Full
+  R$ 299,90 — x 4 durações — Mensal/Trimestral/Semestral/Anual, com
+  desconto crescente por duração: 0%/5%/10%/15%) e gera um contrato ativo
+  para **todos os 51 alunos** da escola, com distribuição ponderada de
+  plano/duração e histórico de parcelas variado (pagas, parcialmente
+  pagas, vencidas sem pagamento, pendentes futuras) para alimentar
+  `/finance/installments`, `/finance/overdue` e `/finance/dashboard` com
+  números realistas. O plano placeholder antigo ("Plano Mensal Ilimitado",
+  criado por engano num seed anterior nesta mesma sessão) foi marcado
+  `legacy` em vez de apagado (FK `contracts.plan_id` é `on delete
+  restrict`).
+  > Bug corrigido durante a geração: a primeira tentativa usava
+  > `installments_count` fixo (6) para todas as durações, o que diluía o
+  > preço mensal (ex: plano de R$ 220/mês virava 6x de R$ 36,67). Corrigido
+  > para `installments_count` = nº de meses da duração do plano (Mensal=1x,
+  > Trimestral=3x, Semestral=6x, Anual=12x) — mesmo modelo usado pela
+  > própria action `createContract` (Fase 5.6), que trata `plans.base_price`
+  > como preço total do período, não preço mensal a ser multiplicado.
+  Resultado final validado com Playwright (login admin e login aluno,
+  sem erros de console): 51 contratos ativos, 19 alunos inadimplentes,
+  receita prevista de julho/2026 R$ 7.084,44, recebida R$ 2.561,51.
+  Commit `95a9558`.
