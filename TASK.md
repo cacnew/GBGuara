@@ -1109,3 +1109,32 @@ corrigido para import relativo.
 > false })` diretamente na query — sem precisar de ordenação no cliente.
 > Verificado direto no banco e via Playwright (dashboard admin): 5 alunos
 > diferentes, em ordem cronológica correta, sem erros de console.
+>
+> **Segunda atualização (mesmo dia):** a pedido do usuário, auditoria de
+> **todos** os `.order("created_at", ...)` do projeto (grep completo) para
+> achar outras telas com o mesmo padrão de bug. Da lista completa, a
+> maioria estava correta (notificações, observações internas, sugestões de
+> graduação, leads, audit log, lista de usuários — nesses casos
+> `created_at` É a data de negócio relevante). Dois pontos reais
+> encontrados e corrigidos:
+> - `app/(admin)/dashboard/queries.ts` ("Últimas graduações",
+>   `recentGraduationRows`): ordenava `graduation_history` por
+>   `created_at` em vez de `graduation_date` (coluna própria da tabela,
+>   sem o problema de `foreignTable`). Confirmado com dado real: uma
+>   graduação registrada às pressas durante os testes desta sessão tinha
+>   `graduation_date` de 2027, inserida com `created_at` de agora — subia
+>   pro topo da lista por engano. Corrigido para `.order("graduation_date",
+>   { ascending: false })`.
+> - `app/(teacher)/professor/queries.ts` ("Observações recentes",
+>   `recentNotes`): ordenava por `created_at` da linha de `attendances`
+>   (quando a presença foi originalmente registrada), não por quando a
+>   observação foi de fato escrita (`saveAttendanceNote` faz um `UPDATE`,
+>   que bate a coluna `updated_at` via trigger já existente
+>   `attendances_set_updated_at`). Corrigido para `.order("updated_at",
+>   { ascending: false })` e a data exibida no card passou a usar
+>   `updated_at`. Sem observações cadastradas no ambiente no momento do
+>   teste para validar visualmente com dado real; validado via `tsc
+>   --noEmit`/lint/ausência de erros de console.
+> Verificado que não sobrou nenhum outro uso de ordenação por
+> `foreignTable`/dot-notation em tabela embutida no projeto (mesma causa
+> raiz dos bugs de presença) além dos já corrigidos.

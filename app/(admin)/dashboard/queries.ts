@@ -170,7 +170,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     supabase
       .from("graduation_history")
       .select("id, students(name), belts!new_belt_id(name), new_degree, graduation_date")
-      .order("created_at", { ascending: false })
+      .order("graduation_date", { ascending: false })
       .limit(5),
     supabase
       .from("todays_class_groups")

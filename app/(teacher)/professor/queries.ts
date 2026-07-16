@@ -137,17 +137,21 @@ export async function getTeacherDashboardData(email: string): Promise<TeacherDas
 
     const { data: noteRows } = await supabase
       .from("attendances")
-      .select("id, student_notes, created_at, students(name), class_sessions!inner(actual_teacher_id)")
+      .select("id, student_notes, updated_at, students(name), class_sessions!inner(actual_teacher_id)")
       .eq("class_sessions.actual_teacher_id", teacher.id)
       .not("student_notes", "is", null)
-      .order("created_at", { ascending: false })
+      .order("updated_at", { ascending: false })
       .limit(5);
 
+    // `updated_at` (não `created_at`) reflete quando a observação foi de
+    // fato salva — saveAttendanceNote faz um UPDATE na linha, que pode ter
+    // sido criada bem antes (ex: sessão registrada, nota adicionada dias
+    // depois).
     recentNotes = (noteRows ?? []).map((row) => ({
       id: row.id,
       studentName: row.students?.name ?? "-",
       note: row.student_notes ?? "",
-      date: row.created_at.slice(0, 10),
+      date: row.updated_at.slice(0, 10),
     }));
 
     const { data: suggestionRows } = await supabase
