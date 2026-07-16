@@ -47,6 +47,7 @@ export async function createTeacherProfile(
   });
 
   revalidatePath("/teachers");
+  revalidatePath("/");
   return {};
 }
 
@@ -88,5 +89,6 @@ export async function updateTeacherProfile(
   });
 
   revalidatePath("/teachers");
+  revalidatePath("/");
   return {};
 }

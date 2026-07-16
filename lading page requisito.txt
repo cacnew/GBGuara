@@ -1,0 +1,478 @@
+# DESENVOLVIMENTO DA LANDING PAGE INSTITUCIONAL
+
+Quero que você desenvolva uma landing page institucional para o sistema tomando como referência principal e obrigatória o seguinte site:
+
+https://www.gbmangueiral.com.br
+
+Antes de iniciar a implementação, acesse e analise detalhadamente essa página de referência.
+
+Não remova, ignore ou substitua esse link durante o desenvolvimento.
+
+## OBJETIVO VISUAL PRINCIPAL
+
+Quero que a nova landing page reproduza com máxima fidelidade possível a estrutura, o layout, a experiência de navegação e a apresentação visual do site:
+
+https://www.gbmangueiral.com.br
+
+A nova página deverá ser extremamente semelhante à referência, incluindo:
+
+* Mesma ordem geral das seções;
+* Mesma organização visual;
+* Mesma hierarquia de títulos e textos;
+* Mesma distribuição dos conteúdos;
+* Mesma composição do cabeçalho;
+* Mesmo estilo de banner principal;
+* Mesmas proporções entre textos e imagens;
+* Mesmo comportamento de rolagem;
+* Mesmo estilo de indicadores numéricos;
+* Mesmo estilo de apresentação dos professores;
+* Mesmo conceito visual da grade de horários;
+* Mesmo modelo de seção institucional;
+* Mesmo conceito da seção de campanha;
+* Mesmo estilo de chamada para contato;
+* Mesmo conceito de rodapé;
+* Mesma sensação visual;
+* Mesma experiência no desktop e no celular;
+* Mesmos tipos de transições e efeitos;
+* Mesma utilização de tipografia grande e impactante;
+* Mesmo equilíbrio entre áreas claras e escuras;
+* Mesmo padrão de espaçamentos;
+* Mesmo padrão de alinhamentos;
+* Mesmo nível de acabamento visual.
+
+O objetivo não é criar uma landing page apenas inspirada vagamente na referência.
+
+O objetivo é reproduzir o mesmo modelo visual e estrutural, adaptando-o para funcionar dentro deste sistema e utilizando os dados configurados pelo administrador.
+
+## LIMITES DE CONTEÚDO
+
+A estrutura, o layout, a sequência das seções, as proporções, os comportamentos, os efeitos e a experiência visual poderão ser reproduzidos de forma muito próxima à referência.
+
+Entretanto, não utilize diretamente:
+
+* Logotipo da Gracie Barra;
+* Nome Gracie Barra;
+* Nome Gracie Barra Mangueiral;
+* Fotografias retiradas do site;
+* Textos institucionais copiados literalmente;
+* Informações de professores do site;
+* Endereço do site de referência;
+* Telefone do site de referência;
+* Redes sociais do site de referência;
+* Código-fonte copiado diretamente;
+* Arquivos, ícones ou materiais proprietários extraídos do site.
+
+Esses elementos deverão ser substituídos pelas informações, imagens e identidade visual cadastradas para cada academia.
+
+A aparência e a estrutura devem permanecer extremamente semelhantes à referência, mas o conteúdo será próprio e administrável.
+
+## SITE DE REFERÊNCIA OBRIGATÓRIO
+
+Sempre que houver dúvida sobre:
+
+* Ordem de uma seção;
+* Formato do banner;
+* Posição de um elemento;
+* Tamanho dos títulos;
+* Organização dos professores;
+* Apresentação dos horários;
+* Composição da campanha;
+* Distribuição das imagens;
+* Espaçamentos;
+* Navegação;
+* Responsividade;
+* Efeitos visuais;
+* Rodapé;
+* Chamadas para ação;
+
+consulte novamente:
+
+https://www.gbmangueiral.com.br
+
+Não substitua a referência por um template genérico.
+
+Não crie uma interface tradicional de painel administrativo na página pública.
+
+Não aplique o estilo visual padrão de sistemas produzidos por inteligência artificial.
+
+Não transforme a landing page em uma sequência genérica de cards arredondados e gradientes.
+
+A página pública deverá conservar o estilo editorial, esportivo, impactante e profissional da referência.
+
+# SISTEMA DE PRATELEIRA
+
+Este é um sistema de prateleira que poderá ser comercializado e utilizado por diferentes academias.
+
+Portanto, apesar de a estrutura pública seguir fielmente a referência, nenhuma informação da academia poderá ficar fixa no código.
+
+A seguinte regra é obrigatória:
+
+“Tudo o que identifica a academia ou aparece na landing page deverá ser gerenciável pelo administrador.”
+
+O sistema deverá possuir um menu administrativo chamado:
+
+“Gestão da Landing Page”
+
+Dentro desse menu, o administrador deverá controlar todos os conteúdos exibidos na página pública.
+
+# IDENTIDADE DA ACADEMIA
+
+Criar dentro da “Gestão da Landing Page” uma área chamada:
+
+“Identidade da Academia”
+
+O administrador deverá conseguir configurar:
+
+* Nome oficial da academia;
+* Nome de exibição;
+* Nome curto;
+* Slogan;
+* Descrição institucional;
+* Logotipo principal;
+* Logotipo para fundo claro;
+* Logotipo para fundo escuro;
+* Versão reduzida do logotipo;
+* Favicon;
+* Imagem de compartilhamento;
+* Cor principal;
+* Cor secundária;
+* Cor de destaque;
+* Tipografia;
+* Telefone;
+* WhatsApp;
+* E-mail;
+* Instagram;
+* Facebook;
+* YouTube;
+* TikTok;
+* Endereço;
+* Complemento;
+* Cidade;
+* Estado;
+* CEP;
+* Localização no mapa;
+* Horário de funcionamento;
+* Dados jurídicos do rodapé;
+* Política de privacidade;
+* Termos de uso.
+
+O nome da academia deverá aparecer dinamicamente em todas as áreas necessárias, incluindo:
+
+* Landing page;
+* Cabeçalho;
+* Banner;
+* Seção institucional;
+* Contato;
+* Rodapé;
+* Título da página;
+* Metadados de SEO;
+* Compartilhamento no WhatsApp;
+* Página de login;
+* Mensagens automáticas;
+* E-mails;
+* Formulários;
+* Área restrita.
+
+Nunca utilizar o nome de uma academia diretamente no código.
+
+Exemplo incorreto:
+
+```tsx
+<h1>Nome fixo da academia</h1>
+```
+
+Exemplo correto:
+
+```tsx
+<h1>{academySettings.displayName}</h1>
+```
+
+# ESTRUTURA OBRIGATÓRIA DA LANDING PAGE
+
+A landing page deverá seguir a mesma sequência estrutural apresentada em:
+
+https://www.gbmangueiral.com.br
+
+## 1. CABEÇALHO
+
+Reproduzir o conceito visual do cabeçalho da referência, contendo:
+
+* Logotipo da academia;
+* Menu de navegação por âncoras;
+* Professores;
+* Horários;
+* Sobre;
+* Campanha;
+* Contato;
+* Botão de chamada principal;
+* Botão “Acesso restrito”;
+* Menu responsivo no celular.
+
+Todos os itens deverão ser gerenciáveis.
+
+O administrador poderá:
+
+* Alterar os nomes;
+* Alterar os links;
+* Mudar a ordem;
+* Ocultar itens;
+* Criar novos itens;
+* Definir abertura na mesma aba ou nova aba;
+* Escolher a seção de destino.
+
+## 2. BANNER PRINCIPAL
+
+Reproduzir o conceito do banner inicial da referência, incluindo:
+
+* Imagem ou vídeo de fundo em tela ampla;
+* Camada de sobreposição;
+* Identificação das modalidades;
+* Texto de apoio;
+* Título principal grande;
+* Descrição;
+* Botões de ação;
+* Lista de diferenciais;
+* Indicação para continuar rolando;
+* Elementos de apoio visual;
+* Animações discretas.
+
+Tudo deverá ser editável pelo administrador.
+
+## 3. INDICADORES
+
+Reproduzir a seção de indicadores da referência.
+
+Permitir cadastrar indicadores como:
+
+* Horas de treino por semana;
+* Dias de funcionamento;
+* Quantidade de tatames;
+* Número de alunos;
+* Ano de fundação;
+* Número de unidades;
+* Número de turmas;
+* Número de professores.
+
+Cada indicador deverá possuir:
+
+* Valor;
+* Prefixo;
+* Sufixo;
+* Descrição;
+* Ordem;
+* Status;
+* Animação opcional.
+
+## 4. PROFESSORES E INSTRUTORES
+
+Reproduzir o mesmo conceito visual da seção de professores e instrutores.
+
+O administrador deverá cadastrar:
+
+* Nome;
+* Foto;
+* Faixa ou graduação;
+* Cargo;
+* Especialidades;
+* Qualificações;
+* Tempo de experiência;
+* Frase;
+* Mini biografia;
+* Redes sociais;
+* Ordem;
+* Status.
+
+Os professores deverão ser apresentados em uma composição visual semelhante à referência, com imagens de destaque, tipografia forte e informações organizadas.
+
+## 5. GRADE DE HORÁRIOS
+
+Reproduzir a seção de horários da referência, mantendo:
+
+* Seleção dos dias da semana;
+* Exibição dos horários;
+* Nome da turma;
+* Professor;
+* Modalidade;
+* Organização visual adequada;
+* Alternância entre os dias;
+* Experiência adaptada ao celular.
+
+Preferencialmente, os horários deverão ser obtidos das turmas já cadastradas no sistema.
+
+O administrador deverá escolher quais turmas aparecem na landing page.
+
+## 6. SEÇÃO SOBRE A ACADEMIA
+
+Reproduzir a composição da seção institucional da referência, incluindo:
+
+* Texto de apoio;
+* Título grande;
+* História;
+* Imagem;
+* Lista de diferenciais;
+* Elementos gráficos;
+* Chamada institucional.
+
+Todos os conteúdos deverão ser administráveis.
+
+## 7. CAMPANHA
+
+Reproduzir o mesmo conceito visual da seção de campanha existente no site de referência.
+
+A campanha deverá permitir:
+
+* Título de grande impacto;
+* Subtítulo;
+* Texto explicativo;
+* Imagem comparativa;
+* Estatísticas;
+* Cards informativos;
+* Benefícios;
+* Comparações;
+* Chamada final;
+* Botão de conversão;
+* Data inicial;
+* Data final;
+* Publicação agendada;
+* Ativação ou desativação.
+
+A campanha apresentada inicialmente poderá seguir o mesmo formato estrutural da referência, mas seus textos, números e imagens deverão ser próprios e gerenciáveis.
+
+## 8. CONTATO
+
+Reproduzir a composição final de contato da referência, contendo:
+
+* Título de chamada;
+* Telefone;
+* WhatsApp;
+* Endereço;
+* Instagram;
+* Redes sociais;
+* Imagem da academia;
+* Botão para contato;
+* Botão para localização.
+
+## 9. RODAPÉ
+
+Reproduzir o estilo de rodapé da referência, mas carregando dinamicamente:
+
+* Nome da academia;
+* Logotipo;
+* Ano atual;
+* Direitos reservados;
+* Links jurídicos;
+* Redes sociais;
+* Informações de contato;
+* Identificação opcional da empresa responsável pelo sistema.
+
+# ACESSO RESTRITO
+
+Adicionar no cabeçalho, em posição visível, um botão chamado:
+
+“Acesso restrito”
+
+Esse botão deverá direcionar para a página de login do sistema.
+
+Fluxo:
+
+Landing page pública → Acesso restrito → Login → Sistema interno.
+
+A página de login deverá utilizar dinamicamente:
+
+* Nome da academia;
+* Logotipo;
+* Cor principal;
+* Imagem de fundo;
+* Mensagem de boas-vindas;
+* Link para retornar ao site;
+* Informações de suporte.
+
+# GESTÃO COMPLETA
+
+Todos os elementos da página deverão ser gerenciáveis, incluindo:
+
+* Textos;
+* Títulos;
+* Subtítulos;
+* Imagens;
+* Vídeos;
+* Logotipos;
+* Botões;
+* Links;
+* Ícones;
+* Cores;
+* Indicadores;
+* Professores;
+* Horários;
+* Campanhas;
+* Telefones;
+* Endereços;
+* Redes sociais;
+* Rodapé;
+* SEO;
+* Ordem das seções;
+* Visibilidade das seções.
+
+O administrador deverá conseguir:
+
+* Editar;
+* Visualizar;
+* Salvar como rascunho;
+* Publicar;
+* Despublicar;
+* Reordenar;
+* Ativar;
+* Desativar;
+* Duplicar;
+* Restaurar uma versão anterior.
+
+# REGRA FINAL DE IMPLEMENTAÇÃO
+
+A página final deverá parecer uma versão personalizada do seguinte modelo:
+
+https://www.gbmangueiral.com.br
+
+Não entregue uma interpretação distante da referência.
+
+Não utilize outro template.
+
+Não simplifique a composição.
+
+Não substitua as seções por componentes genéricos.
+
+Não entregue apenas uma página estática.
+
+A implementação deverá combinar:
+
+* Alta fidelidade visual à referência;
+* Conteúdo completamente gerenciável;
+* Identidade dinâmica por academia;
+* Responsividade;
+* Área administrativa;
+* Backend;
+* Banco de dados;
+* Upload de mídia;
+* Publicação;
+* Histórico;
+* Autenticação;
+* Permissões;
+* Isolamento dos dados de cada academia.
+
+Antes de concluir, compare visualmente a implementação com:
+
+https://www.gbmangueiral.com.br
+
+Corrija diferenças relevantes de:
+
+* Estrutura;
+* Ordem;
+* Proporção;
+* Tipografia;
+* Espaçamento;
+* Alinhamento;
+* Responsividade;
+* Composição;
+* Animação;
+* Experiência de navegação.
+
+O trabalho só estará concluído quando a página possuir fidelidade visual clara à referência e, ao mesmo tempo, todos os seus conteúdos puderem ser administrados pelo sistema.

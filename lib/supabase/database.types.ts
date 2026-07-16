@@ -1106,6 +1106,192 @@ export type Database = {
           },
         ]
       }
+      landing_class_groups: {
+        Row: {
+          class_group_id: string
+          created_at: string
+          id: string
+          label_override: string | null
+          ordering: number
+          school_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          class_group_id: string
+          created_at?: string
+          id?: string
+          label_override?: string | null
+          ordering?: number
+          school_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          class_group_id?: string
+          created_at?: string
+          id?: string
+          label_override?: string | null
+          ordering?: number
+          school_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landing_class_groups_class_group_id_fkey"
+            columns: ["class_group_id"]
+            isOneToOne: false
+            referencedRelation: "class_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "landing_class_groups_class_group_id_fkey"
+            columns: ["class_group_id"]
+            isOneToOne: false
+            referencedRelation: "todays_class_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "landing_class_groups_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      landing_pages: {
+        Row: {
+          about: Json
+          campaign: Json
+          contact: Json
+          created_at: string
+          footer: Json
+          hero: Json
+          id: string
+          identity: Json
+          metrics: Json
+          navigation: Json
+          published_at: string | null
+          school_id: string
+          seo: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          about?: Json
+          campaign?: Json
+          contact?: Json
+          created_at?: string
+          footer?: Json
+          hero?: Json
+          id?: string
+          identity?: Json
+          metrics?: Json
+          navigation?: Json
+          published_at?: string | null
+          school_id: string
+          seo?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          about?: Json
+          campaign?: Json
+          contact?: Json
+          created_at?: string
+          footer?: Json
+          hero?: Json
+          id?: string
+          identity?: Json
+          metrics?: Json
+          navigation?: Json
+          published_at?: string | null
+          school_id?: string
+          seo?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landing_pages_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: true
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      landing_teacher_profiles: {
+        Row: {
+          belt_label: string | null
+          bio: string | null
+          created_at: string
+          display_name: string
+          id: string
+          instagram_url: string | null
+          ordering: number
+          photo_url: string | null
+          quote: string | null
+          role_title: string | null
+          school_id: string
+          specialties: string[]
+          status: string
+          teacher_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          belt_label?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          instagram_url?: string | null
+          ordering?: number
+          photo_url?: string | null
+          quote?: string | null
+          role_title?: string | null
+          school_id: string
+          specialties?: string[]
+          status?: string
+          teacher_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          belt_label?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          instagram_url?: string | null
+          ordering?: number
+          photo_url?: string | null
+          quote?: string | null
+          role_title?: string | null
+          school_id?: string
+          specialties?: string[]
+          status?: string
+          teacher_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landing_teacher_profiles_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "landing_teacher_profiles_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           converted_student_id: string | null

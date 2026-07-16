@@ -1,87 +1,25 @@
-"use client";
+import { getPublishedLandingPage } from "@/modules/landing/queries";
+import { LoginForm } from "./login-form";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/supabase/client";
-import { loginSchema, type LoginInput } from "@/lib/validations/login";
-import { resolveLoginDestination } from "@/modules/auth/actions";
-
-export default function LoginPage() {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
-
-  async function onSubmit(data: LoginInput) {
-    setIsSubmitting(true);
-    const supabase = createClient();
-    const { data: signInData, error } = await supabase.auth.signInWithPassword(data);
-
-    if (error || !signInData.user) {
-      setIsSubmitting(false);
-      toast.error("E-mail ou senha inválidos");
-      return;
-    }
-
-    const destination = await resolveLoginDestination(signInData.session.access_token);
-    setIsSubmitting(false);
-    // Não chamar router.refresh() logo em seguida: cancela a transição
-    // client-side pendente do push (reproduzido nesta sessão — a URL
-    // nunca chegava a mudar, mesmo com o destino resolvido corretamente).
-    router.push(destination);
-  }
+export default async function LoginPage() {
+  const landing = await getPublishedLandingPage();
+  const bg =
+    landing.hero.backgroundUrl ||
+    "https://images.unsplash.com/photo-1555597673-b21d5c935865?auto=format&fit=crop&w=2200&q=80";
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-background px-4 py-12 text-foreground">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-card p-6"
-      >
-        <div className="space-y-1 text-center">
-          <h1 className="font-heading text-2xl font-semibold">Entrar</h1>
-          <p className="text-sm text-muted-foreground">
-            Acesse o painel da sua escola.
-          </p>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="email">E-mail</Label>
-          <Input id="email" type="email" {...register("email")} />
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="password">Senha</Label>
-          <Input id="password" type="password" {...register("password")} />
-          {errors.password && (
-            <p className="text-sm text-destructive">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
-
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Entrando..." : "Entrar"}
-        </Button>
-
-        <p className="text-center text-xs text-muted-foreground">
-          <Link href="/privacy" className="hover:underline">
-            Política de privacidade
-          </Link>
-        </p>
-      </form>
+    <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-background px-4 py-12 text-foreground">
+      <div className="absolute inset-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={bg} alt="" className="h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-black/70" />
+      </div>
+      <div className="relative z-10">
+        <LoginForm
+          academyName={landing.identity.displayName}
+          logoUrl={landing.identity.logoUrl || landing.identity.logoLightUrl}
+        />
+      </div>
     </div>
   );
 }

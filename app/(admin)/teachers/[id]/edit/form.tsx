@@ -87,6 +87,7 @@ export function EditTeacherProfileForm({
         entityType="teachers"
         entityId={id}
         currentUrl={defaultValues.photoUrl || null}
+        hint="Para um melhor enquadramento na landing page, sugerimos fazer upload de imagem vertical em 1200 x 1600 px (proporcao 3:4), com rosto e tronco centralizados."
         onUploaded={(url) => setValue("photoUrl", url)}
       />
 

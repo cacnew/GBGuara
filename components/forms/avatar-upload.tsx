@@ -10,12 +10,14 @@ export function AvatarUpload({
   entityType,
   entityId,
   currentUrl,
+  hint,
   onUploaded,
 }: {
   schoolId: string;
   entityType: "students" | "teachers";
   entityId: string;
   currentUrl: string | null;
+  hint?: string;
   onUploaded: (url: string) => void;
 }) {
   const [preview, setPreview] = useState<string | null>(currentUrl);
@@ -82,6 +84,7 @@ export function AvatarUpload({
           onChange={handleFileChange}
         />
       </div>
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );

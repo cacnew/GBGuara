@@ -8,20 +8,23 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AvatarUpload } from "@/components/forms/avatar-upload";
 import { maskBrazilianPhoneInput } from "@/lib/phone";
 import { studentSchema, type StudentInput } from "@/lib/validations/student";
 import { createStudent } from "../actions";
 
-export function NewStudentForm() {
+export function NewStudentForm({ schoolId }: { schoolId: string }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadEntityId] = useState(() => crypto.randomUUID());
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<StudentInput>({
     resolver: zodResolver(studentSchema),
-    defaultValues: { status: "ativo" },
+    defaultValues: { status: "ativo", photoUrl: "" },
   });
 
   async function onSubmit(data: StudentInput) {
@@ -43,6 +46,16 @@ export function NewStudentForm() {
       onSubmit={handleSubmit(onSubmit)}
       className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-card p-6"
     >
+      <input type="hidden" {...register("photoUrl")} />
+
+      <AvatarUpload
+        schoolId={schoolId}
+        entityType="students"
+        entityId={uploadEntityId}
+        currentUrl={null}
+        onUploaded={(url) => setValue("photoUrl", url)}
+      />
+
       <div className="space-y-1.5">
         <Label htmlFor="name">Nome</Label>
         <Input id="name" {...register("name")} />

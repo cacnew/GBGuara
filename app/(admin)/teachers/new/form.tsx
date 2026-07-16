@@ -8,20 +8,23 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AvatarUpload } from "@/components/forms/avatar-upload";
 import { maskBrazilianPhoneInput } from "@/lib/phone";
 import { teacherSchema, type TeacherInput } from "@/lib/validations/teacher";
 import { createTeacherProfile } from "../actions";
 
-export function NewTeacherProfileForm() {
+export function NewTeacherProfileForm({ schoolId }: { schoolId: string }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadEntityId] = useState(() => crypto.randomUUID());
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<TeacherInput>({
     resolver: zodResolver(teacherSchema),
-    defaultValues: { status: "active" },
+    defaultValues: { status: "active", photoUrl: "" },
   });
 
   async function onSubmit(data: TeacherInput) {
@@ -43,6 +46,17 @@ export function NewTeacherProfileForm() {
       onSubmit={handleSubmit(onSubmit)}
       className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-card p-6"
     >
+      <input type="hidden" {...register("photoUrl")} />
+
+      <AvatarUpload
+        schoolId={schoolId}
+        entityType="teachers"
+        entityId={uploadEntityId}
+        currentUrl={null}
+        hint="Para um melhor enquadramento na landing page, sugerimos fazer upload de imagem vertical em 1200 x 1600 px (proporcao 3:4), com rosto e tronco centralizados."
+        onUploaded={(url) => setValue("photoUrl", url)}
+      />
+
       <div className="space-y-1.5">
         <Label htmlFor="name">Nome</Label>
         <Input id="name" {...register("name")} />

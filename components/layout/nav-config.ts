@@ -5,6 +5,7 @@ import {
   CalendarDays,
   ClipboardList,
   GraduationCap,
+  Globe2,
   LayoutDashboard,
   ShieldCheck,
   UserCircle,
@@ -71,6 +72,12 @@ export const ADMIN_NAV: NavGroup[] = [
       { label: "Inadimplentes", href: "/finance/overdue" },
       { label: "Receita por periodo", href: "/finance/reports" },
     ],
+  },
+  {
+    label: "Site publico",
+    icon: Globe2,
+    collapsible: true,
+    children: [{ label: "Gestao da Landing Page", href: "/landing" }],
   },
   {
     label: "Administracao",
