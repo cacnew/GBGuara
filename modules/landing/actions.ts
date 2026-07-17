@@ -161,7 +161,11 @@ export async function saveLandingPage(
       return { error: error?.message ?? "Nao foi possivel salvar a landing page." };
     }
 
-    await syncTeachers(supabase, profile.schoolId, selectedIds(formData, "teacherIds"));
+    const teacherIds = selectedIds(formData, "teacherIds");
+    const teacherPhotoOverrides = Object.fromEntries(
+      teacherIds.map((id) => [id, text(formData, `teacherPhoto_${id}`)]),
+    );
+    await syncTeachers(supabase, profile.schoolId, teacherIds, teacherPhotoOverrides);
     await syncClasses(supabase, profile.schoolId, selectedIds(formData, "classGroupIds"));
 
     await logAuditEvent({
@@ -202,6 +206,7 @@ async function syncTeachers(
   supabase: Awaited<ReturnType<typeof createClient>>,
   schoolId: string,
   teacherIds: string[],
+  photoOverrides: Record<string, string>,
 ) {
   const { data: teachers } = await supabase
     .from("teachers")
@@ -221,7 +226,7 @@ async function syncTeachers(
       teacher_id: teacher.id,
       display_name: teacher.name,
       role_title: "Professor",
-      photo_url: teacher.photo_url,
+      photo_url: photoOverrides[teacher.id] || teacher.photo_url,
       specialties: ["Tecnica", "Disciplina", "Evolucao"],
       quote: "Compromisso com a evolucao de cada aluno no tatame.",
       ordering: index,

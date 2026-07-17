@@ -201,6 +201,7 @@ export function LandingForm({
   const [state, formAction, pending] = useActionState(saveLandingPage, initialState);
   const selectedTeacherIds = new Set(landing.teachers.map((teacher) => teacher.id));
   const selectedClassIds = new Set(landing.classes.map((classGroup) => classGroup.id));
+  const landingPhotoByTeacherId = new Map(landing.teachers.map((teacher) => [teacher.id, teacher.photoUrl]));
 
   return (
     <form action={formAction} className="space-y-6">
@@ -346,18 +347,33 @@ export function LandingForm({
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="space-y-2">
             <h3 className="text-sm font-bold">Professores publicados</h3>
-            <div className="max-h-72 overflow-y-auto rounded-lg border border-border bg-background">
-              {options.teachers.map((teacher) => (
-                <label key={teacher.id} className="flex items-center gap-2 border-b border-border p-3 text-sm last:border-0">
-                  <input
-                    type="checkbox"
-                    name="teacherIds"
-                    value={teacher.id}
-                    defaultChecked={selectedTeacherIds.has(teacher.id)}
-                  />
-                  {teacher.name}
-                </label>
-              ))}
+            <div className="max-h-[32rem] overflow-y-auto rounded-lg border border-border bg-background">
+              {options.teachers.map((teacher) => {
+                const isSelected = selectedTeacherIds.has(teacher.id);
+                return (
+                  <div key={teacher.id} className="space-y-3 border-b border-border p-3 text-sm last:border-0">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        name="teacherIds"
+                        value={teacher.id}
+                        defaultChecked={isSelected}
+                      />
+                      {teacher.name}
+                    </label>
+                    {isSelected && (
+                      <LandingImageUpload
+                        label="Foto para a landing (opcional)"
+                        name={`teacherPhoto_${teacher.id}`}
+                        schoolId={uploadSchoolId}
+                        defaultValue={landingPhotoByTeacherId.get(teacher.id) || teacher.photo_url || ""}
+                        aspect="portrait"
+                        hint="Sugestao: foto de rosto/corpo simples, sem texto ou arte promocional — o card da landing ja desenha nome e cargo por cima. Se vazio, usa a foto do cadastro do professor."
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
           <div className="space-y-2">

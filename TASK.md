@@ -1277,3 +1277,61 @@ Nenhum dado real foi alterado permanentemente — o toggle de RLS e a edição
 de teste no formulário (`slogan`) foram revertidos ao estado original
 (`status: published`, slogan "Jiu-jitsu e defesa pessoal para todos") ao
 final da validação. Scripts temporários de teste removidos.
+
+### Correção do bug de fotos de professores (2026-07-17)
+
+A pedido do usuário, corrigido o problema 1 encontrado na validação acima.
+
+**Causa raiz completa** (mais profunda do que a nota original identificou):
+`syncTeachers` (`modules/landing/actions.ts`, chamada a cada save do
+formulário `/landing`) sempre sobrescrevia `landing_teacher_profiles.photo_url`
+com `teachers.photo_url` (a foto interna do cadastro do professor),
+incondicionalmente, a cada save — então mesmo que existisse uma foto
+dedicada da landing, ela seria apagada no próximo save. Combinado com a
+query (`teacher.teachers?.photo_url ?? teacher.photo_url`, prioridade
+invertida) e a ausência total de campo de upload para
+`landing_teacher_profiles.photo_url` no formulário, não havia nenhum
+caminho possível para o admin usar uma foto diferente da interna na
+landing.
+
+**Correção (3 arquivos):**
+- `modules/landing/queries.ts` (`getAdminLandingTeachers`,
+  `getPublicLandingTeachers`): precedência invertida para
+  `teacher.photo_url || teacher.teachers?.photo_url || ""` — a foto
+  dedicada da landing agora vence quando existir.
+- `app/(admin)/landing/landing-form.tsx`: cada professor selecionado em
+  "Professores publicados" ganhou um campo
+  `LandingImageUpload` próprio (`teacherPhoto_<teacherId>`, mesmo
+  componente/padrão já usado para logo/hero/about/campanha/contato),
+  com aviso explícito no hint para não usar arte promocional com texto
+  embutido. Campo aparece só para professores já marcados (calculado a
+  partir de `landing.teachers`, que só reflete o que já foi salvo —
+  marcar o checkbox e salvar uma vez é necessário antes do campo de foto
+  aparecer para um professor novo; limitação aceita, consistente com o
+  resto do formulário que já é assim).
+- `modules/landing/actions.ts` (`saveLandingPage`/`syncTeachers`): novo
+  parâmetro `photoOverrides` (map teacherId → URL, lido de
+  `teacherPhoto_<id>` no formData) — `photo_url` do upsert passa a ser
+  `photoOverrides[teacher.id] || teacher.photo_url`, preservando a
+  escolha do admin em vez de sempre sobrescrever com a foto interna.
+
+**Dados reais corrigidos:** as 3 fotos com arte promocional (Lucas
+Gomides, Yuri Resfa, Daniel Gomide — a 4a professora featured, Camila
+Duarte, já usava uma foto normal e não precisou de ajuste) foram
+recortadas (`sharp`, script local descartado depois) para isolar só a
+porção de foto limpa de cada arte, e reenviadas através do novo campo do
+formulário (upload real via Playwright dirigindo a UI, não escrita direta
+no banco) — validando o código novo de ponta a ponta ao mesmo tempo que
+corrigia o dado. Confirmado visualmente que os 4 cards da seção
+"Professores e instrutores" renderizam sem sobreposição de texto.
+`tsc --noEmit` e `eslint` limpos. Status da landing page permanece
+`published` (restaurado via clique real no botão "Publicar" durante o
+teste, não escrita direta).
+
+**Não corrigido nesta sessão (fora do escopo do bug reportado):**
+`role_title`, `specialties` e `quote` de `landing_teacher_profiles`
+continuam hardcoded/sobrescritos a cada save (sempre "Professor" e o
+mesmo texto genérico) — nunca tiveram UI própria, não é regressão desta
+mudança. O botão "Salvar rascunho" também continua sem forma de salvar
+conteúdo sem trocar o status para `draft` (mesmo comportamento de antes,
+não é o bug reportado).
