@@ -1374,3 +1374,44 @@ correto (recém-salvo) imediatamente, sem precisar de reload — confirmado
 com Playwright preenchendo o slogan, publicando, e lendo o valor do campo
 no mesmo carregamento de página (sem reload), sem erros de console.
 `tsc --noEmit` e `eslint` limpos.
+
+### Revalidação completa pós-correções (2026-07-17)
+
+A pedido do usuário, repetida a bateria de testes da validação original da
+Fase 11 depois das duas correções acima (fotos dos professores +
+FieldControl), para confirmar que nada regrediu.
+
+**Ambiente muito lento nesta rodada** (mesmo padrão de instabilidade já
+registrado na Fase 10.7): o dev server chegou a levar 64s só para
+compilar a primeira request e 19–101s por escrita de cache do Turbopack;
+scripts com timeout de 30–60s falharam por timeout puro do ambiente antes
+mesmo de qualquer asserção rodar. Timeouts elevados para 120–180s
+resolveram.
+
+**Resultado (tudo OK após ajustar os timeouts):**
+- As 7 seções da página pública, os 4 cards de professores (sem
+  sobreposição de texto — fotos da correção anterior confirmadas), 0
+  `<img>` quebrada, as 6 abas de dia da grade de horários, mapa e links de
+  contato — todos OK, sem erros de console, desktop e mobile.
+- RLS: `anon` não enxerga a linha com `status=draft`, volta a enxergar
+  após restaurar `published` — confirmado de novo.
+- Formulário admin: os 4 campos de foto dedicada por professor (da
+  correção desta sessão) presentes; salvar com `Publicar` mostra o valor
+  recém-salvo no campo imediatamente, sem reload e sem warning de
+  console — confirma as duas correções juntas, sem regressão.
+
+**Incidente durante o teste (causado pelo teste, não pelo produto):** o
+passo final do script de revalidação restaurava o slogan de teste para o
+valor original, mas por causa da lentidão do ambiente (fetch da resposta
+do save ainda em voo quando o script leu o campo após um timeout fixo de
+3s) o slogan ficou temporariamente salvo como o marcador de teste
+(`revalidacao-<timestamp>`) na landing pública real. Detectado
+imediatamente ao conferir o banco depois do resultado do script (hábito
+de nunca confiar cegamente em teste automatizado sob ambiente instável),
+corrigido na hora com um script à parte que faz *polling* direto no banco
+em vez de esperar um tempo fixo, confirmando o valor restaurado
+(`Jiu-jitsu e defesa pessoal para todos`) antes de encerrar. Sem impacto
+duradouro — a landing ficou com o slogan errado por alguns minutos durante
+o teste, nunca em produção fora de uma janela de teste ativo.
+
+Scripts temporários removidos, dev server parado.
