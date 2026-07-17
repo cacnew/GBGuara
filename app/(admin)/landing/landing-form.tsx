@@ -41,7 +41,16 @@ function Field({
   return (
     <div className="space-y-1.5">
       <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} type={type} defaultValue={defaultValue} placeholder={placeholder} />
+      {/* key={defaultValue}: depois de salvar, o Server Component reenvia
+          `landing` atualizado para este client component ja montado. Sem a
+          key, o Input (Base UI) recebe um novo defaultValue na mesma
+          instancia e acusa "uncontrolled FieldControl mudando de default
+          value depois de inicializado" — e o reset automatico de campos
+          nao controlados do React 19 apos uma form action reverteria o
+          campo para esse defaultValue antigo. Com a key, o valor novo
+          remonta o Input do zero (novo "default" legitimo), sem warning e
+          sem perder o valor recem-salvo. */}
+      <Input key={defaultValue} id={name} name={name} type={type} defaultValue={defaultValue} placeholder={placeholder} />
     </div>
   );
 }

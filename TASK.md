@@ -1335,3 +1335,42 @@ mesmo texto genérico) — nunca tiveram UI própria, não é regressão desta
 mudança. O botão "Salvar rascunho" também continua sem forma de salvar
 conteúdo sem trocar o status para `draft` (mesmo comportamento de antes,
 não é o bug reportado).
+
+### Correção do aviso de console do FieldControl (2026-07-17)
+
+A pedido do usuário, investigado e corrigido o problema 2 da validação.
+
+**Causa raiz:** `Field` (`app/(admin)/landing/landing-form.tsx`) repassava
+`defaultValue={defaultValue}` direto do prop `landing.*` para o `Input`
+(`components/ui/input.tsx`, que envolve `@base-ui/react/input`). Depois de
+qualquer save (`Salvar rascunho`/`Despublicar`/`Publicar`), o
+`revalidatePath("/landing")` dentro da server action faz o Server
+Component (`app/(admin)/landing/page.tsx`) reexecutar `getAdminLandingPage()`
+e reenviar `landing` atualizado para o `LandingForm`, que **continua
+montado** (não desmonta entre saves) — então o mesmo `Input` recebe um
+`defaultValue` novo depois de já inicializado, e o Base UI acusa isso
+("changing the default value state of an uncontrolled FieldControl after
+being initialized").
+
+**Investigação teve uma pegadinha:** a primeira tentativa (travar o
+`defaultValue` no primeiro render via `useState`) fez o aviso sumir, mas
+introduziu uma regressão real — descoberta testando o valor do campo
+*imediatamente* após salvar, sem reload de página (teste que não tinha
+sido feito na validação original, só "salva → reload → confere"). React
+19 reseta campos não controlados para o respectivo `defaultValue` ao fim
+de uma form action; travando o `defaultValue` num valor fixo, esse reset
+passou a devolver sempre o valor de quando a página carregou, escondendo
+visualmente o que acabou de ser salvo (mesmo com o banco correto) — o
+tipo de bug que faria um admin achar que o save falhou e tentar salvar de
+novo. Reproduzido e depois descartado antes de virar commit.
+
+**Correção final:** `key={defaultValue}` no `Input` dentro de `Field`. Como
+o valor só muda de fato depois de um save bem-sucedido (nunca durante a
+digitação, já que o campo não é controlado), a key só muda nesse momento —
+React desmonta e remonta uma instância nova do `Input` com o valor recém-
+salvo como `defaultValue` "de fábrica", em vez de mutar uma instância já
+inicializada. Resultado: sem aviso do Base UI e o campo mostra o valor
+correto (recém-salvo) imediatamente, sem precisar de reload — confirmado
+com Playwright preenchendo o slogan, publicando, e lendo o valor do campo
+no mesmo carregamento de página (sem reload), sem erros de console.
+`tsc --noEmit` e `eslint` limpos.
