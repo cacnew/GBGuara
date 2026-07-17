@@ -1138,3 +1138,63 @@ corrigido para import relativo.
 > Verificado que não sobrou nenhum outro uso de ordenação por
 > `foreignTable`/dot-notation em tabela embutida no projeto (mesma causa
 > raiz dos bugs de presença) além dos já corrigidos.
+
+---
+
+## Fase 11 — Landing page institucional gerenciável (2026-07-16/17)
+
+> **Nota de processo:** feature entregue pelo Carlos (commits `8138179` e
+> `df595ab`) sem ter passado pelo planejamento formal em subtarefas `[ ]`
+> neste arquivo antes da implementação — diferente do padrão seguido nas
+> Fases 0–10. Registrada aqui retroativamente (a pedido do usuário, sessão
+> de 2026-07-17) para o `TASK.md` voltar a refletir o estado real do
+> código, conforme a Regra de Ouro do `CLAUDE.md`. Especificação de
+> referência visual usada pelo Carlos: `lading page requisito.txt` (raiz do
+> repo, cita `https://www.gbmangueiral.com.br` como referência obrigatória
+> de layout/estrutura).
+
+- [x] **11.1 — Schema + gestão da landing page pelo admin**
+  Migration `20260716110000_landing_page_management.sql`: tabela
+  `landing_pages` (1 por escola, `unique(school_id)`) com conteúdo em
+  colunas `jsonb` (`identity`, `navigation`, `hero`, `metrics`, `about`,
+  `campaign`, `contact`, `footer`, `seo`) e `status`
+  (`draft`/`published`/`unpublished`); RLS permite leitura pública
+  (`anon`) só de páginas `published`, leitura/escrita irrestrita da própria
+  escola para usuários autenticados. Tabelas relacionadas
+  `landing_teacher_profiles` (perfil de professor específico da landing,
+  com FK opcional para `teachers`) e presumivelmente uma tabela/estrutura
+  para as turmas exibidas na grade de horários pública.
+  `modules/landing/{queries,actions,defaults}.ts`: `defaults.ts` define o
+  conteúdo padrão/schema de merge (`LandingContent`, `mergeContent`);
+  `queries.ts` monta `LandingPageData` juntando a linha de
+  `landing_pages` com professores/turmas; `actions.ts`
+  (`saveLandingPage`, `requireRole("admin")`) grava o formulário completo
+  (identidade visual, navegação, hero, métricas, seção institucional,
+  campanha, contato, rodapé, SEO) via `logAuditEvent`.
+  `app/(admin)/landing/{page,landing-form}.tsx`: tela de edição no admin
+  (nav nova, ver `components/layout/nav-config.ts`).
+  `app/page.tsx` + `app/landing-schedule.tsx` + `app/globals.css`: página
+  pública (`/`) renderizando o conteúdo publicado, incluindo grade de
+  horários (`landing-schedule.tsx`) e estilos dedicados novos em
+  `globals.css` (726 linhas).
+  Mudanças colaterais em `app/(auth)/login/{page,login-form}.tsx`
+  (refatoração do login, novo `login-form.tsx` como client component
+  separado), `avatar-upload.tsx`, e pequenos ajustes em
+  `students/new`/`teachers/new`/`teachers/actions.ts`.
+  `database.types.ts` regenerado (+186 linhas) — inclui os tipos novos de
+  `landing_pages`/`landing_teacher_profiles`.
+  Sem registro de verificação end-to-end (Playwright ou manual) nesta
+  entrada — não documentado pelo Carlos nos commits originais.
+
+- [x] **11.2 — Fix: link e preview do mapa na landing**
+  Commit `df595ab`: ajustes em `app/page.tsx` (34 linhas) e
+  `app/globals.css` (15 linhas) — corrige o link e a exibição do preview
+  do mapa (provavelmente embed do Google Maps na seção de contato/
+  localização) introduzidos na 11.1.
+
+> **Pendência aberta:** esta fase não tem os registros de verificação
+> (Playwright/manual, RLS, screenshots) que as Fases 9/10 passaram a ter
+> como padrão. Recomenda-se validar manualmente a página pública `/` e o
+> formulário `/landing` (incluindo a policy de leitura pública `anon` só
+> para `status = 'published'`) antes de considerar a Fase 11 encerrada com
+> a mesma confiança das fases anteriores.
