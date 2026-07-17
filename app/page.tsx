@@ -10,6 +10,19 @@ function whatsappHref(phone: string) {
   return digits ? `https://wa.me/${digits}` : "#contato";
 }
 
+function externalHref(url: string) {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  return `https://${url}`;
+}
+
+function mapEmbedSrc(addressParts: string[]) {
+  const query = addressParts.filter(Boolean).join(", ");
+  return query
+    ? `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`
+    : "";
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const landing = await getPublishedLandingPage();
   const image = landing.identity.shareImageUrl || landing.hero.backgroundUrl;
@@ -41,6 +54,13 @@ export default async function Home() {
   const contactImage =
     landing.contact.imageUrl ||
     "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1600&q=80";
+  const addressParts = [
+    landing.identity.address,
+    landing.identity.city,
+    landing.identity.state,
+  ];
+  const mapUrl = externalHref(landing.identity.mapUrl);
+  const mapSrc = mapEmbedSrc(addressParts);
 
   return (
     <main
@@ -246,12 +266,22 @@ export default async function Home() {
             <Link className="landing-primary-button" href={whatsappHref(landing.identity.whatsapp || landing.identity.phone)}>
               {landing.contact.whatsappLabel}
             </Link>
-            {landing.identity.mapUrl && (
-              <Link className="landing-secondary-button" href={landing.identity.mapUrl} target="_blank">
+            {mapUrl && (
+              <Link className="landing-secondary-button" href={mapUrl} target="_blank" rel="noreferrer">
                 {landing.contact.mapLabel}
               </Link>
             )}
           </div>
+          {mapSrc && (
+            <div className="landing-map-preview">
+              <iframe
+                title={`Mapa de ${landing.identity.displayName}`}
+                src={mapSrc}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          )}
         </div>
       </section>
 
