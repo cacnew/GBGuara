@@ -1198,3 +1198,82 @@ corrigido para import relativo.
 > formulário `/landing` (incluindo a policy de leitura pública `anon` só
 > para `status = 'published'`) antes de considerar a Fase 11 encerrada com
 > a mesma confiança das fases anteriores.
+
+### Validação da Fase 11 (2026-07-17)
+
+Feita a pedido do usuário para fechar a pendência acima. Dev server local
+contra o Supabase compartilhado (`nexusdojo-dev`), Playwright dirigindo
+Chromium headless, desktop (1400×900) e mobile (390×844).
+
+**Confirmado funcionando:**
+- Página pública `/` renderiza todas as 7 seções (`#top`, `#indicadores`,
+  `#professores`, `#horarios`, `#sobre`, `#campanha`, `#contato`) com o
+  estilo editorial-esportivo pretendido (tipografia grande, hero com
+  imagem de fundo e overlay, chips de modalidade, painel lateral) — sem
+  erros de console/página. Nenhuma `<img>` quebrada.
+- Grade de horários (`landing-schedule.tsx`): troca de dia (Seg–Sáb) filtra
+  corretamente as turmas exibidas (testado as 6 abas, contagens batendo
+  com os dados reais de `class_groups`).
+- Mapa de contato: iframe do Google Maps embed carrega meses (usa
+  `identity.address/city/state`) e o botão "Ver localização" usa a URL
+  completa configurada manualmente (`identity.mapUrl`) — os dois
+  independentes, ambos funcionais; fix do commit `df595ab` confirmado.
+- RLS de `landing_pages`: testado invertendo o `status` da linha real para
+  `draft` via service role — `anon` deixou de enxergar a linha
+  (`select` retornou `[]`) — e restaurado para `published` em seguida;
+  confirma que a policy "public can select published landing pages" no
+  banco funciona (mesmo a página pública em si não depender dela, já que
+  `getPublishedLandingPage` usa `createAdminClient()` no server — a RLS
+  importa para quem acessa a API REST do Supabase diretamente).
+- Formulário admin (`/landing`): edição de campo + "Salvar rascunho"
+  persiste corretamente (confirmado com reload da página), mensagem de
+  sucesso inline aparece. Botão "Publicar" funciona (testado restaurando o
+  status real para `published` depois do teste).
+
+**2 problemas reais encontrados (nenhum bloqueante, mas precisam de
+follow-up):**
+1. **Fotos dos professores na landing pública ficam com texto ilegível/
+   sobreposto** (`#professores`, cards "Conheça o professor"). Causa raiz:
+   não é bug de CSS — as 3 fotos usadas (`teachers.photo_url`, mesmo campo
+   usado na ficha interna do professor desde a Fase 2.5/8.1) são artes
+   promocionais completas (estilo post de Instagram, já com "CONHEÇA O
+   PROFESSOR / NOME / BLACK BELT" desenhado na própria imagem), não fotos
+   simples de rosto. O card da landing sobrepõe SEU PRÓPRIO nome/cargo por
+   cima da imagem (`.landing-teacher-info`), então o texto embutido na
+   arte + o texto do card colidem visualmente, e o `object-fit: cover`
+   (imagem quadrada num card mais alto que largo) corta a arte de um jeito
+   que "vaza" para a lateral. `landing_teacher_profiles.photo_url` (coluna
+   dedicada para uma foto só da landing, que resolveria isso) existe no
+   schema (migration 11.1) mas **não tem campo de upload no formulário
+   admin** (`landing-form.tsx` só deixa escolher quais professores
+   aparecem, via `teacherIds`) — e mesmo que tivesse, a query
+   (`teacher.teachers?.photo_url ?? teacher.photo_url`) prioriza a foto
+   interna sobre a da landing, então a foto dedicada nunca venceria.
+   Precisa de: (a) upload de foto dedicada por professor na landing (UI
+   nova), e (b) inverter a prioridade da query para `landing photo ??
+   internal photo`. Ou, mais simples a curto prazo: trocar as 3 fotos
+   internas desses professores por fotos de rosto simples.
+2. **Aviso de console (não visual) no formulário admin**: "Base UI: A
+   component is changing the default value state of an uncontrolled
+   FieldControl after being initialized." — componente de formulário
+   (provavelmente um dos campos de cor/upload) inicializa sem valor
+   controlado e recebe o valor default depois via effect. Não impediu
+   salvar/carregar dados nesta sessão, mas é o tipo de aviso que pode virar
+   bug real de sincronização de estado; vale investigar qual campo
+   específico dispara (não identificado nesta sessão).
+
+**Observação arquitetural (não é bug, é para confirmar intenção):**
+`getPublishedLandingPage()` busca a landing `published` mais recente
+**sem filtrar por domínio/host** — se este deployment algum dia servir
+mais de uma escola (`school_id`) no mesmo domínio Next.js, a rota `/`
+pública mostraria só a landing da escola que publicou por último, para
+todo mundo. Hoje não é um problema porque o ambiente compartilhado só tem
+1 escola ativa (`Gracie Barra Riacho Fundo I`), mas vale confirmar com o
+Carlos se o modelo de deploy pretendido é 1 deployment por escola (aí é
+inofensivo) ou multi-tenant num domínio só (aí precisa de resolução por
+subdomínio/host antes de ir para produção com mais de uma escola).
+
+Nenhum dado real foi alterado permanentemente — o toggle de RLS e a edição
+de teste no formulário (`slogan`) foram revertidos ao estado original
+(`status: published`, slogan "Jiu-jitsu e defesa pessoal para todos") ao
+final da validação. Scripts temporários de teste removidos.
