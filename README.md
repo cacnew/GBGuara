@@ -47,3 +47,30 @@ npm run build
 - React Hook Form
 - Zod
 - shadcn/ui
+
+## Landing page publica
+
+- `/` exibe a landing institucional publicada da escola.
+- `/landing` e a tela admin de gestao da landing page.
+- Conteudo, imagens, professores publicados e horarios publicados ficam no
+  Supabase nas tabelas `landing_pages`, `landing_teacher_profiles` e
+  `landing_class_groups`.
+- Imagens da landing e avatares usam upload para o bucket `avatars`; a tela
+  nao deve voltar a aceitar URL manual em campos de imagem.
+- Professores publicados na landing usam a imagem de avatar salva em
+  `teachers.photo_url`. A orientacao de enquadramento para professores e
+  imagens verticais e `1200 x 1600 px` (3:4).
+
+## Deploy na Vercel
+
+Variaveis de ambiente necessarias em runtime:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+`SUPABASE_DB_PASSWORD` nao e usada em runtime pela aplicacao; ela so e
+necessaria para CLI/scripts/migrations. A migration da landing ja foi aplicada
+no Supabase remoto usado pelo ambiente local.

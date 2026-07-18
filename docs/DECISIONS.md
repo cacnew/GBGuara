@@ -1084,3 +1084,28 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   resolução de `contractIdsFilter` em `installments`) continuam
   operando sobre o conjunto completo antes do corte de página, sem
   afetar a paginação em si.
+
+## Landing page institucional gerenciavel (extra)
+
+- A landing publica vive na raiz `/` e e alimentada por Supabase, nao por
+  conteudo hardcoded. Isso permite trocar textos, imagens, professores,
+  horarios, mapa e campanha sem novo deploy.
+- `landing_pages` usa JSONB para blocos editoriais e identidade visual. A
+  escolha reduz churn de migration para copy/design, mantendo tabelas
+  separadas somente para relacoes que precisam apontar para cadastros reais:
+  `landing_teacher_profiles` e `landing_class_groups`.
+- Imagens usam upload para o bucket `avatars`, pasta `landing/`, e a aplicacao
+  salva URL publica. O admin nao deve voltar a receber URL manual para imagem,
+  porque isso quebra consistencia, preview e governanca dos assets.
+- A landing usa `teachers.photo_url` para professores publicados. Assim a
+  imagem institucional do professor fica em um unico cadastro e tambem pode
+  ser reaproveitada no app interno.
+- A dimensao recomendada para professores e imagens verticais e
+  `1200 x 1600 px` (3:4). Esse formato encaixa melhor nos cards verticais da
+  landing sem cortar rosto/faixa/corpo de forma agressiva.
+- Link do Google Maps e normalizado para URL absoluta antes de renderizar.
+  A miniatura do mapa usa iframe com base no endereco configurado, evitando
+  depender de URL embed manual salva pelo admin.
+- O site de referencia da GB Mangueiral foi usado apenas como direcao visual.
+  Imagens/conteudo finais devem vir do admin, do Supabase Storage e dos dados
+  publicos aprovados pelo usuario.

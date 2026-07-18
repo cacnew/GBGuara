@@ -46,3 +46,26 @@ Papéis futuros: `student`, `guardian` (área logada, MVP 2).
 | `docs/ROADMAP.md` | Fases do projeto e o que entra em cada uma |
 | `docs/DECISIONS.md` | Decisões técnicas já tomadas e o porquê |
 | `CLAUDE.md` | Protocolo de trabalho entre os dois devs via Git |
+
+## Landing publica atual
+
+A raiz `/` e uma landing institucional gerenciavel pelo admin. A gestao fica
+em `/landing`, dentro do menu `Site publico > Gestao da Landing Page`.
+
+Arquivos principais:
+
+| Arquivo | Conteudo |
+|---|---|
+| `app/page.tsx` | Landing publica dinamica |
+| `app/(admin)/landing/page.tsx` | Entrada admin da gestao da landing |
+| `app/(admin)/landing/landing-form.tsx` | Formulario completo de conteudo, imagens, professores e horarios |
+| `modules/landing/defaults.ts` | Valores padrao da landing |
+| `modules/landing/queries.ts` | Leitura da landing publicada/admin |
+| `modules/landing/actions.ts` | Gravacao e upload de imagens |
+| `app/landing-schedule.tsx` | Grade semanal publica |
+| `supabase/migrations/20260716110000_landing_page_management.sql` | Schema da landing |
+
+O conteudo publicado atual foi carregado no Supabase remoto do `.env.local`.
+A escola foi inicialmente preenchida como GB Guara; depois o usuario editou
+parte do conteudo no admin para GB Riacho Fundo I. Para dados institucionais,
+a fonte da verdade atual e sempre o banco.

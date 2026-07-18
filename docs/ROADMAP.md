@@ -42,3 +42,10 @@ cada vez seguindo o ciclo de sincronização Git descrito em `CLAUDE.md`
 (fetch → pull se houver novidade → confirmar próxima `[ ]` → executar →
 marcar `[x]` → commit → push). Blocos marcados como `> PARALELIZÁVEL` no
 `TASK.md` podem ser divididos entre os dois devs ou via subagentes.
+
+## Extra: landing institucional
+
+Entregue fora da sequencia formal do MVP: landing publica na raiz `/`,
+gerenciada em `/landing`, com conteudo vindo do Supabase e imagens por upload
+no bucket `avatars`. O detalhamento operacional esta em `TASK.md` na secao
+`Landing page institucional gerenciavel (2026-07-17)`.
