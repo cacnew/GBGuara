@@ -1586,7 +1586,7 @@ usuário antes de iniciar:
   `medals.event_id on delete restrict`, defesa em profundidade).
   `tsc --noEmit` limpo.
 
-- [ ] **12.4 — Fluxo do aluno: lançar desempenho e gerenciar minhas medalhas**
+- [x] **12.4 — Fluxo do aluno: lançar desempenho e gerenciar minhas medalhas**
   Critério de pronto: formulário em `(student)` primeiro exige escolher
   um evento existente do catálogo (12.3) — sem opção de criar evento novo
   pelo aluno — depois preenche os campos da decisão 2 (modalidade,
@@ -1596,6 +1596,19 @@ usuário antes de iniciar:
   pode ser editado (inclusive trocar o evento escolhido) e reenviado
   (volta a `pending`); lançamento `pending`/`approved` não pode ser
   apagado (só editado enquanto pendente ou rejeitado).
+  Migration adicional (`20260719121000_medals_student_modalities_access.sql`):
+  `modalities` só tinha policy de select para staff (Fase 2.1) — aluno
+  precisa da lista para o campo de modalidade do formulário; mesmo padrão
+  de correção já aplicado a class_groups/class_sessions/teachers/belts na
+  Fase 9.6. `modules/medals/student-actions.ts` (`"use server"`) +
+  `components/medals/medal-launch-form.tsx` (compartilhado entre novo/
+  editar) + `app/(student)/aluno/medalhas/{page,new/page,[id]/edit/page}.tsx`.
+  Edição sempre limpa `reviewed_by_user_id`/`reviewed_at`/
+  `rejection_reason` no mesmo update que volta o status a `pending` — a
+  policy de RLS de update do aluno exige os dois primeiros nulos no estado
+  pós-update, e um lançamento rejeitado chega com ambos preenchidos pela
+  análise anterior. `StatusBadge` ganhou as chaves `approved`/`rejected`.
+  `tsc --noEmit` e `eslint` limpos.
 
 - [ ] **12.5 — Fluxo do professor/admin: fila de aprovação**
   Critério de pronto: tela lista lançamentos pendentes da escola (com
