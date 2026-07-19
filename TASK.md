@@ -1854,3 +1854,47 @@ e2e completa rodada em chromium: `medals.spec.ts` passou 2x seguidas
 falhou nessa rodada por motivo não relacionado (não há arquivo de
 presença tocado nesta sessão — provável dependência de horário/janela de
 sinalização de aula no momento do teste, não investigado aqui).
+
+### Investigação e correção do bug de RLS em class_sessions (2026-07-19)
+
+A pedido do usuário, investigada a falha do `attendance-signal.spec.ts`
+apontada acima. Causa não era de horário: o teste sempre rodava contra a
+data de **hoje** e, no dia em que essa investigação aconteceu (2026-07-19,
+domingo), nenhuma turma do catálogo roda aos domingos (`class_groups.
+week_days` só usa `1`–`6`, nunca `0`) — a Agenda ficava sem nenhum botão
+"Sinalizar presença" na tela. Corrigido `e2e/attendance-signal.spec.ts`
+para navegar para `/aluno?date=` da segunda-feira mais próxima (hoje
+mesmo, se já for segunda; senão a próxima) em vez de depender da data
+corrente — sempre dentro da janela de 7 dias de antecedência de
+`checkSignalWindow` (`modules/students/signal-rules.ts`).
+
+**Bug real de produto encontrado ao validar esse ajuste** (não é
+específico do teste): sinalizar presença numa turma cuja `class_sessions`
+daquele dia ainda não existe (nenhum staff mexeu nela ainda) falhava com
+`"new row violates row-level security policy for table class_sessions"` —
+confirmado inspecionando a resposta real da server action no trace do
+Playwright (o toast de erro aparecia e sumia rápido, por isso parecia que
+"nada acontecia" num primeiro olhar). Causa raiz: a policy de insert em
+`class_sessions` (`20260704004656_create_class_sessions.sql`) só libera
+para staff via `current_school_id()` (resolve a partir de `public.users`);
+a migration da Fase 9.6 (`20260712100000_student_agenda_read_access.sql`)
+deu ao aluno só **leitura** em `class_sessions`, nunca **insert** — ao
+contrário de `attendances`, que já tinha a policy de insert do aluno desde
+a Fase 9.4 (`20260711150000`). Isso contradizia o próprio comentário de
+`modules/classes/session-materialization.ts` ("quem chama já deve ter
+resolvido schoolId a partir de um perfil autenticado (staff **ou
+aluno**)"): a materialização de sessão pelo aluno nunca funcionou de
+verdade. Ficava mascarado no dia a dia porque normalmente algum staff já
+tinha aberto a tela de chamada do dia antes do aluno sinalizar,
+materializando a sessão primeiro — só apareceu ao testar contra uma data
+futura que ninguém, nem staff, tinha tocado ainda (o cenário que a Fase
+9.3 deveria suportar: aluno sinalizando de véspera).
+
+Migration `20260719140000_class_sessions_student_insert.sql` (nova
+policy `"students can insert own school class_sessions"`, mesmo padrão de
+`attendances`/`current_student_school_id()`) aplicada no Supabase
+compartilhado (`nexusdojo-dev`) via `supabase db push --db-url`; não
+precisou de patch em `database.types.ts` (só policy nova, sem mudança de
+schema). Suíte e2e completa (5 testes, chromium) passando, incluindo
+`attendance-signal.spec.ts` 2x seguidas. `tsc --noEmit`, `eslint` e os 47
+testes (`npx vitest run`) limpos.

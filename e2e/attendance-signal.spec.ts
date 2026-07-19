@@ -7,6 +7,20 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// A agenda so lista turmas do dia da semana selecionado (week_days da
+// class_group); nenhuma turma do ambiente compartilhado roda aos domingos,
+// entao depender da data corrente (sem ?date=) faz o teste falhar sempre
+// que rodar num domingo. Ancora numa segunda-feira (hoje mesmo, se ja for
+// segunda; senao a proxima), sempre dentro da janela de 7 dias de
+// antecedencia permitida por checkSignalWindow (signal-rules.ts).
+function nearestMondayISODate(): string {
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const daysUntilMonday = (1 - today.getUTCDay() + 7) % 7;
+  today.setUTCDate(today.getUTCDate() + daysUntilMonday);
+  return today.toISOString().slice(0, 10);
+}
+
 test("aluno sinaliza e cancela presença em uma aula da agenda", async ({ page }) => {
   await page.goto("/login");
   await page.fill("#email", STUDENT_EMAIL);
@@ -15,6 +29,10 @@ test("aluno sinaliza e cancela presença em uma aula da agenda", async ({ page }
   // evita depender do evento "load" do waitForURL, que pode nao disparar de
   // novo em navegacoes client-side apos o redirect da server action de login
   await expect(page.getByRole("heading", { name: "Agenda" })).toBeVisible({ timeout: 60000 });
+
+  await page.goto(`/aluno?date=${nearestMondayISODate()}`);
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByRole("heading", { name: "Agenda" })).toBeVisible({ timeout: 30000 });
 
   const initialSignalButton = page.getByRole("button", { name: "Sinalizar presença" }).first();
   await expect(initialSignalButton).toBeVisible();
