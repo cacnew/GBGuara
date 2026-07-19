@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { formatDateOnly } from "@/lib/dates/format";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { MedalEventSummary } from "@/modules/medals/events";
+
+const STATUS_LABEL: Record<string, string> = { active: "Ativo", inactive: "Inativo" };
 
 export function MedalEventList({
   events,
@@ -18,6 +21,7 @@ export function MedalEventList({
             <th className="p-3 font-medium">Organização</th>
             <th className="p-3 font-medium">Data</th>
             <th className="p-3 font-medium">Modalidade</th>
+            <th className="p-3 font-medium">Status</th>
             <th className="p-3" />
           </tr>
         </thead>
@@ -28,6 +32,9 @@ export function MedalEventList({
               <td className="p-3 text-muted-foreground">{event.organization ?? "-"}</td>
               <td className="p-3">{formatDateOnly(event.eventDate)}</td>
               <td className="p-3 text-muted-foreground">{event.modalityName ?? "-"}</td>
+              <td className="p-3">
+                <StatusBadge value={event.status} label={STATUS_LABEL[event.status]} />
+              </td>
               <td className="p-3 text-right">
                 <Link
                   href={`${basePath}/${event.id}/edit`}
@@ -40,7 +47,7 @@ export function MedalEventList({
           ))}
           {!events.length && (
             <tr>
-              <td className="p-3 text-muted-foreground" colSpan={5}>
+              <td className="p-3 text-muted-foreground" colSpan={6}>
                 Nenhum evento cadastrado.
               </td>
             </tr>

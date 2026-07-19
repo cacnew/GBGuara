@@ -236,7 +236,12 @@ export default async function TeacherStudentPage({
             }))}
           />
 
-          <MedalsSection medals={medals} />
+          <MedalsSection
+            medals={medals}
+            canEdit
+            events={medalLaunchFormData.events}
+            modalities={medalLaunchFormData.modalities}
+          />
         </section>
 
         <aside className="space-y-4">

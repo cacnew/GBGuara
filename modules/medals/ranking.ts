@@ -54,7 +54,10 @@ export async function getMedalRanking(
       .eq("school_id", schoolId)
       .eq("status", "approved"),
     getMedalPointRules(schoolId),
-    listMedalEventOptions(schoolId),
+    // Decisão 12 da Fase 12: o filtro por evento do ranking é sobre
+    // histórico, não sobre oferecer o evento para lançamento — inclui
+    // eventos inativos (Fase 12.12), diferente das listas de lançamento.
+    listMedalEventOptions(schoolId, { activeOnly: false }),
     supabase.from("medal_event_point_rules").select("event_id, level, points"),
     supabase.from("belts").select("id, name"),
   ]);

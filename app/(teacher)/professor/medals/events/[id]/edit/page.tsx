@@ -37,6 +37,7 @@ export default async function EditTeacherMedalEventPage({
           organization: event.organization ?? "",
           eventDate: event.eventDate,
           modalityId: event.modalityId ?? "",
+          status: event.status,
           pointsOuro: event.pointOverrides.ouro?.toString() ?? "",
           pointsPrata: event.pointOverrides.prata?.toString() ?? "",
           pointsBronze: event.pointOverrides.bronze?.toString() ?? "",

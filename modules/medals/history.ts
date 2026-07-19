@@ -3,9 +3,11 @@ import type { MedalLevel } from "@/modules/medals/points";
 
 export type ApprovedMedalDisplay = {
   id: string;
+  eventId: string;
   eventName: string;
   eventDate: string;
   organization: string | null;
+  modalityId: string | null;
   modalityName: string | null;
   category: string | null;
   level: MedalLevel;
@@ -30,7 +32,7 @@ export async function getApprovedMedalsForStudent(
   const { data } = await supabase
     .from("medals")
     .select(
-      "id, category, level, proof_url, submitted_by_student_id, medal_events(name, event_date, organization), modalities(name), submitted_by:users!medals_submitted_by_user_id_fkey(name), reviewer:users!medals_reviewed_by_user_id_fkey(name)",
+      "id, event_id, modality_id, category, level, proof_url, submitted_by_student_id, medal_events(name, event_date, organization), modalities(name), submitted_by:users!medals_submitted_by_user_id_fkey(name), reviewer:users!medals_reviewed_by_user_id_fkey(name)",
     )
     .eq("student_id", studentId)
     .eq("school_id", schoolId)
@@ -39,9 +41,11 @@ export async function getApprovedMedalsForStudent(
 
   return (data ?? []).map((row) => ({
     id: row.id,
+    eventId: row.event_id,
     eventName: row.medal_events?.name ?? "",
     eventDate: row.medal_events?.event_date ?? "",
     organization: row.medal_events?.organization ?? null,
+    modalityId: row.modality_id,
     modalityName: row.modalities?.name ?? null,
     category: row.category,
     level: row.level as MedalLevel,

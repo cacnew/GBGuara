@@ -12,6 +12,7 @@ import { getStudentFinancialSummary } from "../edit/financial-queries";
 import { AttendanceHistory } from "../edit/attendance-history";
 import { getInternalNotes } from "@/modules/students/internal-notes";
 import { getApprovedMedalsForStudent } from "@/modules/medals/history";
+import { getStaffMedalLaunchFormData } from "@/modules/medals/staff-launch";
 
 const SITUACAO_LABEL: Record<string, string> = {
   sem_contrato: "Sem contrato",
@@ -68,6 +69,7 @@ export default async function StudentDossiePage({
   const financialSummary = await getStudentFinancialSummary(id);
   const notes = await getInternalNotes(id);
   const medals = await getApprovedMedalsForStudent(id, profile.schoolId);
+  const medalFormData = await getStaffMedalLaunchFormData();
 
   return (
     <div className="flex flex-1 flex-col items-center gap-6 p-6 text-foreground">
@@ -194,7 +196,12 @@ export default async function StudentDossiePage({
             </dl>
           </div>
 
-          <MedalsSection medals={medals} />
+          <MedalsSection
+            medals={medals}
+            canEdit
+            events={medalFormData.events}
+            modalities={medalFormData.modalities}
+          />
 
           <AttendanceHistory studentId={id} />
         </section>

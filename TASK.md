@@ -1757,3 +1757,55 @@ usuário antes de iniciar:
   aprovadas (2026 e 2025, níveis diferentes) + 1 pendente. Verificado
   direto no banco após a execução (contagens de status, override
   presente, histórico da conta demo). `eslint` limpo no script novo.
+
+### Refinamentos pós-implementação (2026-07-19)
+
+Perguntas de refinamento feitas ao usuário depois de completar as 10
+subtarefas originais (12.1–12.10). Decisões: comprovante continua como URL
+manual (sem upload real por agora) e os dados de demonstração da 12.10
+ficam permanentemente no ambiente compartilhado — nenhuma subtarefa nova
+para essas duas. As outras duas geraram subtarefas novas:
+
+- [x] **12.11 — Editar medalha aprovada pelo staff**
+  Critério de pronto: seção de medalhas do dossiê (admin/professor, nunca
+  no dossiê do próprio aluno) ganha botão "Editar" por medalha aprovada,
+  abrindo o mesmo tipo de formulário do lançamento em nome do aluno
+  (12.6) pré-preenchido, permitindo corrigir evento/modalidade/categoria/
+  nível/comprovante sem precisar rejeitar e relançar; não altera
+  `status`/`reviewed_by_user_id`/`reviewed_at`, só os dados descritivos;
+  loga em `audit_logs`.
+  `modules/medals/history.ts` (`ApprovedMedalDisplay`) passou a expor
+  `eventId`/`modalityId` crus (não só os nomes), necessários para
+  pré-preencher o formulário de edição.
+  `updateApprovedMedal` em `modules/medals/staff-launch.ts` (só aceita
+  editar quando `status = 'approved'`, devolve erro claro se não) +
+  `components/medals/edit-approved-medal-button.tsx` (mesmo padrão visual
+  de `LaunchMedalForStudentButton`) + `MedalsSection` ganhou prop opcional
+  `canEdit`/`events`/`modalities` (default `false`/`[]`/`[]`, então o
+  dossiê do aluno continua sem o botão sem precisar de nenhuma mudança
+  ali). Defesa contra evento inativo (12.12): o botão de editar garante
+  que o evento atual da medalha apareça no `<select>` mesmo se não
+  estiver mais na lista de eventos ativos, para não trocar o evento por
+  engano ao salvar. Wired no dossiê do admin (que passou a buscar
+  `getStaffMedalLaunchFormData()`, antes só usado na ficha do professor) e
+  na ficha do professor (reaproveitando o fetch que já existia para o
+  botão de lançar). `tsc --noEmit` e `eslint` limpos.
+
+- [x] **12.12 — Status ativo/inativo em eventos de medalha**
+  Critério de pronto: `medal_events` ganha coluna `status`
+  (`active`/`inactive`, default `active`, mesmo padrão de `modalities`);
+  tela de cadastro de evento (12.3) ganha o campo; evento `inactive` sai
+  das listas de escolha nos formulários de lançamento (aluno na 12.4,
+  staff na 12.6/12.11) mas continua aparecendo no filtro de evento do
+  ranking (12.7) e no histórico do dossiê (12.8) — nenhum dado histórico
+  se perde ao inativar um evento.
+  Migration `20260719130000_medal_events_status.sql` aplicada no Supabase
+  compartilhado. `listMedalEventOptions(schoolId, { activeOnly })` ganhou
+  o parâmetro (default `true`) — chamadas de lançamento (student-actions,
+  staff-launch) continuam com o default; `getMedalRanking` passou a
+  chamar com `{ activeOnly: false }` explicitamente, único ponto que
+  precisa ver eventos inativos. `database.types.ts` recebeu o patch
+  manual da coluna nova. `tsc --noEmit`, `eslint` e os 47 testes
+  (`npx vitest run`) limpos.
+  Com a 12.11/12.12, os refinamentos pós-implementação pedidos pelo
+  usuário estão concluídos.

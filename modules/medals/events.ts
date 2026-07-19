@@ -6,12 +6,15 @@ import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/modules/audit/log";
 import { MEDAL_LEVELS, type MedalLevel } from "@/modules/medals/points";
 
+export type MedalEventStatus = "active" | "inactive";
+
 export type MedalEventSummary = {
   id: string;
   name: string;
   organization: string | null;
   eventDate: string;
   modalityName: string | null;
+  status: MedalEventStatus;
   hasMedals: boolean;
 };
 
@@ -21,6 +24,7 @@ export type MedalEventDetail = {
   organization: string | null;
   eventDate: string;
   modalityId: string | null;
+  status: MedalEventStatus;
   pointOverrides: Partial<Record<MedalLevel, number>>;
 };
 
@@ -36,6 +40,7 @@ export type MedalEventInput = {
   organization: string;
   eventDate: string;
   modalityId: string;
+  status: MedalEventStatus;
   points: Partial<Record<MedalLevel, string>>;
 };
 
@@ -58,7 +63,7 @@ export async function getMedalEvents(): Promise<MedalEventSummary[]> {
 
   const { data: events } = await supabase
     .from("medal_events")
-    .select("id, name, organization, event_date, modalities(name)")
+    .select("id, name, organization, event_date, status, modalities(name)")
     .eq("school_id", profile.schoolId)
     .order("event_date", { ascending: false });
 
@@ -75,6 +80,7 @@ export async function getMedalEvents(): Promise<MedalEventSummary[]> {
     organization: event.organization,
     eventDate: event.event_date,
     modalityName: event.modalities?.name ?? null,
+    status: event.status as MedalEventStatus,
     hasMedals: eventIdsWithMedals.has(event.id),
   }));
 }
@@ -85,14 +91,26 @@ export async function getMedalEvents(): Promise<MedalEventSummary[]> {
  * de resolver o profile aqui dentro pelo mesmo motivo de
  * `modules/medals/points.ts`: é chamada tanto do lado staff quanto do lado
  * aluno, cada chamador já validou a própria sessão antes.
+ *
+ * `activeOnly` (default `true`) filtra eventos `inactive` — decisão da
+ * Fase 12.12: evento inativo sai das listas de lançamento, mas o ranking
+ * (`getMedalRanking`) chama com `activeOnly: false` porque o filtro por
+ * evento ali é sobre histórico, não sobre oferecer o evento para lançar.
  */
-export async function listMedalEventOptions(schoolId: string): Promise<MedalEventOption[]> {
+export async function listMedalEventOptions(
+  schoolId: string,
+  options: { activeOnly?: boolean } = {},
+): Promise<MedalEventOption[]> {
+  const { activeOnly = true } = options;
   const supabase = await createClient();
-  const { data } = await supabase
+  let query = supabase
     .from("medal_events")
     .select("id, name, event_date, organization")
-    .eq("school_id", schoolId)
-    .order("event_date", { ascending: false });
+    .eq("school_id", schoolId);
+
+  if (activeOnly) query = query.eq("status", "active");
+
+  const { data } = await query.order("event_date", { ascending: false });
 
   return (data ?? []).map((event) => ({
     id: event.id,
@@ -108,7 +126,7 @@ export async function getMedalEvent(id: string): Promise<MedalEventDetail | null
 
   const { data: event } = await supabase
     .from("medal_events")
-    .select("id, name, organization, event_date, modality_id")
+    .select("id, name, organization, event_date, modality_id, status")
     .eq("id", id)
     .eq("school_id", profile.schoolId)
     .single();
@@ -131,6 +149,7 @@ export async function getMedalEvent(id: string): Promise<MedalEventDetail | null
     organization: event.organization,
     eventDate: event.event_date,
     modalityId: event.modality_id,
+    status: event.status as MedalEventStatus,
     pointOverrides,
   };
 }
@@ -173,6 +192,7 @@ export async function createMedalEvent(input: MedalEventInput): Promise<MedalEve
       organization: input.organization.trim() || null,
       event_date: input.eventDate,
       modality_id: input.modalityId || null,
+      status: input.status,
       created_by_user_id: profile.id,
     })
     .select("id")
@@ -224,6 +244,7 @@ export async function updateMedalEvent(
       organization: input.organization.trim() || null,
       event_date: input.eventDate,
       modality_id: input.modalityId || null,
+      status: input.status,
     })
     .eq("id", id)
     .eq("school_id", profile.schoolId);

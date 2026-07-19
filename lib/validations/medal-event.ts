@@ -5,6 +5,7 @@ export const medalEventSchema = z.object({
   organization: z.string().trim().optional().or(z.literal("")),
   eventDate: z.string().min(1, "Data obrigatória"),
   modalityId: z.string().optional().or(z.literal("")),
+  status: z.enum(["active", "inactive"]),
   pointsOuro: z.string().optional().or(z.literal("")),
   pointsPrata: z.string().optional().or(z.literal("")),
   pointsBronze: z.string().optional().or(z.literal("")),

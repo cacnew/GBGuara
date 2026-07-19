@@ -100,3 +100,67 @@ export async function launchMedalForStudent(
 
   return {};
 }
+
+/**
+ * Correção de uma medalha já aprovada (Fase 12.11 — refinamento pedido
+ * pelo usuário depois da entrega original). Só altera os campos
+ * descritivos (evento/modalidade/categoria/nível/comprovante); nunca
+ * toca em `status`/`reviewed_by_user_id`/`reviewed_at` — não é uma nova
+ * aprovação, é uma correção de dado já aprovado.
+ */
+export async function updateApprovedMedal(
+  medalId: string,
+  input: StaffMedalLaunchInput,
+): Promise<StaffMedalLaunchActionResult> {
+  const profile = await requireUser();
+
+  if (!input.eventId) return { error: "Selecione um evento" };
+  if (!(MEDAL_LEVELS as readonly string[]).includes(input.level)) {
+    return { error: "Nível inválido" };
+  }
+
+  const supabase = await createClient();
+
+  const { data: medal } = await supabase
+    .from("medals")
+    .select("id, student_id, status")
+    .eq("id", medalId)
+    .eq("school_id", profile.schoolId)
+    .single();
+
+  if (!medal) return { error: "Medalha não encontrada" };
+  if (medal.status !== "approved") {
+    return { error: "Só é possível editar por aqui uma medalha já aprovada" };
+  }
+
+  const { error } = await supabase
+    .from("medals")
+    .update({
+      event_id: input.eventId,
+      modality_id: input.modalityId || null,
+      category: input.category.trim() || null,
+      level: input.level,
+      proof_url: input.proofUrl.trim() || null,
+    })
+    .eq("id", medalId);
+
+  if (error) return { error: error.message };
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "medal",
+    entityId: medalId,
+    action: "medal_approved_edited",
+  });
+
+  revalidatePath(`/students/${medal.student_id}/dossie`);
+  revalidatePath(`/professor/students/${medal.student_id}`);
+  revalidatePath("/aluno/medalhas");
+  revalidatePath("/aluno/ranking");
+  revalidatePath("/medals/ranking");
+  revalidatePath("/professor/medals/ranking");
+
+  return {};
+}

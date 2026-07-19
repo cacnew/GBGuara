@@ -34,7 +34,7 @@ export function MedalEventForm({
     formState: { errors },
   } = useForm<MedalEventFormInput>({
     resolver: zodResolver(medalEventSchema),
-    defaultValues: defaultValues ?? { modalityId: "" },
+    defaultValues: defaultValues ?? { modalityId: "", status: "active" },
   });
 
   async function onSubmit(data: MedalEventFormInput) {
@@ -44,6 +44,7 @@ export function MedalEventForm({
       organization: data.organization ?? "",
       eventDate: data.eventDate,
       modalityId: data.modalityId ?? "",
+      status: data.status,
       points: {
         ouro: data.pointsOuro ?? "",
         prata: data.pointsPrata ?? "",
@@ -116,6 +117,22 @@ export function MedalEventForm({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="status">Status</Label>
+        <select
+          id="status"
+          {...register("status")}
+          className="h-8 w-full rounded-lg border border-border bg-background px-2.5 text-sm"
+        >
+          <option value="active">Ativo</option>
+          <option value="inactive">Inativo</option>
+        </select>
+        <p className="text-xs text-muted-foreground">
+          Evento inativo sai das listas de lançamento, mas continua aparecendo no ranking e no
+          histórico dos alunos.
+        </p>
       </div>
 
       <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
