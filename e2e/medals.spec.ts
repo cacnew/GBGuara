@@ -42,14 +42,19 @@ test("aluno lança medalha, staff aprova, e ela passa a constar no dossiê do al
   let medalId: string | undefined;
 
   try {
+    // waitUntil: "domcontentloaded" em vez do default "load" — no Firefox,
+    // navegar pra uma rota do app enquanto já existe uma sessão ativa nunca
+    // dispara "load" (servidor dev do Next.js), travando o goto até estourar
+    // o navigationTimeout; os expects a seguir já validam o conteúdo real.
     // aluno loga e lança uma medalha para um evento existente do catálogo
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle");
     await page.fill("#email", STUDENT_EMAIL);
     await page.fill("#password", STUDENT_PASSWORD);
     await page.click('button[type="submit"]');
     await expect(page).toHaveURL(/\/aluno/, { timeout: 60000 });
 
-    await page.goto("/aluno/medalhas/new");
+    await page.goto("/aluno/medalhas/new", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle");
 
     const eventSelect = page.locator("#eventId");
@@ -76,14 +81,14 @@ test("aluno lança medalha, staff aprova, e ela passa a constar no dossiê do al
     expect(created!.status).toBe("pending");
 
     // staff (admin) loga e aprova o lançamento na fila
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle");
     await page.fill("#email", ADMIN_EMAIL);
     await page.fill("#password", ADMIN_PASSWORD);
     await page.click('button[type="submit"]');
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 60000 });
 
-    await page.goto("/medals/approvals");
+    await page.goto("/medals/approvals", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle");
     await page.getByPlaceholder("Buscar por aluno...").fill(studentName);
 
@@ -108,15 +113,21 @@ test("aluno lança medalha, staff aprova, e ela passa a constar no dossiê do al
       .single();
     expect(afterApprove?.status).toBe("approved");
 
+    // o "Aprovar" dispara router.refresh() no client — espera a navegação de
+    // refresh assentar antes de trocar de usuário, senão o goto("/login")
+    // seguinte corre contra ela (Webkit trata isso como erro de navegação
+    // interrompida; Chromium tolera silenciosamente)
+    await page.waitForLoadState("networkidle");
+
     // aluno loga de novo e confirma que a medalha aprovada aparece no dossiê
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle");
     await page.fill("#email", STUDENT_EMAIL);
     await page.fill("#password", STUDENT_PASSWORD);
     await page.click('button[type="submit"]');
     await expect(page).toHaveURL(/\/aluno/, { timeout: 60000 });
 
-    await page.goto("/aluno/dossie");
+    await page.goto("/aluno/dossie", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle");
     await expect(page.getByRole("heading", { name: "Medalhas" })).toBeVisible();
 

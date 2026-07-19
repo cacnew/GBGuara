@@ -32,15 +32,20 @@ test("admin reseta senha do aluno; aluno é forçado a trocar no próximo login"
     .single();
   const studentId = student!.id;
 
+  // waitUntil: "domcontentloaded" em vez do default "load" — no Firefox,
+  // navegar de volta pra uma rota do app (servidor dev do Next.js) enquanto
+  // já existe uma sessão/conexão ativa nunca dispara o evento "load", e o
+  // goto trava até estourar o navigationTimeout; domcontentloaded resolve
+  // cedo o bastante e o conteúdo real ainda é validado pelos expects a seguir.
   // login admin
-  await page.goto("/login");
+  await page.goto("/login", { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle");
   await page.fill("#email", ADMIN_EMAIL);
   await page.fill("#password", ADMIN_PASSWORD);
   await page.click('button[type="submit"]');
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 60000 });
 
-  await page.goto(`/students/${studentId}/edit`);
+  await page.goto(`/students/${studentId}/edit`, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "Resetar senha" }).click();
 
@@ -61,7 +66,7 @@ test("admin reseta senha do aluno; aluno é forçado a trocar no próximo login"
   expect(afterReset?.must_change_password).toBe(true);
 
   // aluno tenta logar com a senha antiga -> deve falhar
-  await page.goto("/login");
+  await page.goto("/login", { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle");
   await page.fill("#email", STUDENT_EMAIL);
   await page.fill("#password", ORIGINAL_PASSWORD);
@@ -69,7 +74,7 @@ test("admin reseta senha do aluno; aluno é forçado a trocar no próximo login"
   await expect(page.getByText(/inválid|incorret|Invalid/i)).toBeVisible({ timeout: 30000 });
 
   // aluno loga com a senha temporária -> deve ser forçado para /aluno/nova-senha
-  await page.goto("/login");
+  await page.goto("/login", { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle");
   await page.fill("#email", STUDENT_EMAIL);
   await page.fill("#password", tempPassword);
@@ -78,8 +83,9 @@ test("admin reseta senha do aluno; aluno é forçado a trocar no próximo login"
   await expect(page.getByRole("heading", { name: "Defina uma nova senha" })).toBeVisible();
 
   // tenta acessar outra rota do aluno -> deve continuar preso na tela obrigatória
-  await page.goto("/aluno");
+  await page.goto("/aluno", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/aluno\/nova-senha/, { timeout: 30000 });
+  await page.waitForLoadState("networkidle");
 
   // define nova senha (restaura a senha padrão da conta demo)
   await page.fill("#password", ORIGINAL_PASSWORD);

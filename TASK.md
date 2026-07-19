@@ -1898,3 +1898,52 @@ precisou de patch em `database.types.ts` (só policy nova, sem mudança de
 schema). Suíte e2e completa (5 testes, chromium) passando, incluindo
 `attendance-signal.spec.ts` 2x seguidas. `tsc --noEmit`, `eslint` e os 47
 testes (`npx vitest run`) limpos.
+
+### Suíte e2e em Firefox e Webkit (2026-07-19)
+
+A pedido do usuário, rodada a suíte completa também em firefox e webkit
+(antes só validada em chromium). Achado real: navegar de volta para uma
+rota do app (`page.goto`) enquanto já existe sessão ativa **nunca dispara
+o evento `load` no Firefox** contra o servidor dev do Next.js — o `goto`
+travava até estourar o `navigationTimeout` (60s), derrubando
+`attendance-signal.spec.ts`, `medals.spec.ts` e `reset-password.spec.ts`
+inteiros nesse navegador. Corrigido trocando todo `page.goto(...)` para
+`{ waitUntil: "domcontentloaded" }` seguido de
+`page.waitForLoadState("networkidle")` explícito antes de qualquer
+interação (padrão aplicado nos 3 specs) — elimina o travamento de vez.
+
+**Webkit**: corrigido um bug real do teste (não do produto) em
+`medals.spec.ts` — depois de aprovar a medalha, o `router.refresh()` do
+client dispara uma navegação que ainda estava em andamento quando o teste
+já chamava `page.goto("/login")` pra trocar de usuário; Webkit trata isso
+como erro de navegação interrompida (Chromium tolera silenciosamente).
+Corrigido com `waitForLoadState("networkidle")` antes de trocar de
+usuário. Com as duas correções, Webkit passa os 5 testes de forma
+consistente.
+
+**Firefox continua instável mesmo após a correção do travamento** — não é
+mais timeout puro, mas falhas variáveis (toast que não aparece, elemento
+"detached from the DOM" no meio de um clique, modal que não abre).
+Investigando o trace de rede de uma falha em `medals.spec.ts`, a página
+`/aluno/medalhas/new` foi recarregada sozinha **8 vezes** (GET repetido
+pra mesma URL, sem nenhuma ação do teste) antes do clique em "Lançar
+medalha" — indício de que o servidor dev do Next.js (Turbopack/Fast
+Refresh) está disparando reloads automáticos da página especificamente no
+Firefox nesse ambiente (projeto rodando em disco de rede), cada um
+resetando a hidratação; se o clique do teste cai no meio de um desses
+reloads, vira submit nativo (GET, aparece na URL como querystring) em vez
+de disparar a server action. Esse comportamento só existe em `next dev`
+(HMR não existe em build de produção) — não é um bug de produto, e não é
+algo resolvível ajustando waits/timeouts do teste. **Não investigado até o
+fim**: confirmar contra `next build && next start` (sem Turbopack dev)
+ficou de fora do escopo desta sessão a pedido do usuário. Se algum dia for
+necessário Firefox no CI, começar por aí.
+
+Confirmado que o Chromium continua 100% estável (5/5, reforçando fluxo
+normal ~1min) quando rodado isolado — um flake pontual visto numa rodada
+anterior foi sobrecarga do processo do servidor dev (mesmo processo
+`next dev`, reaproveitado via `reuseExistingServer`, atendendo várias
+rodadas completas de 15 testes em 3 navegadores em sequência sem reiniciar
+nada), não regressão de código.
+
+`tsc --noEmit`, `eslint` e os 47 testes (`npx vitest run`) limpos.

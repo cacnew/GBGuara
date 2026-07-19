@@ -22,7 +22,12 @@ function nearestMondayISODate(): string {
 }
 
 test("aluno sinaliza e cancela presença em uma aula da agenda", async ({ page }) => {
-  await page.goto("/login");
+  // waitUntil: "domcontentloaded" em vez do default "load" — no Firefox,
+  // navegar pra uma rota do app (servidor dev do Next.js) enquanto já existe
+  // sessão ativa nunca dispara "load", travando o goto até o navigationTimeout;
+  // os expects a seguir já validam o conteúdo real carregado.
+  await page.goto("/login", { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle");
   await page.fill("#email", STUDENT_EMAIL);
   await page.fill("#password", STUDENT_PASSWORD);
   await page.click('button[type="submit"]');
@@ -30,7 +35,7 @@ test("aluno sinaliza e cancela presença em uma aula da agenda", async ({ page }
   // novo em navegacoes client-side apos o redirect da server action de login
   await expect(page.getByRole("heading", { name: "Agenda" })).toBeVisible({ timeout: 60000 });
 
-  await page.goto(`/aluno?date=${nearestMondayISODate()}`);
+  await page.goto(`/aluno?date=${nearestMondayISODate()}`, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle");
   await expect(page.getByRole("heading", { name: "Agenda" })).toBeVisible({ timeout: 30000 });
 
