@@ -1356,6 +1356,229 @@ export type Database = {
           },
         ]
       }
+      medal_event_point_rules: {
+        Row: {
+          event_id: string
+          id: string
+          level: string
+          points: number
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          level: string
+          points: number
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          level?: string
+          points?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medal_event_point_rules_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "medal_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medal_events: {
+        Row: {
+          created_at: string
+          created_by_user_id: string | null
+          event_date: string
+          id: string
+          modality_id: string | null
+          name: string
+          organization: string | null
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id?: string | null
+          event_date: string
+          id?: string
+          modality_id?: string | null
+          name: string
+          organization?: string | null
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string | null
+          event_date?: string
+          id?: string
+          modality_id?: string | null
+          name?: string
+          organization?: string | null
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medal_events_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medal_events_modality_id_fkey"
+            columns: ["modality_id"]
+            isOneToOne: false
+            referencedRelation: "modalities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medal_events_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medal_point_rules: {
+        Row: {
+          id: string
+          level: string
+          points: number
+          school_id: string
+        }
+        Insert: {
+          id?: string
+          level: string
+          points: number
+          school_id: string
+        }
+        Update: {
+          id?: string
+          level?: string
+          points?: number
+          school_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medal_point_rules_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medals: {
+        Row: {
+          category: string | null
+          created_at: string
+          event_id: string
+          id: string
+          level: string
+          modality_id: string | null
+          proof_url: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by_user_id: string | null
+          school_id: string
+          status: string
+          student_id: string
+          submitted_by_student_id: string | null
+          submitted_by_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          level: string
+          modality_id?: string | null
+          proof_url?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          school_id: string
+          status?: string
+          student_id: string
+          submitted_by_student_id?: string | null
+          submitted_by_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          level?: string
+          modality_id?: string | null
+          proof_url?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          school_id?: string
+          status?: string
+          student_id?: string
+          submitted_by_student_id?: string | null
+          submitted_by_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medals_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "medal_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medals_modality_id_fkey"
+            columns: ["modality_id"]
+            isOneToOne: false
+            referencedRelation: "modalities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medals_reviewed_by_user_id_fkey"
+            columns: ["reviewed_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medals_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medals_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medals_submitted_by_student_id_fkey"
+            columns: ["submitted_by_student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medals_submitted_by_user_id_fkey"
+            columns: ["submitted_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modalities: {
         Row: {
           created_at: string

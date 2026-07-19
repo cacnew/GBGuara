@@ -1514,7 +1514,7 @@ usuário antes de iniciar:
     (considerando o override da decisão 5, se houver); o filtro por
     evento independe do ano selecionado (um evento tem data fixa).
 
-- [ ] **12.1 — Migration: `medals` + `medal_point_rules` + `medal_events` + `medal_event_point_rules`**
+- [x] **12.1 — Migration: `medals` + `medal_point_rules` + `medal_events` + `medal_event_point_rules`**
   Critério de pronto: 4 tabelas com RLS. `medal_events` (school_id, name,
   organization nullable, event_date, modality_id nullable FK `modalities`
   — sugestão, created_by_user_id, created_at/updated_at).
@@ -1540,6 +1540,19 @@ usuário antes de iniciar:
   escola (para o ranking), só insere/edita as próprias e nunca define
   `status=approved`; staff lê/insere/edita todas as medalhas da escola e é
   o único que pode aprovar/rejeitar.
+  Migration `20260719120000_medals_system.sql` aplicada no Supabase
+  compartilhado (`nexusdojo-dev`) via `supabase db push --db-url`; inclui
+  backfill de `medal_point_rules` para a escola já existente no ambiente
+  (`create_default_medal_point_rules` só dispara em escolas novas). RLS de
+  aluno modelada com `using`/`with check` assimétricos (edição de
+  pendente/rejeitado sempre volta a `pending`, nunca preenche campos de
+  revisão — aluno nunca se autoaprova). Verificado direto no banco após o
+  push: as 4 linhas de `medal_point_rules` (ouro=3/prata=2/bronze=1/
+  participação=0) existem para a escola `Gracie Barra Guará`.
+  `lib/supabase/database.types.ts` recebeu patch manual com os `Row`/
+  `Insert`/`Update`/`Relationships` das 4 tabelas novas (mesmo padrão
+  cirúrgico das Fases 9.1/9.2/10.1 — regen completo via `db:types` continua
+  pendente de Docker/token de management API). `tsc --noEmit` limpo.
 
 - [ ] **12.2 — Tela admin: configurar pontuação default por nível**
   Critério de pronto: tela simples em `(admin)` lista os 4 níveis com o
