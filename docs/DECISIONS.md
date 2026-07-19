@@ -1109,3 +1109,436 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
 - O site de referencia da GB Mangueiral foi usado apenas como direcao visual.
   Imagens/conteudo finais devem vir do admin, do Supabase Storage e dos dados
   publicos aprovados pelo usuario.
+
+## Login do aluno (Fase 9.1)
+
+- `current_student_id()` (SECURITY DEFINER, mesmo padrão de
+  `current_school_id()` da Fase 1.3) evita duplicar a lógica de resolução
+  de perfil nas policies de RLS de cada tabela nova que passa a aceitar o
+  papel aluno.
+- Redirect pós-login passou a resolver entre 3 destinos (admin/professor/
+  aluno) em vez de 2 — lógica centralizada em `modules/auth/actions.ts`,
+  não duplicada em cada layout.
+- `database.types.ts` recebeu patch manual cirúrgico (só o campo
+  `auth_user_id`) em vez de regen completo — Docker indisponível neste
+  ambiente e o Access Token testado não tinha privilégio de management
+  API no projeto `nexusdojo-dev`. O mesmo patch cirúrgico se repetiria em
+  toda fase seguinte que altera schema, até hoje sem regen completo.
+- Testado ponta a ponta contra o Supabase compartilhado: aluno autentica,
+  lê a própria linha, RLS bloqueia silenciosamente a linha de outro
+  aluno, e o aluno não aparece em `public.users` (papéis staff e aluno
+  são tabelas físicas diferentes — `users` vs `students`).
+
+## Migration do módulo de check-in (Fase 9.2)
+
+- Todas as colunas novas de `class_groups` (capacidade, faixa/grau
+  mínimo, restrição de sexo) são opt-in/nullable — turma sem esses campos
+  preenchidos continua "turma flexível" (decisão já tomada na Fase 4),
+  sem quebrar nada existente.
+- Modelo de presença estendido aditivamente: novos status
+  (`signaled`/`confirmed`/`added_by_instructor`/`no_show`/`cancelled`)
+  convivem com `presente`/`falta`/`falta_justificada` da Fase 4, em vez
+  de renomear ou migrar dados existentes.
+- **Efeito colateral real**: a nova FK `attendances.confirmed_by → users`
+  criou uma segunda relação `attendances`↔`users`, tornando ambíguo o
+  embed `users(name)` já usado em `attendance-history.tsx` — corrigido
+  com hint explícito de FK (`users!registered_by_user_id(name)`),
+  primeira aparição de um padrão que se repetiria em várias fases
+  seguintes (Fase 12 incluída) sempre que uma tabela ganha uma segunda FK
+  para o mesmo alvo.
+
+## Serviço de materialização de sessões sob demanda (Fase 9.3)
+
+- `getOrCreateClassSession` extraído para um helper compartilhado (sem
+  checagem de autorização própria — recebe `schoolId` já resolvido pelo
+  chamador) porque tanto a API do aluno (9.4) quanto a do professor (9.5)
+  precisam materializar sessões em datas diferentes de "hoje", e a tela
+  "Turmas do dia" (Fase 3.2) só cobria o dia corrente.
+- Idempotente via `unique(class_group_id, date)`, com o mesmo tratamento
+  de corrida (código `23505`) já validado em produção desde a Fase 3.2 —
+  reaproveitado, não reinventado.
+
+## API do aluno: agenda, sinalizar, cancelar (Fase 9.4)
+
+- Janela de sinalização (7 dias antes / 24h de tolerância depois) e
+  conflito de horário bloqueante são regras de produto confirmadas com o
+  usuário antes de implementar, não inferidas.
+- Cancelamento é soft (`status='cancelled'`) para manter histórico e
+  permitir re-sinalizar na mesma sessão — decisão que geraria um bug real
+  de RLS descoberto só na Fase 9.11 (ver abaixo).
+- Elegibilidade por faixa é fail-closed quando aluno e turma usam
+  `belt_system_id` diferentes — trata ambiguidade como "não elegível" em
+  vez de arriscar liberar por engano.
+- `attendances.registered_by_user_id` teve que virar nullable:
+  autossinalização do aluno não tem nenhum ator staff, diferente de todo
+  insert anterior nessa tabela.
+- **Limitação conhecida aceita**: checagem de capacidade não é atômica
+  (duas sinalizações simultâneas no último lugar podem ambas passar) —
+  risco aceito no volume do MVP 2, revisitar só se virar problema real.
+
+## API do professor: chamada (Fase 9.5)
+
+- `roll-call.ts` é um arquivo novo que convive com
+  `modules/attendance/actions.ts` (Fase 4) sem alterá-lo — a chamada
+  antiga continua funcionando em paralelo enquanto a nova (com
+  sinalização) é validada.
+- Todas as ações de escrita exigem sessão na data corrente ou passada,
+  ainda não fechada — mesmo guard-rail nos 4 endpoints
+  (`confirmAttendance`/`revertToSignaled`/`addStudentManually`/
+  `closeRollCall`), centralizado numa função `assertSessionEditable` para
+  não repetir a lógica 4 vezes.
+- Reabertura de chamada fechada ficou deliberadamente fora de escopo
+  (autorizado pela spec do módulo).
+
+## Tela Agenda do aluno (Fase 9.6)
+
+- **Bug real de RLS encontrado em produção**: `class_groups`,
+  `class_sessions`, `teachers` e `belts` não tinham NENHUMA policy de
+  select para aluno — só para staff, desde suas fases de criação
+  originais. A agenda aparecia sempre vazia, sem erro nenhum (RLS bloqueia
+  silenciosamente). Esse mesmo tipo de lacuna se repetiria em
+  `modalities` na Fase 12.4 — dado de catálogo não sensível esquecido de
+  liberar para o papel `student` quando ele nasceu.
+- **Bug de navegação**: chamar `router.refresh()` imediatamente depois de
+  `router.push()` cancelava a transição client-side pendente (a URL nunca
+  mudava, mesmo o destino resolvendo certo). Corrigido removendo o
+  `refresh()` redundante.
+
+## Tela Chamada do professor (Fase 9.7)
+
+- Tela nova paralela a `attendance-client.tsx` (não substitui) — link
+  "Chamada com sinalização" adicionado à tela antiga para acesso, mesma
+  filosofia de convivência da Fase 9.5.
+
+## Painel e histórico do aluno (Fase 9.8)
+
+- Gráfico mensal e histórico alimentados só por presenças
+  `confirmed`/`added_by_instructor` — sinalização sem confirmação e
+  cancelamentos não contam.
+
+## Minha Academia (Fase 9.9)
+
+- **Decisão de segurança central do módulo**: `students` guarda CPF/
+  telefone/endereço/notas médicas que nunca podem vazar para outro aluno.
+  Em vez de abrir select geral na tabela para o papel aluno, criada a
+  view `student_directory` (sem `security_invoker` — roda com privilégio
+  de dono, mas o próprio `WHERE` já escopa por
+  `coalesce(current_school_id(), current_student_school_id())`) expondo
+  só as colunas seguras — mesmo padrão reaproveitado depois pelo ranking
+  de medalhas (Fase 12.7).
+
+## Notificações e Perfil do aluno (Fase 9.10)
+
+- Escopo reduzido conscientemente vs. a spec original: "mudar de
+  academia"/"trocar de conta"/"idioma" não se aplicam a este sistema
+  (uma escola só); "excluir conta" e "push" ficam fora por exigirem fluxo
+  próprio ainda não construído.
+
+## Testes das regras de negócio do módulo do aluno (Fase 9.11)
+
+- Projeto não tinha nenhum runner de teste — `vitest` adicionado aqui,
+  junto com o padrão que se repetiria em toda fase daí em diante: lógica
+  pura sem I/O extraída para arquivos próprios (`eligibility.ts`,
+  `signal-rules.ts`) para ser testável sem banco, enquanto regras que
+  vivem na camada de RLS ganham teste de integração num client
+  autenticado de verdade (não `service_role`, que bypassa RLS e não
+  provaria nada).
+- **2 bugs reais encontrados pelos próprios testes**: (1)
+  `checkSignalWindow` comparava hora local do processo com um instante
+  absoluto (`now`), causando desvio sistemático fora de UTC — corrigido
+  forçando `Z` explícito; (2) **bug sério de produção**: a policy de
+  update do aluno em `attendances` só permitia mexer na linha quando o
+  status ATUAL já era `signaled`, bloqueando silenciosamente a
+  reativação `cancelled → signaled` de que `signalAttendance` depende —
+  como RLS filtra linhas sem erro em UPDATE, a Server Action respondia
+  sucesso mesmo sem reativar nada, e o aluno via a UI "funcionar" enquanto
+  o banco continuava cancelado. Esse exato padrão de risco (policy de
+  update com `using` mais restritivo que o fluxo real de reenvio) foi a
+  referência direta usada ao desenhar a RLS de edição de medalha
+  rejeitada na Fase 12.1.
+
+## Reset de senha de alunos pelo admin (Fase 10.1)
+
+- `students.must_change_password` + enforcement no layout `(student)`
+  (redireciona para `/aluno/nova-senha` enquanto ativa) — página fica num
+  route group próprio (`(student-forced)`) fora de `(student)` de
+  propósito, para não herdar o próprio redirect e criar um loop.
+- `components/ui/confirm-dialog.tsx` criado aqui como o primeiro modal
+  genérico reutilizável do projeto — reaproveitado depois em toda ação
+  destrutiva/sensível que precisasse de confirmação (incluindo a
+  rejeição de medalha na Fase 12.5).
+- Senha temporária mostrada uma única vez, com botão copiar — nunca
+  persistida em texto claro além do necessário para o admin repassar ao
+  aluno.
+
+## Data e dia da semana no grid de aulas (Fase 10.2)
+
+- Decisão de escopo confirmada com o usuário: cada linha da aba "Aulas"
+  representa uma turma **recorrente**, não uma ocorrência datada — "dia
+  da semana" vem de `class_groups.week_days`, nunca hardcoded nem
+  expandido em datas específicas (isso ficaria fora de escopo).
+
+## Padronizar visual das faixas em /aluno (Fase 10.3)
+
+- Substituição do dot manual (`style={{backgroundColor}}`) por
+  `BeltPreview`/`BeltWithPreview` elimina a necessidade de propagar
+  `colorHex` pelas queries — a cor passa a ser derivada do nome da faixa
+  pelo próprio componente, mesma fonte de verdade usada no admin desde
+  sempre.
+
+## Foto do aluno (Fase 10.4)
+
+- Upload self-service do aluno usa `createAdminClient()` (não o client
+  de sessão normal) porque o aluno não tem policy de update na tabela
+  `students` — mesmo padrão de `clearMustChangePassword` da 10.1.
+- Bucket `avatars` (criado na Fase 8.1 só para staff) precisou de
+  policies novas usando `current_student_school_id()`/
+  `current_student_id()`, restritas ao próprio arquivo do aluno via
+  convenção de nome (`storage.filename(name) like student_id || '-%'`) —
+  sem essa convenção de nomenclatura, restringir por "próprio arquivo" no
+  Storage exigiria uma tabela de metadados extra.
+
+## Área financeira do aluno (Fase 10.5)
+
+- Usa `createClient()` com RLS normal (não admin client) — aluno só lê,
+  nunca escreve dado financeiro próprio.
+- RLS de `plans`/`price_tables` precisou de policy nova para aluno mesmo
+  essas tabelas não sendo "dele": o PostgREST também filtra a tabela do
+  lado embutido de um join, então mostrar o nome do plano dentro do
+  contrato exige select nessas duas tabelas também, não só em
+  `contracts`.
+- Botão "Pagar" nasceu como texto de espera ("aguardando envio da
+  cobrança") de propósito — a Fase 10.6 ainda não existia, e a tela foi
+  desenhada para já ter o lugar certo pronto quando o Pix real chegasse.
+
+## Gestão de cobranças pelo admin (Fase 10.6)
+
+- Pix copia-e-cola (BR Code/EMV, TLV + CRC16-CCITT) e QR Code montados
+  100% localmente em TS puro — sem gateway, sem chamada externa, decisão
+  de escopo confirmada com o usuário em 2026-07-14 (boleto com gateway
+  real continua fora de escopo).
+- `QRCode.toString(..., { type: "svg" })` escolhido especificamente por
+  não depender de `canvas` — funciona identicamente no server (geração
+  da imagem) e no client, sem diferença de ambiente.
+- Notificação `charge_sent` reaproveitou o campo `type` já livre de
+  `notifications` (Fase 9.2) — sem migration de schema nova só para
+  adicionar um tipo de notificação, mesmo padrão que a Fase 12.5 seguiria
+  depois para `medal_approved`/`medal_rejected`.
+
+## Dossiê do aluno (Fase 10.7)
+
+- `student_internal_notes` nasce **sem nenhuma policy de select para
+  aluno** — mesmo padrão defensivo de `student_financial_exemptions`
+  (Fase 5.10): a informação nunca vaza por construção, independente de
+  qualquer tela futura que venha a consultar essa tabela sem cuidado.
+  Esse padrão (tabela sensível sem policy alguma para o papel aluno, em
+  vez de confiar só na tela para não mostrar) foi reaproveitado
+  literalmente na decisão de "medalhas aprovadas só" do dossiê da
+  Fase 12.
+- `InternalNotesSection` é o primeiro componente explicitamente desenhado
+  para ser importado sem alteração tanto do dossiê do admin quanto da
+  ficha do professor — o modelo que a Fase 12 replicaria para
+  `MedalsSection`/`EditApprovedMedalButton`.
+- Verificação visual do dossiê do próprio aluno ficou incompleta nesta
+  sessão por instabilidade do ambiente (filesystem/rede lentos) — risco
+  aceito como baixo porque as funções consumidas (`getStudentDashboard`,
+  `getStudentFinance`) já tinham validação end-to-end própria em fases
+  anteriores.
+
+## Landing page: schema e fluxo de publicação (Fase 11.1/11.2)
+
+- RLS de `landing_pages` libera leitura pública (`anon`) só para
+  `status = 'published'` — mas a página pública em si (`app/page.tsx`)
+  usa `createAdminClient()` no server, então essa policy nunca é
+  exercitada pelo fluxo normal do produto. Ela importa mesmo assim para
+  quem acessa a API REST do Supabase diretamente (ex: um app mobile
+  futuro, ou qualquer client que não seja este Next.js) — confirmado
+  testando o toggle `draft`/`published` direto no banco e observando
+  `anon` perder/recuperar acesso à linha.
+- Conteúdo em `jsonb` por seção (identidade, hero, métricas, sobre,
+  campanha, contato, rodapé, SEO) em vez de colunas próprias — reduz o
+  custo de migration para qualquer mudança de copy/design, mantendo
+  tabela própria só para o que precisa apontar para um cadastro real
+  (`landing_teacher_profiles` → `teachers`).
+- `getPublishedLandingPage()` busca a landing publicada mais recente sem
+  filtrar por domínio/host — inofensivo com uma escola só no ambiente,
+  mas precisaria de resolução por subdomínio antes de suportar mais de
+  uma escola no mesmo deployment Next.js.
+
+## Correção do bug de fotos de professores na landing (2026-07-17)
+
+- Causa raiz de três camadas, não uma: `syncTeachers` sempre sobrescrevia
+  `landing_teacher_profiles.photo_url` com a foto interna do professor a
+  cada save (apagando qualquer foto dedicada), **e** a query de leitura
+  já priorizava a foto interna sobre a da landing, **e** não existia
+  campo de upload para a foto dedicada no formulário — as três lacunas
+  juntas tornavam impossível o admin usar uma foto diferente da interna
+  na landing, mesmo a coluna já existindo desde a Fase 11.1.
+- Corrigido nos 3 pontos ao mesmo tempo: prioridade da query invertida
+  (`landing photo ?? internal photo`), campo de upload novo por
+  professor selecionado, e `syncTeachers` passou a preservar a escolha
+  do admin em vez de sempre sobrescrever.
+
+## Correção do aviso de FieldControl não controlado (2026-07-17)
+
+- Causa raiz: o formulário da landing não desmonta entre saves
+  (`revalidatePath` só reexecuta o Server Component pai, que reenvia
+  `defaultValue` novo para um `Input` não controlado já inicializado) —
+  o Base UI acusa isso corretamente como um bug potencial de
+  sincronização de estado.
+- **Armadilha real durante a investigação**: a primeira tentativa
+  (travar `defaultValue` num `useState` no primeiro render) fez o aviso
+  desaparecer, mas introduziu uma regressão silenciosa — o campo passava
+  a ignorar o valor recém-salvo até um reload de página, porque o React
+  19 reseta campos não controlados para o `defaultValue` ao fim de uma
+  form action. Só foi descoberta testando o valor *imediatamente* após
+  salvar, sem reload — um teste que a validação original não tinha feito.
+- Correção final: `key={defaultValue}` no `Input` — como o valor só muda
+  de fato após um save bem-sucedido, a mudança de key força o React a
+  desmontar/remontar uma instância nova com o valor recém-salvo como
+  `defaultValue` de fábrica, sem o aviso e sem a regressão.
+
+## Schema do sistema de medalhas (Fase 12.1)
+
+- Catálogo de eventos (`medal_events`) existe antes de qualquer
+  lançamento — aluno sempre escolhe um evento já cadastrado por staff,
+  nunca digita nome/data/organização livremente (decisão de produto que
+  troca flexibilidade por consistência de dados no ranking).
+- Pontuação em duas camadas: default por escola (`medal_point_rules`,
+  seed automático via trigger em cada escola nova, mesmo padrão da Fase
+  2.1) + override opcional por evento (`medal_event_point_rules`) —
+  resolvido em cascata (`resolveMedalPoints`: override do evento se
+  existir, senão default da escola).
+- RLS de `medals` assimétrica de propósito: aluno lê próprias medalhas
+  em qualquer status + medalhas aprovadas de qualquer aluno da escola
+  (para o ranking ver todo mundo); insert do aluno só aceita
+  `status='pending'`; update do aluno usa `using`/`with check`
+  diferentes — pode editar enquanto `pending`/`rejected`, mas o resultado
+  do update tem que voltar a `pending` com os campos de revisão nulos,
+  nunca pode se autoaprovar. Esse desenho é o espelho direto da lição da
+  Fase 9.11 (policy de update mais restritiva que o fluxo real de
+  reenvio bloqueava silenciosamente).
+- Constraint "exatamente um de `submitted_by_student_id`/
+  `submitted_by_user_id`" vive no banco, não só na aplicação — impede um
+  estado ambíguo de "quem lançou" mesmo que algum código futuro esqueça
+  de validar isso.
+- Backfill manual de `medal_point_rules` para a escola já existente no
+  ambiente compartilhado — o trigger só dispara em `AFTER INSERT ON
+  schools`, então escolas criadas antes da migration não ganham as 4
+  linhas de graça (mesma pegadinha já vista em toda fase que adiciona
+  seed-via-trigger depois que a escola de demonstração já existe).
+
+## Tela admin de pontuação default (Fase 12.2)
+
+- Tela de edição inline (sem create/delete) porque os 4 níveis são
+  fixos — diferente do CRUD completo de `modalities`/eventos, aqui só o
+  valor de pontos varia por nível.
+
+## Catálogo de eventos com pontuação por evento (Fase 12.3)
+
+- Reconciliação de override por evento é "apaga tudo e recria a partir
+  do formulário" em vez de upsert seletivo — evento tem no máximo 4
+  linhas de override (1 por nível), então o custo de reescrever tudo é
+  irrelevante e o código fica mais simples que rastrear o que mudou.
+- Remoção de evento bloqueada em duas camadas: checagem na aplicação
+  (mensagem amigável) **e** FK `medals.event_id on delete restrict` no
+  banco (defesa em profundidade — a checagem da aplicação existe só para
+  não expor o erro técnico do Postgres).
+
+## Fluxo do aluno: lançar e gerenciar medalhas (Fase 12.4)
+
+- `modalities` não tinha policy de select para aluno desde a Fase 2.1 —
+  mesma lacuna exata já corrigida para `class_groups`/`class_sessions`/
+  `teachers`/`belts` na Fase 9.6, só que ninguém tinha notado que faltava
+  também em `modalities` até o formulário de lançamento precisar dela.
+- Edição de um lançamento rejeitado precisa zerar explicitamente
+  `reviewed_by_user_id`/`reviewed_at`/`rejection_reason` no mesmo update
+  que muda o status para `pending` — a policy de RLS exige os três
+  nulos no estado pós-update, e um registro rejeitado chega com os três
+  preenchidos pela análise anterior.
+
+## Fila de aprovação (Fase 12.5)
+
+- Busca por aluno é filtro client-side sobre a lista completa de
+  pendentes (mesmo padrão de `academia-client.tsx`, Fase 9.9) — volume
+  de pendentes por escola é pequeno, não justifica ida ao servidor a
+  cada tecla.
+- **Bug de embed ambíguo**: `medals` tem duas FKs para `students`
+  (`student_id` e `submitted_by_student_id`) — qualquer select que tente
+  `students(...)` sem hint explícito falha com "more than one
+  relationship was found". Resolvido com
+  `students!medals_student_id_fkey(...)`; o mesmo problema se repetiria
+  para `users` na Fase 12.8 (duas FKs: `submitted_by_user_id` e
+  `reviewed_by_user_id`), mesma correção.
+
+## Staff lança medalha em nome de aluno (Fase 12.6)
+
+- Nasce direto `approved` (autor = revisor) em vez de entrar na fila de
+  aprovação — decisão de produto explícita: quem lança em nome de um
+  aluno já é a mesma autoridade que aprovaria, então forçar uma segunda
+  aprovação da própria equipe seria burocracia sem função real.
+- Modal próprio (não `ConfirmDialog`) porque precisa de campos de
+  formulário reais, não só uma confirmação — mesmo componente de base
+  reaproveitado depois para o botão de editar medalha aprovada
+  (Fase 12.11).
+
+## Ranking anual (Fase 12.7)
+
+- Ranking por evento e ranking por ano têm semânticas diferentes de
+  propósito: por ano, todo aluno ativo aparece (mesmo com 0 pontos, para
+  não sugerir que ele "não existe"); por evento, só aparecem os
+  participantes reais — misturar as duas regras seria confuso.
+- Filtro por evento ignora o seletor de ano de propósito — um evento já
+  tem data fixa, então o ano é redundante nesse contexto.
+- Empate resolvido por pontos desc + nome alfabético — critério simples
+  e documentado, sem tentar inventar um critério "justo" mais
+  sofisticado sem pedido explícito do usuário.
+
+## Seção de medalhas aprovadas no dossiê (Fase 12.8)
+
+- Só medalhas aprovadas aparecem no dossiê — é o registro oficial de
+  conquistas; a fila de pendentes/rejeitados fica só nas telas de gestão
+  (12.4/12.5), decisão de produto para o dossiê não misturar "o que está
+  em análise" com "o que já é fato".
+
+## Testes de regras de negócio das medalhas (Fase 12.9)
+
+- **2 bugs de infraestrutura de teste encontrados e corrigidos, nenhum
+  específico desta fase**: (1) o projeto nunca tinha um
+  `vitest.config.ts`, então o include default também varria os specs do
+  Playwright em `e2e/` e falhava — `test()` do Playwright não pode ser
+  chamado fora do runner dele; (2) o mesmo bug já documentado na Fase
+  9.11 (import `@/` quebra teste unitário porque o vitest não resolve
+  esse alias) se repetiu em `points.ts`/`ranking.ts`, que misturavam
+  função pura com uma função de I/O no mesmo arquivo — corrigido
+  extraindo a lógica pura para `points-rules.ts`/`ranking-rules.ts`,
+  exatamente o padrão já estabelecido por `eligibility.ts`/
+  `signal-rules.ts`.
+
+## Dados de demonstração de medalhas (Fase 12.10)
+
+- Ciclo de "rejeitado e reenviado" simulado literalmente (insere
+  rejeitado, depois aplica o mesmo update que a Server Action de
+  reenvio faria) em vez de só inserir um registro `pending` comum —
+  garante que o cenário de demonstração reflita o fluxo real, não uma
+  aproximação.
+
+## Editar medalha aprovada pelo staff (Fase 12.11)
+
+- Corrige só os campos descritivos (evento/modalidade/categoria/nível/
+  comprovante) — nunca `status`/`reviewed_by_user_id`/`reviewed_at`,
+  porque não é uma nova aprovação, é uma correção de dado já aprovado
+  (preserva quem/quando aprovou de verdade).
+- Botão de editar garante que o evento atual da medalha apareça no
+  seletor mesmo se esse evento tiver sido inativado depois (Fase
+  12.12) — sem essa defesa, o `<select>` cairia silenciosamente na
+  primeira opção da lista e o save trocaria o evento por engano.
+
+## Status ativo/inativo em eventos (Fase 12.12)
+
+- Evento inativo sai das listas de lançamento (um novo lançamento não
+  deveria mais escolher um evento "encerrado"), mas continua aparecendo
+  no filtro de evento do ranking e no histórico do dossiê — inativar
+  nunca apaga dado histórico. Por isso `listMedalEventOptions` ganhou um
+  parâmetro `activeOnly` (default `true` para lançamento) em vez de duas
+  funções separadas.

@@ -36,6 +36,7 @@ Validacao local:
 ```bash
 npm run lint
 npm run build
+npm test
 ```
 
 ## Stack
@@ -47,6 +48,20 @@ npm run build
 - React Hook Form
 - Zod
 - shadcn/ui
+
+## Modulo do aluno
+
+- Aluno tem login proprio (`/aluno`), separado de admin/professor.
+- Agenda com sinalizacao de presenca, painel, financeiro (leitura),
+  medalhas/ranking, notificacoes e perfil.
+- Professor confirma/inclui presenca sinalizada em `/attendance/[id]/roll-call`.
+
+## Sistema de medalhas e ranking
+
+- Staff (admin/professor) cadastra o catalogo de eventos; aluno lanca seu
+  desempenho escolhendo um evento existente; staff aprova ou rejeita.
+- Ranking anual soma pontos por nivel (ouro/prata/bronze/participacao),
+  configuravel por escola ou por evento, visivel para todos os perfis.
 
 ## Landing page publica
 
