@@ -1461,6 +1461,15 @@ usuário antes de iniciar:
    ampla-porém-escopada-por-escola já usado em `student_directory`
    (Fase 9.9), expondo só nome/foto/faixa + pontuação, nunca dados
    sensíveis do cadastro.
+7. **Visão do próprio aluno**: além da tabela geral do ranking (item 6),
+   o aluno vê um resumo pessoal com pontos do ano selecionado, pontos
+   totais (soma de todas as medalhas aprovadas em todos os anos, sem
+   recorte por ano) e sua colocação atual no ranking da escola.
+8. **Dossiê do aluno**: uma medalha só passa a constar no dossiê (ficha
+   consolidada do aluno, tanto na visão do admin/professor quanto na
+   visão do próprio aluno em `/aluno/dossie`) depois que o staff aprova —
+   é o registro oficial de conquistas, não a fila de lançamentos
+   pendentes/rejeitados (essa fica só na tela de gestão da Fase 12.3/12.4).
 
 - [ ] **12.1 — Migration: `medals` + `medal_point_rules`**
   Critério de pronto: tabela `medals` (school_id, student_id, modality_id
@@ -1514,14 +1523,18 @@ usuário antes de iniciar:
   padrão), com nome/foto/faixa (reaproveitando `student_directory` da
   Fase 9.9) e posição; empate resolvido por critério simples e documentado
   (ex: nome alfabético); aluno sem medalha no ano aparece com 0 pontos,
-  não fica de fora da lista.
+  não fica de fora da lista. Na visão do aluno (decisão 7 do preâmbulo), a
+  tela também mostra um resumo pessoal: pontos do ano selecionado, pontos
+  totais (todas as medalhas aprovadas, todos os anos somados) e a
+  colocação atual do aluno dentro do ranking da escola.
 
-- [ ] **12.7 — Seção de medalhas na ficha/dossiê do aluno**
+- [ ] **12.7 — Seção de medalhas aprovadas na ficha/dossiê do aluno**
   Critério de pronto: ficha do aluno no admin/professor e dossiê do
-  próprio aluno (`/aluno/dossie`, Fase 10.7) ganham seção com histórico
-  completo de medalhas (todos os status, com quem lançou e quem
-  analisou), reaproveitando o componente sempre que possível em vez de
-  duplicar entre as duas telas.
+  próprio aluno (`/aluno/dossie`, Fase 10.7) ganham seção com as medalhas
+  **aprovadas** (decisão 8 do preâmbulo — registro oficial de conquistas,
+  não a fila de pendentes/rejeitados da Fase 12.3/12.4), mostrando quem
+  lançou e quem analisou cada uma; componente reaproveitado entre as duas
+  telas em vez de duplicado.
 
 - [ ] **12.8 — Testes das regras de negócio**
   Critério de pronto: testes unitários do cálculo de pontuação/ranking
@@ -1530,3 +1543,18 @@ usuário antes de iniciar:
   própria medalha, aluno não vê lançamento pendente/rejeitado de outro
   aluno, staff aprova/rejeita corretamente, edição só permitida em
   pending/rejected), mesmo padrão de `tests/` já estabelecido na Fase 9.11.
+
+- [ ] **12.9 — Dados de demonstração de medalhas**
+  Critério de pronto: script novo em `scripts/` (mesmo padrão de
+  `seed-attendance.mjs`/`seed-full-finance.mjs`) popula o ambiente
+  compartilhado (`nexusdojo-dev`) com lançamentos de medalha distribuídos
+  em vários anos (incluindo o ano corrente e ao menos 2 anos anteriores,
+  para o seletor de histórico da 12.6 ter o que mostrar) e nos 3 status
+  (pending/approved/rejected, incluindo pelo menos um caso de rejeitado
+  com motivo e reenviado); distribuição plausível entre os alunos
+  existentes (nem todos com medalha, alguns com várias, níveis variados)
+  para o ranking, a fila de aprovação e o dossiê fazerem sentido tanto do
+  lado do staff quanto da conta demo do aluno
+  (`aluno@nexusdojo.dev`), que deve ficar com histórico próprio
+  (aprovadas de anos diferentes + ao menos um pendente) para validar a
+  visão pessoal (pontos anuais/totais/colocação) descrita na decisão 7.
