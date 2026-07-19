@@ -1415,3 +1415,118 @@ duradouro — a landing ficou com o slogan errado por alguns minutos durante
 o teste, nunca em produção fora de uma janela de teste ativo.
 
 Scripts temporários removidos, dev server parado.
+
+---
+
+## Fase 12 — Sistema de Medalhas e Ranking (aprovado em 2026-07-19)
+
+Aluno registra medalhas conquistadas em campeonatos; professor ou admin
+analisa (aprova/rejeita) cada lançamento, ficando registrado quem lançou e
+quem analisou. Ranking anual (por ano civil) soma pontos das medalhas
+aprovadas de **todos os alunos** da escola, visível para qualquer perfil
+(aluno/professor/admin), com seletor de anos anteriores para manter
+histórico ao longo do tempo. Decisões de arquitetura confirmadas com o
+usuário antes de iniciar:
+
+1. **Campos do lançamento** (opção "campeonato/evento completo"): nome do
+   evento, organização/federação (opcional), data do evento, modalidade
+   (opcional, FK `modalities`), categoria/peso (texto livre, opcional),
+   nível (`ouro`/`prata`/`bronze`/`participacao`), comprovante/foto
+   (opcional, reaproveitando o padrão de upload do Supabase Storage já
+   usado em fotos de aluno/professor).
+2. **Pontuação configurável pelo admin**: tabela de pontos por nível
+   (`medal_point_rules`, 1 linha por nível por escola), com seed default
+   (ouro=3, prata=2, bronze=1, participação=0) aplicado automaticamente ao
+   criar a escola (mesmo padrão de seed via trigger já usado em
+   modalidades/faixas/contas financeiras na Fase 1/2/5); tela simples de
+   edição para o admin ajustar os valores da própria escola.
+3. **Rejeição**: motivo obrigatório (campo texto); o aluno vê o motivo e
+   pode editar os dados do lançamento rejeitado e reenviar — o mesmo
+   registro volta para `pending` (sem duplicar linha), preservando o
+   motivo da última rejeição até a próxima decisão.
+4. **Ranking por ano civil**: calculado a partir do ano de `event_date`
+   das medalhas `approved`, com seletor de ano (corrente por padrão,
+   anos anteriores disponíveis) — calculado sob demanda (sem tabela de
+   snapshot), mesmo padrão de relatórios já existentes no projeto (ex:
+   receita por período da Fase 8.7).
+5. **Quem pode lançar/analisar**: aluno lança/edita só os próprios
+   registros; professor ou admin lança em nome de qualquer aluno da
+   escola e analisa (aprova/rejeita) qualquer lançamento pendente — mesmo
+   padrão de `requireUser()` aceitando admin OU professor já usado nas
+   observações internas (Fase 10.7). Só professor/admin pode aprovar;
+   aluno nunca aprova o próprio lançamento.
+6. **Visibilidade do ranking**: todos os alunos da escola aparecem no
+   ranking de todos os perfis (não só os próprios dados do aluno logado),
+   para estimular competitividade — reaproveita o padrão de leitura
+   ampla-porém-escopada-por-escola já usado em `student_directory`
+   (Fase 9.9), expondo só nome/foto/faixa + pontuação, nunca dados
+   sensíveis do cadastro.
+
+- [ ] **12.1 — Migration: `medals` + `medal_point_rules`**
+  Critério de pronto: tabela `medals` (school_id, student_id, modality_id
+  nullable, event_name, organization nullable, event_date, category
+  nullable, level enum ouro/prata/bronze/participacao, proof_url nullable,
+  status enum pending/approved/rejected, submitted_by_student_id nullable,
+  submitted_by_user_id nullable — exatamente um dos dois preenchido via
+  CHECK, reviewed_by_user_id nullable, reviewed_at nullable,
+  rejection_reason nullable) e `medal_point_rules` (school_id, level,
+  points, unique(school_id, level)) criadas com RLS; seed automático dos 4
+  níveis de pontuação default ao criar uma escola (trigger, mesmo padrão
+  da Fase 1.2/2.1); policies: aluno lê próprias medalhas (qualquer status)
+  + medalhas `approved` de qualquer aluno da escola (para o ranking), só
+  insere/edita as próprias e nunca define `status=approved`; staff
+  (admin/professor) lê/insere/edita todas as medalhas da escola e é o
+  único que pode aprovar/rejeitar; leitura de `medal_point_rules` liberada
+  para todo autenticado da escola, escrita só para admin.
+
+- [ ] **12.2 — Tela admin: configurar pontuação por nível**
+  Critério de pronto: tela simples em `(admin)` lista os 4 níveis com o
+  campo de pontos editável, salva via server action `requireRole("admin")`
+  com `audit_logs`.
+
+- [ ] **12.3 — Fluxo do aluno: lançar e gerenciar minhas medalhas**
+  Critério de pronto: formulário em `(student)` com os campos da decisão
+  1, cria registro `pending` vinculado ao próprio aluno; listagem "Minhas
+  medalhas" mostra status (pendente/aprovada/rejeitada) e, quando
+  rejeitada, o motivo; lançamento rejeitado pode ser editado e reenviado
+  (volta a `pending`); lançamento `pending`/`approved` não pode ser
+  apagado (só editado enquanto pendente ou rejeitado).
+
+- [ ] **12.4 — Fluxo do professor/admin: fila de aprovação**
+  Critério de pronto: tela lista lançamentos pendentes da escola (com
+  filtro por aluno), ação aprovar (grava `reviewed_by_user_id`/
+  `reviewed_at`) e ação rejeitar (exige motivo, mesmos campos); ao
+  decidir, dispara notificação ao aluno (`notifications`, novos tipos
+  `medal_approved`/`medal_rejected`) e loga em `audit_logs`.
+
+- [ ] **12.5 — Fluxo do professor/admin: lançar medalha em nome de um aluno**
+  Critério de pronto: a partir da ficha do aluno (ou da tela de medalhas),
+  admin/professor lança uma medalha para qualquer aluno da escola,
+  gravando `submitted_by_user_id` (não `submitted_by_student_id`);
+  lançado por staff pode nascer já `approved` diretamente ou como
+  `pending` seguindo o fluxo normal de aprovação — decisão de UX a
+  confirmar com o usuário ao implementar esta subtarefa.
+
+- [ ] **12.6 — Ranking anual (todos os alunos, com histórico por ano)**
+  Critério de pronto: tela de ranking acessível para aluno/professor/admin
+  lista todos os alunos da escola ordenados por soma de pontos das
+  medalhas `approved` do ano selecionado (seletor de ano, corrente por
+  padrão), com nome/foto/faixa (reaproveitando `student_directory` da
+  Fase 9.9) e posição; empate resolvido por critério simples e documentado
+  (ex: nome alfabético); aluno sem medalha no ano aparece com 0 pontos,
+  não fica de fora da lista.
+
+- [ ] **12.7 — Seção de medalhas na ficha/dossiê do aluno**
+  Critério de pronto: ficha do aluno no admin/professor e dossiê do
+  próprio aluno (`/aluno/dossie`, Fase 10.7) ganham seção com histórico
+  completo de medalhas (todos os status, com quem lançou e quem
+  analisou), reaproveitando o componente sempre que possível em vez de
+  duplicar entre as duas telas.
+
+- [ ] **12.8 — Testes das regras de negócio**
+  Critério de pronto: testes unitários do cálculo de pontuação/ranking
+  (empate, ano sem medalhas, pesos configuráveis) e testes de integração
+  contra o Supabase compartilhado cobrindo RLS (aluno não aprova a
+  própria medalha, aluno não vê lançamento pendente/rejeitado de outro
+  aluno, staff aprova/rejeita corretamente, edição só permitida em
+  pending/rejected), mesmo padrão de `tests/` já estabelecido na Fase 9.11.
