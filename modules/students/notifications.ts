@@ -11,6 +11,8 @@ export type NotificationPayload = {
   installmentNumber?: number;
   amount?: number;
   dueDate?: string;
+  eventName?: string;
+  reason?: string;
 };
 
 export type StudentNotification = {

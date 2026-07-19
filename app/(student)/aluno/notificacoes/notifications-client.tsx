@@ -13,6 +13,8 @@ const TITLE_BY_TYPE: Record<string, string> = {
   presence_confirmed: "Instrutor confirmou sua presença",
   added_to_class: "Instrutor adicionou você à aula",
   charge_sent: "Nova cobrança disponível",
+  medal_approved: "Medalha aprovada",
+  medal_rejected: "Lançamento de medalha rejeitado",
 };
 
 function formatMoney(value: number) {
@@ -84,6 +86,11 @@ export function NotificationsClient({
                   Parcela {n.payload.installmentNumber}
                   {n.payload.amount !== undefined ? ` · ${formatMoney(n.payload.amount)}` : ""}
                   {n.payload.dueDate ? ` · vencimento ${formatDateOnly(n.payload.dueDate)}` : ""}
+                </>
+              ) : n.type === "medal_approved" || n.type === "medal_rejected" ? (
+                <>
+                  {n.payload.eventName}
+                  {n.type === "medal_rejected" && n.payload.reason ? ` · ${n.payload.reason}` : ""}
                 </>
               ) : (
                 <>

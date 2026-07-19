@@ -1610,12 +1610,22 @@ usuário antes de iniciar:
   análise anterior. `StatusBadge` ganhou as chaves `approved`/`rejected`.
   `tsc --noEmit` e `eslint` limpos.
 
-- [ ] **12.5 — Fluxo do professor/admin: fila de aprovação**
+- [x] **12.5 — Fluxo do professor/admin: fila de aprovação**
   Critério de pronto: tela lista lançamentos pendentes da escola (com
   filtro por aluno), ação aprovar (grava `reviewed_by_user_id`/
   `reviewed_at`) e ação rejeitar (exige motivo, mesmos campos); ao
   decidir, dispara notificação ao aluno (`notifications`, novos tipos
   `medal_approved`/`medal_rejected`) e loga em `audit_logs`.
+  `modules/medals/approvals.ts` (`getPendingMedals`, `approveMedal`,
+  `rejectMedal`) + `components/medals/approval-queue.tsx` (busca por aluno
+  client-side, mesmo padrão da Fase 9.9; rejeição usa `ConfirmDialog` com
+  textarea do motivo) + páginas espelhadas em `(admin)/medals/approvals` e
+  `(teacher)/professor/medals/approvals`. `notifications-client.tsx` e
+  `NotificationPayload` ganharam os campos/labels de `medal_approved`/
+  `medal_rejected`. Bug de embed evitado: `medals` tem 2 FKs para
+  `students` (`student_id` e `submitted_by_student_id`) — select precisou
+  do hint explícito `students!medals_student_id_fkey(...)` (PostgREST
+  rejeita embed ambíguo sem isso). `tsc --noEmit` e `eslint` limpos.
 
 - [ ] **12.6 — Fluxo do professor/admin: lançar medalha em nome de um aluno**
   Critério de pronto: a partir da ficha do aluno (ou da tela de
