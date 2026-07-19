@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatDateOnly } from "@/lib/dates/format";
-import { MEDAL_LEVEL_LABELS } from "@/modules/medals/points";
+import { MEDAL_LEVEL_LABELS } from "@/modules/medals/points-rules";
 import { launchMedalForStudent } from "@/modules/medals/staff-launch";
 import type { MedalEventOption } from "@/modules/medals/events";
 

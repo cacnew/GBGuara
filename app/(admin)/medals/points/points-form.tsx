@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MEDAL_LEVEL_LABELS, type MedalPointRule } from "@/modules/medals/points";
+import { MEDAL_LEVEL_LABELS, type MedalPointRule } from "@/modules/medals/points-rules";
 import { updateMedalPointRules } from "./actions";
 
 export function MedalPointsForm({ rules }: { rules: MedalPointRule[] }) {

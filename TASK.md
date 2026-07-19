@@ -1809,3 +1809,48 @@ para essas duas. As outras duas geraram subtarefas novas:
   (`npx vitest run`) limpos.
   Com a 12.11/12.12, os refinamentos pós-implementação pedidos pelo
   usuário estão concluídos.
+
+### Teste e2e do fluxo de medalhas + correção de bug de bundling client (2026-07-19)
+
+A pedido do usuário, criado `e2e/medals.spec.ts` (mesmo padrão de
+`attendance-signal.spec.ts`/`reset-password.spec.ts`): aluno loga, lança
+medalha para um evento existente do catálogo (fica `pending`), admin loga,
+aprova na fila de aprovação (12.5), aluno loga de novo e confirma que a
+medalha aprovada passa a constar no dossiê (`/aluno/dossie`, 12.8). Limpa o
+registro criado ao final (`admin.from("medals").delete()`) para não deixar
+dado residual no ambiente compartilhado a cada execução.
+
+**Bug real encontrado ao rodar o teste pela primeira vez** (não é
+específico do teste — já quebrava a tela para qualquer usuário real):
+`/aluno/medalhas/new` (e outras 5 telas do módulo) travava com Build Error
+do Next.js ("You're importing a module that depends on next/headers").
+Causa: 6 componentes `"use client"` importavam `MEDAL_LEVEL_LABELS` de
+`modules/medals/points.ts`, que também expõe `getMedalPointRules` (função
+de I/O que importa `@/lib/supabase/server` → `next/headers`) — o bundler
+puxa o módulo inteiro pro bundle do cliente mesmo só usando a constante
+pura. A separação pura/I/O já existia desde a 12.9
+(`modules/medals/points-rules.ts`, sem nenhum import `@/`), só não estava
+sendo usada pelos componentes client. Corrigido trocando o import para
+`points-rules` em `medal-launch-form.tsx`, `event-form.tsx`,
+`edit-approved-medal-button.tsx`, `launch-for-student-button.tsx`,
+`approval-queue.tsx` e `points-form.tsx` (`app/(admin)/medals/points/`) —
+zero mudança de comportamento, só a origem do import.
+
+**2 bugs de seletor no teste, encontrados e corrigidos durante a
+validação** (nenhum é bug de produto): a conta demo do aluno se chama
+literalmente "Aluno" e o ambiente tem dezenas de alunos de seed nomeados
+"Aluno Dev NN - Fulano" — filtrar a fila de aprovação só por
+nome-substring + nome do evento aprovou o lançamento errado (de outro
+aluno) na primeira tentativa; corrigido ancorando pelo nome exato do aluno
+via regex `^nome$`. Depois, o card de medalha no dossiê usava
+`div.rounded-lg` como seletor, que também casa com o `<div>` do wrapper
+inteiro da seção `MedalsSection` (mesma classe usada no wrapper e em cada
+card) — corrigido restringindo a `div.rounded-lg.bg-background`, classe só
+dos cards individuais.
+
+`tsc --noEmit`, `eslint` e os 47 testes (`npx vitest run`) limpos. Suíte
+e2e completa rodada em chromium: `medals.spec.ts` passou 2x seguidas
+(confirma que a limpeza não deixa resíduo); `attendance-signal.spec.ts`
+falhou nessa rodada por motivo não relacionado (não há arquivo de
+presença tocado nesta sessão — provável dependência de horário/janela de
+sinalização de aula no momento do teste, não investigado aqui).

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatDateOnly } from "@/lib/dates/format";
-import { MEDAL_LEVEL_LABELS } from "@/modules/medals/points";
+import { MEDAL_LEVEL_LABELS } from "@/modules/medals/points-rules";
 import { approveMedal, rejectMedal, type PendingMedal } from "@/modules/medals/approvals";
 
 export function ApprovalQueue({ medals }: { medals: PendingMedal[] }) {

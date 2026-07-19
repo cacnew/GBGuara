@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatDateOnly } from "@/lib/dates/format";
 import { medalLaunchSchema, type MedalLaunchFormInput } from "@/lib/validations/medal-launch";
-import { MEDAL_LEVEL_LABELS } from "@/modules/medals/points";
+import { MEDAL_LEVEL_LABELS } from "@/modules/medals/points-rules";
 import type { MedalEventOption } from "@/modules/medals/events";
 
 export function MedalLaunchForm({

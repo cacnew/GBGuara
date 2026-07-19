@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { medalEventSchema, type MedalEventFormInput } from "@/lib/validations/medal-event";
 import { createMedalEvent, updateMedalEvent, deleteMedalEvent } from "@/modules/medals/events";
-import { MEDAL_LEVEL_LABELS } from "@/modules/medals/points";
+import { MEDAL_LEVEL_LABELS } from "@/modules/medals/points-rules";
 
 export function MedalEventForm({
   id,
