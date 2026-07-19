@@ -10,6 +10,8 @@ import { GraduationSuggestionForm } from "./graduation-suggestion-form";
 import { InternalNotesSection } from "@/components/students/internal-notes-section";
 import { getInternalNotes } from "@/modules/students/internal-notes";
 import { PRESENT_STATUSES } from "@/lib/attendance/constants";
+import { LaunchMedalForStudentButton } from "@/components/medals/launch-for-student-button";
+import { getStaffMedalLaunchFormData } from "@/modules/medals/staff-launch";
 
 function calculateAge(birthDate: string | null) {
   if (!birthDate) return null;
@@ -110,6 +112,7 @@ export default async function TeacherStudentPage({
     .maybeSingle();
 
   const internalNotes = await getInternalNotes(student.id);
+  const medalLaunchFormData = await getStaffMedalLaunchFormData();
 
   const age = calculateAge(student.birth_date);
   const recentNotes = (attendanceRows ?? [])
@@ -148,7 +151,14 @@ export default async function TeacherStudentPage({
             )}
           </div>
         </div>
-        <BackLink href="/professor" />
+        <div className="flex items-center gap-2">
+          <LaunchMedalForStudentButton
+            studentId={student.id}
+            events={medalLaunchFormData.events}
+            modalities={medalLaunchFormData.modalities}
+          />
+          <BackLink href="/professor" />
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

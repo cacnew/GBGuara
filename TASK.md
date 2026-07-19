@@ -1627,7 +1627,7 @@ usuário antes de iniciar:
   do hint explícito `students!medals_student_id_fkey(...)` (PostgREST
   rejeita embed ambíguo sem isso). `tsc --noEmit` e `eslint` limpos.
 
-- [ ] **12.6 — Fluxo do professor/admin: lançar medalha em nome de um aluno**
+- [x] **12.6 — Fluxo do professor/admin: lançar medalha em nome de um aluno**
   Critério de pronto: a partir da ficha do aluno (ou da tela de
   medalhas), admin/professor lança uma medalha para qualquer aluno da
   escola escolhendo um evento existente do catálogo (12.3) — mesmo
@@ -1637,6 +1637,15 @@ usuário antes de iniciar:
   `reviewed_by_user_id`/`reviewed_at` preenchidos com o próprio autor do
   lançamento — não entra na fila de aprovação da 12.5 e já aparece
   imediatamente no ranking (12.7) e no dossiê (12.8).
+  `modules/medals/staff-launch.ts` (`getStaffMedalLaunchFormData`,
+  `launchMedalForStudent`) + `components/medals/launch-for-student-button.tsx`
+  (modal próprio em vez de `ConfirmDialog` — precisa de campos de
+  formulário, não só confirmação); botão adicionado na ficha do aluno no
+  admin (`students/[id]/edit/page.tsx`, mesma linha do "Criar login"/
+  "Resetar senha") e na página do aluno no professor
+  (`professor/students/[id]/page.tsx`, ao lado do `BackLink`) — mesmo
+  padrão de reaproveitar formulário/eventos do catálogo sem duplicar
+  lógica de validação. `tsc --noEmit` e `eslint` limpos.
 
 - [ ] **12.7 — Ranking anual (todos os alunos, com histórico por ano)**
   Critério de pronto: tela de ranking acessível para aluno/professor/admin

@@ -18,6 +18,8 @@ import {
 } from "./graduation-section";
 import { StudentEditTabs } from "./student-edit-tabs";
 import { ResetPasswordButton } from "../reset-password/reset-password-button";
+import { LaunchMedalForStudentButton } from "@/components/medals/launch-for-student-button";
+import { getStaffMedalLaunchFormData } from "@/modules/medals/staff-launch";
 
 export default async function EditStudentPage({
   params,
@@ -120,6 +122,8 @@ export default async function EditStudentPage({
       (1000 * 60 * 60 * 24),
   );
 
+  const medalLaunchFormData = await getStaffMedalLaunchFormData();
+
   return (
     <div className="flex flex-1 flex-col items-center gap-6 p-6 text-foreground">
       <div className="flex w-full max-w-7xl flex-wrap items-center justify-between gap-3">
@@ -147,6 +151,11 @@ export default async function EditStudentPage({
           {student.auth_user_id && (
             <ResetPasswordButton studentId={student.id} studentName={student.name} />
           )}
+          <LaunchMedalForStudentButton
+            studentId={student.id}
+            events={medalLaunchFormData.events}
+            modalities={medalLaunchFormData.modalities}
+          />
         </div>
       </div>
       <StudentEditTabs
