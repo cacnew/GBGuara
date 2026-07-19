@@ -21,6 +21,7 @@ O produto parte de algumas regras centrais:
 - `TASK.md`: progresso e decisoes operacionais do projeto.
 - `CLAUDE.md`: protocolo de trabalho colaborativo.
 - `DESIGN-pinterest.md`: design system vigente.
+- `docs/TEST_ACCOUNTS.md`: contas dedicadas para testes por desenvolvedor.
 
 ## Desenvolvimento
 
