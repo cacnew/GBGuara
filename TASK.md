@@ -1566,7 +1566,7 @@ usuário antes de iniciar:
   cobrindo também os hrefs das próximas subtarefas (12.3/12.5/12.7) desde
   já. `tsc --noEmit` limpo.
 
-- [ ] **12.3 — Tela staff: cadastro de eventos (com pontuação por evento)**
+- [x] **12.3 — Tela staff: cadastro de eventos (com pontuação por evento)**
   Critério de pronto: tela em área staff (admin/professor,
   `requireUser()` aceitando os dois) para criar/editar/listar eventos do
   catálogo (`medal_events`): nome, organização, data, modalidade sugerida
@@ -1577,6 +1577,14 @@ usuário antes de iniciar:
   vinculado pode ser editado/removido livremente; evento com medalhas
   vinculadas só pode ser editado (nunca removido, para não perder
   histórico).
+  `modules/medals/events.ts` (`"use server"` no topo do módulo, mesmo
+  padrão de `internal-notes.ts`: ações exportadas direto, sem
+  `actions.ts` por rota) + `components/medals/{event-form,event-list}.tsx`
+  (compartilhados) + páginas espelhadas em `(admin)/medals/events` e
+  `(teacher)/professor/medals/events` (list/new/[id]/edit). Remoção
+  bloqueada tanto na aplicação (checagem antes) quanto no banco (FK
+  `medals.event_id on delete restrict`, defesa em profundidade).
+  `tsc --noEmit` limpo.
 
 - [ ] **12.4 — Fluxo do aluno: lançar desempenho e gerenciar minhas medalhas**
   Critério de pronto: formulário em `(student)` primeiro exige escolher
