@@ -1723,7 +1723,7 @@ usuário antes de iniciar:
      funcionando igual para o resto do código).
   47 testes passando (`npx vitest run`), `tsc --noEmit` e `eslint` limpos.
 
-- [ ] **12.10 — Dados de demonstração de medalhas e eventos**
+- [x] **12.10 — Dados de demonstração de medalhas e eventos**
   Critério de pronto: script novo em `scripts/` (mesmo padrão de
   `seed-attendance.mjs`/`seed-full-finance.mjs`) popula o ambiente
   compartilhado (`nexusdojo-dev`) com um catálogo de eventos distribuído
@@ -1742,3 +1742,18 @@ usuário antes de iniciar:
   com histórico próprio (aprovadas de anos diferentes + ao menos um
   pendente) para validar a visão pessoal (pontos anuais/totais/colocação)
   descrita na decisão 10.
+  `scripts/seed-medals.mjs`: 6 eventos (2 por ano em 2024/2025/2026),
+  override de pontuação aplicado no "Campeonato Brasileiro de Jiu-Jitsu
+  2025" (ouro=10/prata=6/bronze=3/participação=1); 25 dos 50 alunos
+  (fora a conta demo) receberam de 1 a 3 medalhas cada. Resultado real no
+  ambiente compartilhado: 58 medalhas (approved: 46, pending: 8,
+  rejected: 4), níveis ouro=14/prata=13/bronze=18/participação=13 (dados
+  não determinísticos — sorteio aleatório a cada execução, contagens
+  exatas variam). Ciclo completo de rejeitado-e-reenviado simulado
+  literalmente (insere `rejected` com motivo, depois faz o mesmo update
+  que `updateMyMedal` faria — volta a `pending`, limpa
+  `rejection_reason`/`reviewed_by_user_id`/`reviewed_at`), não só um
+  `pending` comum. Conta demo (`aluno@nexusdojo.dev`) confirmada com 2
+  aprovadas (2026 e 2025, níveis diferentes) + 1 pendente. Verificado
+  direto no banco após a execução (contagens de status, override
+  presente, histórico da conta demo). `eslint` limpo no script novo.
