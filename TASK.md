@@ -1439,7 +1439,11 @@ usuário antes de iniciar:
    (ouro=3, prata=2, bronze=1, participação=0) aplicado automaticamente ao
    criar a escola (mesmo padrão de seed via trigger já usado em
    modalidades/faixas/contas financeiras na Fase 1/2/5); tela simples de
-   edição para o admin ajustar os valores da própria escola.
+   edição para o admin ajustar os valores da própria escola. O nível
+   `participacao` é um nível como qualquer outro nesta tabela — o admin
+   pode atribuir a ele um valor de pontos maior que zero (não é
+   estruturalmente diferente de ouro/prata/bronze), para escolas que
+   queiram premiar a participação em si, não só o pódio.
 3. **Rejeição**: motivo obrigatório (campo texto); o aluno vê o motivo e
    pode editar os dados do lançamento rejeitado e reenviar — o mesmo
    registro volta para `pending` (sem duplicar linha), preservando o
@@ -1470,6 +1474,14 @@ usuário antes de iniciar:
    visão do próprio aluno em `/aluno/dossie`) depois que o staff aprova —
    é o registro oficial de conquistas, não a fila de lançamentos
    pendentes/rejeitados (essa fica só na tela de gestão da Fase 12.3/12.4).
+9. **Filtro por evento no ranking**: staff e aluno podem pesquisar o
+   ranking por nome do evento (busca parcial, case-insensitive). Ao
+   filtrar por um evento, a tela mostra **todos os participantes** daquele
+   evento com lançamento aprovado — inclusive quem só participou (nível
+   `participacao`), não só quem subiu ao pódio — ordenados pelos pontos
+   daquele evento específico; o filtro por evento independe do ano
+   selecionado (um evento tem data fixa, então buscar pelo nome já
+   localiza o ano certo automaticamente).
 
 - [ ] **12.1 — Migration: `medals` + `medal_point_rules`**
   Critério de pronto: tabela `medals` (school_id, student_id, modality_id
@@ -1526,7 +1538,11 @@ usuário antes de iniciar:
   não fica de fora da lista. Na visão do aluno (decisão 7 do preâmbulo), a
   tela também mostra um resumo pessoal: pontos do ano selecionado, pontos
   totais (todas as medalhas aprovadas, todos os anos somados) e a
-  colocação atual do aluno dentro do ranking da escola.
+  colocação atual do aluno dentro do ranking da escola. Campo de busca por
+  evento (decisão 9) disponível para aluno e staff: ao pesquisar, a lista
+  passa a mostrar todos os participantes daquele evento (medalhistas e
+  quem só participou), ordenados pelos pontos daquele evento, ignorando o
+  seletor de ano enquanto a busca estiver ativa.
 
 - [ ] **12.7 — Seção de medalhas aprovadas na ficha/dossiê do aluno**
   Critério de pronto: ficha do aluno no admin/professor e dossiê do
