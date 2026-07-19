@@ -1647,7 +1647,7 @@ usuário antes de iniciar:
   padrão de reaproveitar formulário/eventos do catálogo sem duplicar
   lógica de validação. `tsc --noEmit` e `eslint` limpos.
 
-- [ ] **12.7 — Ranking anual (todos os alunos, com histórico por ano)**
+- [x] **12.7 — Ranking anual (todos os alunos, com histórico por ano)**
   Critério de pronto: tela de ranking acessível para aluno/professor/admin
   lista todos os alunos da escola ordenados por soma de pontos das
   medalhas `approved` do ano selecionado (seletor de ano, corrente por
@@ -1665,6 +1665,17 @@ usuário antes de iniciar:
   daquele evento (medalhistas e quem só participou), ordenados pelos
   pontos daquele evento, ignorando o seletor de ano enquanto o filtro
   estiver ativo.
+  `modules/medals/ranking.ts` (`aggregateMedalPoints` pura — sem I/O,
+  reaproveitada pelos testes da 12.9 — + `getMedalRanking`, que junta
+  `student_directory`/`belts` da Fase 9.9 com os overrides por evento e o
+  default da escola via `resolveMedalPoints`). Empate: pontos desc, depois
+  nome alfabético. Filtro por evento exclui quem não participou (em vez
+  de preencher com zero, diferente do filtro por ano). `components/medals/
+  {ranking-filters,ranking-table,my-ranking-summary}.tsx` (filtros
+  navegam via `router.push(?year=/?event=)`, mesmo padrão de filtro-via-URL
+  já usado no projeto) + páginas espelhadas em `(admin)/medals/ranking`,
+  `(teacher)/professor/medals/ranking` e `(student)/aluno/ranking` (só
+  esta última com o resumo pessoal). `tsc --noEmit` e `eslint` limpos.
 
 - [ ] **12.8 — Seção de medalhas aprovadas na ficha/dossiê do aluno**
   Critério de pronto: ficha do aluno no admin/professor e dossiê do
