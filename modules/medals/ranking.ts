@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { getMedalPointRules, resolveMedalPoints, type MedalLevel } from "@/modules/medals/points";
 import { listMedalEventOptions, type MedalEventOption } from "@/modules/medals/events";
+import { aggregateMedalPoints, type ApprovedMedalRecord } from "./ranking-rules";
+
+export * from "./ranking-rules";
 
 export type RankingRow = {
   studentId: string;
@@ -11,37 +14,6 @@ export type RankingRow = {
   points: number;
   position: number;
 };
-
-export type ApprovedMedalRecord = {
-  studentId: string;
-  level: string;
-  eventId: string;
-  eventYear: number;
-};
-
-/**
- * Agregação pura (sem I/O) dos pontos por aluno, dado um filtro de ano OU
- * evento — os dois são mutuamente exclusivos (decisão 12 da Fase 12: o
- * filtro por evento ignora o ano selecionado). Função pura, testável sem
- * banco (Fase 12.9).
- */
-export function aggregateMedalPoints(
-  medals: ApprovedMedalRecord[],
-  pointsFor: (eventId: string, level: string) => number,
-  filter: { year?: number; eventId?: string } = {},
-): Map<string, number> {
-  const totals = new Map<string, number>();
-  for (const medal of medals) {
-    if (filter.eventId !== undefined) {
-      if (medal.eventId !== filter.eventId) continue;
-    } else if (filter.year !== undefined && medal.eventYear !== filter.year) {
-      continue;
-    }
-    const points = pointsFor(medal.eventId, medal.level);
-    totals.set(medal.studentId, (totals.get(medal.studentId) ?? 0) + points);
-  }
-  return totals;
-}
 
 export type MedalRankingData = {
   rows: RankingRow[];

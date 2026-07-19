@@ -1,16 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
+import { MEDAL_LEVELS, type MedalLevel, type MedalPointRule } from "./points-rules";
 
-export const MEDAL_LEVELS = ["ouro", "prata", "bronze", "participacao"] as const;
-export type MedalLevel = (typeof MEDAL_LEVELS)[number];
-
-export const MEDAL_LEVEL_LABELS: Record<MedalLevel, string> = {
-  ouro: "Ouro",
-  prata: "Prata",
-  bronze: "Bronze",
-  participacao: "Participação",
-};
-
-export type MedalPointRule = { level: MedalLevel; points: number };
+export * from "./points-rules";
 
 /**
  * Pontuação default por nível da escola (decisão 4 da Fase 12). Recebe
@@ -26,19 +17,5 @@ export async function getMedalPointRules(schoolId: string): Promise<MedalPointRu
     .eq("school_id", schoolId);
 
   const byLevel = new Map((data ?? []).map((r) => [r.level, r.points]));
-  return MEDAL_LEVELS.map((level) => ({ level, points: byLevel.get(level) ?? 0 }));
-}
-
-/**
- * Pontos de uma medalha aprovada: usa o override do evento para aquele
- * nível se existir; senão, o default da escola (decisão 5 da Fase 12).
- * Função pura — sem I/O — para ser testável sem banco (Fase 12.9).
- */
-export function resolveMedalPoints(
-  level: string,
-  eventOverrides: Partial<Record<string, number>>,
-  schoolDefaults: Partial<Record<string, number>>,
-): number {
-  const override = eventOverrides[level];
-  return override !== undefined ? override : schoolDefaults[level] ?? 0;
+  return MEDAL_LEVELS.map((level: MedalLevel) => ({ level, points: byLevel.get(level) ?? 0 }));
 }

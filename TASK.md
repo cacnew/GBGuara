@@ -1692,7 +1692,7 @@ usuário antes de iniciar:
   `submitted_by_user_id`/`reviewed_by_user_id`), mesma causa raiz do bug
   de `students` já resolvido na 12.5. `tsc --noEmit` e `eslint` limpos.
 
-- [ ] **12.9 — Testes das regras de negócio**
+- [x] **12.9 — Testes das regras de negócio**
   Critério de pronto: testes unitários do cálculo de pontuação/ranking
   (empate, ano sem medalhas, override por evento vs. default da escola,
   nível `participacao` contando pontos quando configurado) e testes de
@@ -1701,6 +1701,27 @@ usuário antes de iniciar:
   aluno não vê lançamento pendente/rejeitado de outro aluno, staff
   aprova/rejeita corretamente, edição só permitida em pending/rejected),
   mesmo padrão de `tests/` já estabelecido na Fase 9.11.
+  **2 bugs de infraestrutura de teste encontrados e corrigidos nesta
+  subtarefa** (nenhum dos dois é específico da Fase 12, mas bloqueavam a
+  verificação limpa exigida pelo critério de pronto):
+  1. `npm test` (`vitest run`) não tinha `vitest.config.ts` — o include
+     default do vitest também varria `e2e/**` (specs do Playwright) e
+     falhava, porque `test()` do Playwright não pode ser chamado fora do
+     runner dele. Corrigido com `vitest.config.ts` novo excluindo `e2e/**`
+     (o `test:e2e` já existente continua sendo o único jeito de rodar
+     esses arquivos).
+  2. Mesmo bug já documentado na Fase 9.11 (import `@/` quebra teste
+     unitário porque o vitest não resolve esse alias) se repetiu em
+     `points.ts`/`ranking.ts`, que misturavam função pura com uma função
+     de I/O (`import { createClient } from "@/lib/supabase/server"`) no
+     mesmo arquivo. Extraído `resolveMedalPoints`/`MEDAL_LEVELS`/etc. para
+     `points-rules.ts` e `aggregateMedalPoints`/`ApprovedMedalRecord` para
+     `ranking-rules.ts` (sem nenhum import `@/`); `points.ts`/`ranking.ts`
+     passaram a só ter a parte de I/O e reexportar a parte pura
+     (`export * from "./points-rules"`), sem alterar nenhum import externo
+     existente (`@/modules/medals/points`/`.../ranking` continuam
+     funcionando igual para o resto do código).
+  47 testes passando (`npx vitest run`), `tsc --noEmit` e `eslint` limpos.
 
 - [ ] **12.10 — Dados de demonstração de medalhas e eventos**
   Critério de pronto: script novo em `scripts/` (mesmo padrão de
