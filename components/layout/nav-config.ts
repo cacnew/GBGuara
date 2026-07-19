@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Award,
   Bell,
   CalendarCheck,
   CalendarDays,
@@ -74,6 +75,17 @@ export const ADMIN_NAV: NavGroup[] = [
     ],
   },
   {
+    label: "Medalhas",
+    icon: Award,
+    collapsible: true,
+    children: [
+      { label: "Eventos", href: "/medals/events" },
+      { label: "Aprovacoes", href: "/medals/approvals" },
+      { label: "Ranking", href: "/medals/ranking" },
+      { label: "Pontuacao por nivel", href: "/medals/points" },
+    ],
+  },
+  {
     label: "Site publico",
     icon: Globe2,
     collapsible: true,
@@ -102,6 +114,16 @@ export const TEACHER_NAV: NavGroup[] = [
       { label: "Historico de chamadas", href: "/professor/sessions" },
     ],
   },
+  {
+    label: "Medalhas",
+    icon: Award,
+    collapsible: true,
+    children: [
+      { label: "Eventos", href: "/professor/medals/events" },
+      { label: "Aprovacoes", href: "/professor/medals/approvals" },
+      { label: "Ranking", href: "/professor/medals/ranking" },
+    ],
+  },
 ];
 
 // Módulo do aluno (Fase 9) — itens adicionados conforme cada subtarefa
@@ -110,6 +132,8 @@ export const TEACHER_NAV: NavGroup[] = [
 export const STUDENT_NAV: NavGroup[] = [
   { label: "Agenda", href: "/aluno", icon: CalendarCheck },
   { label: "Painel", href: "/aluno/painel", icon: LayoutDashboard },
+  { label: "Minhas Medalhas", href: "/aluno/medalhas", icon: Award },
+  { label: "Ranking", href: "/aluno/ranking", icon: GraduationCap },
   { label: "Minha Academia", href: "/aluno/academia", icon: Users },
   { label: "Financeiro", href: "/aluno/financeiro", icon: Wallet },
   { label: "Notificações", href: "/aluno/notificacoes", icon: Bell },

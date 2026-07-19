@@ -1554,10 +1554,17 @@ usuário antes de iniciar:
   cirúrgico das Fases 9.1/9.2/10.1 — regen completo via `db:types` continua
   pendente de Docker/token de management API). `tsc --noEmit` limpo.
 
-- [ ] **12.2 — Tela admin: configurar pontuação default por nível**
+- [x] **12.2 — Tela admin: configurar pontuação default por nível**
   Critério de pronto: tela simples em `(admin)` lista os 4 níveis com o
   campo de pontos editável (`medal_point_rules`), salva via server action
   `requireRole("admin")` com `audit_logs`.
+  `modules/medals/points.ts` (`getMedalPointRules`, `resolveMedalPoints` —
+  esta última pura, sem I/O, reaproveitada depois no ranking e nos testes
+  da 12.9) + `app/(admin)/medals/points/{page,points-form,actions}.tsx`
+  (mesmo padrão de `modalities/actions.ts`). Nav: novo grupo "Medalhas" em
+  `ADMIN_NAV`/`TEACHER_NAV` e itens em `STUDENT_NAV` (ícone `Award`),
+  cobrindo também os hrefs das próximas subtarefas (12.3/12.5/12.7) desde
+  já. `tsc --noEmit` limpo.
 
 - [ ] **12.3 — Tela staff: cadastro de eventos (com pontuação por evento)**
   Critério de pronto: tela em área staff (admin/professor,
