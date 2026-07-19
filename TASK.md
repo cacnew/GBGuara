@@ -1454,11 +1454,16 @@ usuário antes de iniciar:
    snapshot), mesmo padrão de relatórios já existentes no projeto (ex:
    receita por período da Fase 8.7).
 5. **Quem pode lançar/analisar**: aluno lança/edita só os próprios
-   registros; professor ou admin lança em nome de qualquer aluno da
-   escola e analisa (aprova/rejeita) qualquer lançamento pendente — mesmo
-   padrão de `requireUser()` aceitando admin OU professor já usado nas
-   observações internas (Fase 10.7). Só professor/admin pode aprovar;
-   aluno nunca aprova o próprio lançamento.
+   registros, sempre como `pending` (precisa de aprovação); professor ou
+   admin lança em nome de qualquer aluno da escola e analisa
+   (aprova/rejeita) qualquer lançamento pendente — mesmo padrão de
+   `requireUser()` aceitando admin OU professor já usado nas observações
+   internas (Fase 10.7). Só professor/admin pode aprovar; aluno nunca
+   aprova o próprio lançamento. Lançamento feito por staff em nome de um
+   aluno nasce direto como `approved` (`reviewed_by_user_id`/
+   `reviewed_at` já preenchidos com o próprio autor) — não passa pela
+   fila de aprovação, já que quem lançou é a mesma autoridade que
+   aprovaria.
 6. **Visibilidade do ranking**: todos os alunos da escola aparecem no
    ranking de todos os perfis (não só os próprios dados do aluno logado),
    para estimular competitividade — reaproveita o padrão de leitura
@@ -1523,10 +1528,11 @@ usuário antes de iniciar:
 - [ ] **12.5 — Fluxo do professor/admin: lançar medalha em nome de um aluno**
   Critério de pronto: a partir da ficha do aluno (ou da tela de medalhas),
   admin/professor lança uma medalha para qualquer aluno da escola,
-  gravando `submitted_by_user_id` (não `submitted_by_student_id`);
-  lançado por staff pode nascer já `approved` diretamente ou como
-  `pending` seguindo o fluxo normal de aprovação — decisão de UX a
-  confirmar com o usuário ao implementar esta subtarefa.
+  gravando `submitted_by_user_id` (não `submitted_by_student_id`); nasce
+  direto como `approved` (decisão 5 do preâmbulo), com
+  `reviewed_by_user_id`/`reviewed_at` preenchidos com o próprio autor do
+  lançamento — não entra na fila de aprovação da 12.4 e já aparece
+  imediatamente no ranking (12.6) e no dossiê (12.7).
 
 - [ ] **12.6 — Ranking anual (todos os alunos, com histórico por ano)**
   Critério de pronto: tela de ranking acessível para aluno/professor/admin
