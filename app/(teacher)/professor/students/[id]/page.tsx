@@ -12,6 +12,8 @@ import { getInternalNotes } from "@/modules/students/internal-notes";
 import { PRESENT_STATUSES } from "@/lib/attendance/constants";
 import { LaunchMedalForStudentButton } from "@/components/medals/launch-for-student-button";
 import { getStaffMedalLaunchFormData } from "@/modules/medals/staff-launch";
+import { MedalsSection } from "@/components/students/medals-section";
+import { getApprovedMedalsForStudent } from "@/modules/medals/history";
 
 function calculateAge(birthDate: string | null) {
   if (!birthDate) return null;
@@ -39,7 +41,7 @@ export default async function TeacherStudentPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireUser();
+  const profile = await requireUser();
   const { id } = await params;
   const supabase = await createClient();
 
@@ -113,6 +115,7 @@ export default async function TeacherStudentPage({
 
   const internalNotes = await getInternalNotes(student.id);
   const medalLaunchFormData = await getStaffMedalLaunchFormData();
+  const medals = await getApprovedMedalsForStudent(student.id, profile.schoolId);
 
   const age = calculateAge(student.birth_date);
   const recentNotes = (attendanceRows ?? [])
@@ -232,6 +235,8 @@ export default async function TeacherStudentPage({
                 : undefined,
             }))}
           />
+
+          <MedalsSection medals={medals} />
         </section>
 
         <aside className="space-y-4">

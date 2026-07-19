@@ -6,10 +6,12 @@ import { AvatarInitials } from "@/components/ui/avatar-initials";
 import { BeltWithPreview } from "@/components/belts/belt-preview";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { InternalNotesSection } from "@/components/students/internal-notes-section";
+import { MedalsSection } from "@/components/students/medals-section";
 import { formatDateOnly } from "@/lib/dates/format";
 import { getStudentFinancialSummary } from "../edit/financial-queries";
 import { AttendanceHistory } from "../edit/attendance-history";
 import { getInternalNotes } from "@/modules/students/internal-notes";
+import { getApprovedMedalsForStudent } from "@/modules/medals/history";
 
 const SITUACAO_LABEL: Record<string, string> = {
   sem_contrato: "Sem contrato",
@@ -37,7 +39,7 @@ export default async function StudentDossiePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireRole("admin");
+  const profile = await requireRole("admin");
   const { id } = await params;
   const supabase = await createClient();
 
@@ -65,6 +67,7 @@ export default async function StudentDossiePage({
 
   const financialSummary = await getStudentFinancialSummary(id);
   const notes = await getInternalNotes(id);
+  const medals = await getApprovedMedalsForStudent(id, profile.schoolId);
 
   return (
     <div className="flex flex-1 flex-col items-center gap-6 p-6 text-foreground">
@@ -190,6 +193,8 @@ export default async function StudentDossiePage({
               </div>
             </dl>
           </div>
+
+          <MedalsSection medals={medals} />
 
           <AttendanceHistory studentId={id} />
         </section>

@@ -1677,13 +1677,20 @@ usuário antes de iniciar:
   `(teacher)/professor/medals/ranking` e `(student)/aluno/ranking` (só
   esta última com o resumo pessoal). `tsc --noEmit` e `eslint` limpos.
 
-- [ ] **12.8 — Seção de medalhas aprovadas na ficha/dossiê do aluno**
+- [x] **12.8 — Seção de medalhas aprovadas na ficha/dossiê do aluno**
   Critério de pronto: ficha do aluno no admin/professor e dossiê do
   próprio aluno (`/aluno/dossie`, Fase 10.7) ganham seção com as medalhas
   **aprovadas** (decisão 11 do preâmbulo — registro oficial de
   conquistas, não a fila de pendentes/rejeitados das Fases 12.4/12.5),
   mostrando o evento, quem lançou e quem analisou cada uma; componente
   reaproveitado entre as duas telas em vez de duplicado.
+  `modules/medals/history.ts` (`getApprovedMedalsForStudent`) +
+  `components/students/medals-section.tsx` (mesmo padrão de
+  `InternalNotesSection`, mas só leitura) usado nas 3 telas: dossiê do
+  admin, ficha do professor e dossiê do aluno. Embed de `users` também
+  precisou de hint explícito (`medals` tem 2 FKs para `users`:
+  `submitted_by_user_id`/`reviewed_by_user_id`), mesma causa raiz do bug
+  de `students` já resolvido na 12.5. `tsc --noEmit` e `eslint` limpos.
 
 - [ ] **12.9 — Testes das regras de negócio**
   Critério de pronto: testes unitários do cálculo de pontuação/ranking

@@ -6,6 +6,8 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDateOnly } from "@/lib/dates/format";
 import { getStudentDashboard } from "@/modules/students/dashboard";
 import { getStudentFinance, type SituacaoFinanceira } from "@/modules/students/finance";
+import { MedalsSection } from "@/components/students/medals-section";
+import { getApprovedMedalsForStudent } from "@/modules/medals/history";
 
 const SITUACAO_LABEL: Record<SituacaoFinanceira, string> = {
   sem_contrato: "Sem contrato",
@@ -25,7 +27,7 @@ export default async function StudentDossiePage() {
   const supabase = await createClient();
   const year = new Date().getUTCFullYear();
 
-  const [{ data: student }, dashboard, finance] = await Promise.all([
+  const [{ data: student }, dashboard, finance, medals] = await Promise.all([
     supabase
       .from("students")
       .select(
@@ -35,6 +37,7 @@ export default async function StudentDossiePage() {
       .single(),
     getStudentDashboard(year),
     getStudentFinance(),
+    getApprovedMedalsForStudent(profile.id, profile.schoolId),
   ]);
 
   const currentBelt = dashboard.beltTimeline.find((b) => b.isCurrent);
@@ -137,6 +140,8 @@ export default async function StudentDossiePage() {
           <p className="mt-3 text-muted-foreground">Nenhum plano associado no momento.</p>
         )}
       </section>
+
+      <MedalsSection medals={medals} />
 
       <section className="rounded-lg border border-border bg-card p-4 text-sm">
         <h2 className="font-heading text-lg font-semibold">Histórico de presenças recentes</h2>
