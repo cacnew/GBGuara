@@ -1947,3 +1947,254 @@ rodadas completas de 15 testes em 3 navegadores em sequência sem reiniciar
 nada), não regressão de código.
 
 `tsc --noEmit`, `eslint` e os 47 testes (`npx vitest run`) limpos.
+
+---
+
+## Fase 13 — Configurações Gerais da Academia (2026-07-21)
+
+Baseado em `melhorias/Especificacoes_GB_Bandeirante.txt`. Objetivo: módulo
+exclusivo do administrador com configurações globais do sistema,
+expansível para novas configurações no futuro (primeiro grupo de nav
+"Configurações" do projeto — hoje não existe nenhum). Incremento sobre o
+que já existe, não recriação: a Fase 6.3 já mostra "nº de presenças desde a
+última graduação e tempo decorrido" como indicador solto, sem meta; esta
+fase adiciona a meta configurável por transição de faixa (que não existia)
+e a comparação contra essa meta. Toda exibição de faixa reaproveita
+`BeltPreview`/`BeltWithPreview` (`components/belts/belt-preview.tsx`), sem
+criar nenhum componente novo. O sistema nunca gradua automaticamente — só
+sinaliza aptidão; a decisão continua sendo exclusiva do professor.
+
+- [ ] **13.1 — Migration + tela "Configurações → Graduação" (meta de aulas por transição de faixa)**
+  Critério de pronto: nova tabela (ex: `belt_graduation_requirements`:
+  school_id, belt_system_id, from_belt_id nullable para a primeira faixa,
+  to_belt_id, required_classes, created_at/updated_at) com RLS (leitura
+  staff + aluno, escrita só admin); tela nova em `(admin)` lista apenas as
+  transições de faixa realmente cadastradas no(s) `belt_system(s)` da
+  escola (não as 21 combinações teóricas do catálogo IBJJF inteiro), com
+  campo editável de "nº de aulas" salvando imediatamente por transição
+  alterada; validação: inteiro >= 0, sem negativos. Mesmo padrão de tela
+  "configurar valores default de uma tabela" já usado em
+  `app/(admin)/medals/points` (Fase 12.2).
+
+- [ ] **13.2 — Cálculo de aptidão e indicador para professor/admin**
+  Critério de pronto: função pura nova (sem import `@/`, mesma convenção
+  já documentada nas Fases 9.11/12.9 para não quebrar o vitest — ex:
+  `modules/graduation/eligibility-rules.ts`) que compara as presenças
+  desde a última graduação (já calculadas na Fase 6.3) contra a meta
+  configurada (13.1) para a transição de faixa atual do aluno, retornando
+  apto/não apto e quantas faltam. Usada (a) na tela de chamada existente,
+  mostrando ao lado do nome do aluno algo como "78 aulas · faltam 22 para
+  apto" ou "Apto para graduação" em destaque verde quando atingido — nunca
+  altera a faixa automaticamente; (b) novo indicador no dashboard do
+  professor (Fase 7.2): "Alunos aptos para graduação" (quantidade + lista
+  com nome, data da última graduação, total de aulas).
+
+- [ ] **13.3 — Card "Sua evolução" no painel do aluno**
+  Critério de pronto: no painel do aluno (`/aluno/painel`, Fase 9.8), novo
+  card com faixa atual, aulas realizadas, meta da transição atual, quantas
+  faltam, e mensagem de conquista ("Você atingiu a quantidade mínima de
+  aulas para estar apto à graduação") quando atingida — nunca com data
+  prevista nem promessa de graduação. Aluno sem meta configurada para a
+  própria transição (13.1 vazio) não mostra o card, em vez de quebrar ou
+  mostrar meta zero.
+
+- [ ] **13.4 — Testes das regras de negócio**
+  Critério de pronto: testes unitários da função de elegibilidade (13.2)
+  cobrindo aluno sem meta configurada, aluno exatamente na meta, aluno
+  acima da meta, múltiplas transições; teste de integração confirmando que
+  só admin edita `belt_graduation_requirements` (RLS) e que professor/aluno
+  só leem.
+
+---
+
+## Fase 14 — Posição da Semana (2026-07-21)
+
+Baseado em `melhorias/Especificacoes_GB_Bandeirante.txt`. Funcionalidade
+100% nova — não existe hoje nenhum conteúdo editorial/técnica publicada no
+sistema. Upload de imagem reaproveita o Supabase Storage já configurado na
+Fase 8.1 (fotos de aluno/professor).
+
+- [ ] **14.1 — Migration: `weekly_positions` (técnica da semana)**
+  Critério de pronto: tabela `weekly_positions` (school_id, title,
+  description, image_url, youtube_url nullable, start_date, end_date
+  nullable, published boolean, created_by_user_id, created_at/updated_at)
+  com RLS (staff insere/edita; aluno só lê publicadas); regra "só uma ativa
+  por vez" garantida na aplicação — ao publicar uma nova posição ativa, a
+  anterior da mesma escola é desativada na mesma transação.
+
+- [ ] **14.2 — Tela staff de cadastro ("Conteúdo → Posição da Semana")**
+  Critério de pronto: nova área staff (admin e professor, mesmo padrão de
+  acesso `requireUser()` aceitando os dois papéis já usado nas Fases
+  10.7/12.3) para criar/editar/listar posições, com upload de imagem
+  (Storage), campo de vídeo do YouTube opcional, datas de início/fim,
+  toggle "publicado".
+
+- [ ] **14.3 — Exibição na área do aluno**
+  Critério de pronto: card "🥋 Posição da Semana" na tela inicial do aluno
+  (agenda, Fase 9.6) com imagem, título, descrição resumida e botão "Saiba
+  mais"; se houver vídeo do YouTube, abre modal com o player embutido;
+  imagem responsiva em qualquer viewport.
+
+- [ ] **14.4 — Testes**
+  Critério de pronto: teste de integração confirmando que, ao publicar uma
+  nova posição ativa, a anterior é desativada automaticamente, e que o
+  aluno só enxerga a posição publicada dentro da vigência.
+
+---
+
+## Fase 15 — Mensagens Automáticas de Aniversário (2026-07-21)
+
+Baseado em `melhorias/Especificacoes_GB_Bandeirante.txt`. Decisões
+confirmadas com o usuário em 2026-07-21: (1) **apenas canal WhatsApp**
+nesta fase — reaproveita `sendWhatsAppMessage` (`lib/evolution/client.ts`,
+Fase 8.3) já existente; push e e-mail ficam fora de escopo (sem
+infraestrutura própria no projeto — não existe web-push/VAPID nem
+provedor de e-mail), os toggles correspondentes do documento original de
+especificação não entram nesta fase; (2) agendamento diário via **Vercel
+Cron** (rota de API protegida + `vercel.json`), primeiro uso de cron no
+projeto — assume que o deploy de produção roda na Vercel; se isso não for
+verdade, o mecanismo de disparo precisa ser revisto antes de iniciar 15.3.
+A lista de aniversariantes do mês (Fase 8.4) já existe e é reaproveitada
+como fonte de dados.
+
+- [ ] **15.1 — Migration: configuração e log de mensagens automáticas**
+  Critério de pronto: tabela `birthday_message_settings` (school_id,
+  notify_students boolean default true, notify_teachers boolean default
+  true, enabled boolean default false — desligado até o admin configurar,
+  message_template text com default igual ao exemplo da especificação) +
+  tabela `sent_birthday_messages` (school_id, recipient_type enum
+  aluno/professor, student_id nullable, teacher_id nullable, date, channel
+  default 'whatsapp', status, error_message nullable) com RLS (leitura/
+  escrita só admin nas settings; log só leitura staff). Unique constraint
+  em `(recipient_type, student_id/teacher_id, date)` para impedir
+  duplicidade de envio no mesmo dia.
+
+- [ ] **15.2 — Tela "Configurações → Mensagens Automáticas"**
+  Critério de pronto: tela admin com toggles (enviar para alunos / enviar
+  para professores, habilitar/desabilitar), editor do template de mensagem
+  com as variáveis `{Nome}`/`{Faixa}`/`{Academia}`/`{Professor}`
+  (substituição de texto simples, função pura nova sem I/O), preview do
+  resultado antes de salvar; mesmo padrão de tela de configuração simples
+  das Fases 12.2/13.1.
+
+- [ ] **15.3 — Job diário de disparo (Vercel Cron)**
+  Critério de pronto: rota de API protegida por segredo/`Authorization`
+  header, agendada via `vercel.json` (`crons`) para rodar 1x ao dia; busca
+  aniversariantes do dia (reaproveitando a mesma query da Fase 8.4), monta
+  a mensagem a partir do template (15.2) e envia via `sendWhatsAppMessage`
+  (Fase 8.3) para quem tiver telefone cadastrado e configuração habilitada;
+  grava em `sent_birthday_messages` (sucesso ou erro) e nunca reenvia
+  duplicado no mesmo dia (constraint da 15.1); desligar a configuração
+  (15.2) impede qualquer envio.
+
+- [ ] **15.4 — Testes**
+  Critério de pronto: testes unitários da substituição de variáveis no
+  template e da lógica de "quem deve receber hoje" (pura, sem I/O); teste
+  de integração confirmando que rodar o job duas vezes no mesmo dia não
+  duplica envio (constraint) e que desligar a configuração impede envio.
+
+---
+
+## Fase 16 — Administração de Feriados e Recessos (2026-07-21)
+
+Baseado em `melhorias/Especificacoes_GB_Bandeirante.txt`. Funcionalidade
+100% nova. Decisão confirmada com o usuário em 2026-07-21: datas móveis
+(Carnaval, Sexta-feira Santa, Corpus Christi) são **calculadas
+automaticamente** (algoritmo de cálculo da Páscoa), não cadastradas
+manualmente ano a ano. Reaproveita o mesmo mecanismo de disparo diário da
+Fase 15.3 (Vercel Cron) para os avisos antecipados — mesma dependência de a
+produção rodar na Vercel, e mesma limitação de canal (só WhatsApp).
+
+- [ ] **16.1 — Migration + seed de feriados nacionais**
+  Critério de pronto: tabela `holidays` (school_id, name, date, recurring
+  boolean, has_class boolean default false, custom_message nullable,
+  created_at/updated_at) com RLS (staff lê/escreve, aluno só lê);
+  script/seed que popula automaticamente os feriados nacionais fixos e
+  móveis (calculados) do ano corrente e do próximo para escolas já
+  existentes, e via trigger/função para escolas novas (mesmo padrão de
+  seed automático das Fases 1/2/5/12.1).
+
+- [ ] **16.2 — Tela "Calendário → Feriados"**
+  Critério de pronto: CRUD staff (admin) dos feriados/recessos da escola —
+  nome, data, recorrente, haverá aula (sim/não), mensagem personalizada
+  opcional; feriados calculados automaticamente (16.1) aparecem
+  pré-cadastrados e podem ser editados (ex: marcar "haverá aula" numa data
+  que normalmente não teria).
+
+- [ ] **16.3 — Bloqueio de presença/check-in em dia sem aula**
+  Critério de pronto: quando `has_class = false` para a data, a
+  sinalização de presença do aluno (`modules/students/signal-rules.ts`,
+  Fase 9.4) e a abertura de chamada do professor ficam bloqueadas para
+  aquela data, com aviso visível na agenda do aluno (Fase 9.6) e na tela
+  "Turmas do dia" (Fase 3.3).
+
+- [ ] **16.4 — Notificações de aviso (2 dias antes, 1 dia antes, no dia)**
+  Critério de pronto: reaproveita o job diário da Fase 15.3 (mesma rota de
+  cron, nova responsabilidade) para verificar feriados nos próximos 2
+  dias/1 dia/hoje e enviar aviso via WhatsApp (mesma limitação de canal da
+  Fase 15) para alunos e professores ativos, usando template com variáveis
+  `{Nome}`/`{Data}`/`{NomeFeriado}`/`{Academia}`, editável pelo admin
+  (16.2); não enviar duplicado (mesmo padrão de log/constraint da 15.1).
+
+- [ ] **16.5 — Testes**
+  Critério de pronto: teste unitário do cálculo de datas móveis
+  (Páscoa/Carnaval/Sexta Santa/Corpus Christi) para múltiplos anos; teste
+  de integração confirmando bloqueio de sinalização/chamada em dia sem
+  aula e liberação normal quando `has_class = true`.
+
+---
+
+## Fase 17 — Sugestões, Reclamações e Feedback dos Alunos (2026-07-21)
+
+Baseado em `melhorias/Especificacoes_GB_Bandeirante.txt`. Funcionalidade
+100% nova — arquiteturalmente mais próxima do `InternalNotesSection`/
+`modules/students/internal-notes.ts` (Fase 10.7, thread de comentários
+anexada a um registro), reaproveitado como referência de convenção, não de
+código (é uma entidade nova, não uma nota interna). Mesma limitação de
+canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
+
+- [ ] **17.1 — Migration: `feedback` + `feedback_messages`**
+  Critério de pronto: tabela `feedback` (school_id, student_id, type enum
+  sugestão/elogio/reclamação/dúvida, title, target enum
+  professor/administrador/ambos, teacher_id nullable quando target inclui
+  professor, status enum recebida/em_analise/respondida/encerrada,
+  created_at) + `feedback_messages` (feedback_id, author_user_id nullable,
+  author_student_id nullable, body, attachment_url nullable, created_at) —
+  thread de mensagens por feedback. RLS: aluno lê/cria só os próprios;
+  admin lê/responde tudo; professor lê/responde só quando é o destinatário
+  (`target` inclui professor E `teacher_id` bate, ou `target = ambos`).
+
+- [ ] **17.2 — Tela do aluno "Fale Conosco"**
+  Critério de pronto: novo item em `STUDENT_NAV`; formulário de criação
+  (tipo, título, mensagem, destinatário, anexo opcional reaproveitando
+  Storage da Fase 8.1); listagem com histórico e status (recebida/em
+  análise/respondida/encerrada); abrir um item mostra a conversa em
+  formato de chat e permite responder.
+
+- [ ] **17.3 — Painel staff de gestão**
+  Critério de pronto: tela staff (admin sempre vê tudo; professor só os
+  direcionados a ele) com filtros por status/professor/aluno/tipo;
+  responder abre a mesma thread em formato de chat; ao decidir/responder,
+  muda o status.
+
+- [ ] **17.4 — Notificações de resposta**
+  Critério de pronto: ao staff responder, aluno recebe notificação in-app
+  (reaproveitando `notifications`, mesmo padrão das Fases 9.5/12.5) e
+  WhatsApp (mesma limitação de canal da Fase 15 — sem push/e-mail nesta
+  fase).
+
+- [ ] **17.5 — Auditoria**
+  Critério de pronto: toda criação/resposta grava em `audit_logs` via
+  `logAuditEvent` (quem criou, quem respondeu, data). Captura de IP fica
+  fora de escopo nesta subtarefa — o sistema não tem hoje nenhuma captura
+  de IP em nenhum outro fluxo; registrar essa limitação em vez de inventar
+  uma captação nova sem necessidade comprovada.
+
+- [ ] **17.6 — Exportação PDF/Excel**
+  Critério de pronto: no painel staff (17.3), exportar o histórico
+  filtrado da tela atual em PDF e em Excel/CSV.
+
+- [ ] **17.7 — Testes**
+  Critério de pronto: teste de integração confirmando RLS (aluno não vê
+  feedback de outro aluno; professor não vê feedback não direcionado a
+  ele; admin vê tudo).

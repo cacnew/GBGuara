@@ -1,0 +1,601 @@
+FASE 13 — Configurações Gerais da Academia
+Objetivo
+
+Criar um módulo exclusivo para usuários Administradores contendo todas as configurações globais do sistema que impactam regras de negócio, notificações e funcionamento da academia.
+
+Este módulo deverá ser expansível, pois futuramente outras configurações serão adicionadas.
+
+13.1 Configuração da Métrica para Graduação
+Objetivo
+
+Permitir que cada academia defina quantas aulas um aluno precisa frequentar para tornar-se apto à próxima graduação.
+
+Importante:
+
+O sistema NÃO gradua automaticamente.
+
+Ele apenas identifica quando o aluno está apto segundo a quantidade de aulas cadastradas.
+
+A graduação continua sendo decisão exclusiva do professor.
+
+Regras
+
+Criar uma tela chamada
+
+Configurações → Graduação
+
+Exibir uma tabela contendo todas as faixas existentes.
+
+Exemplo:
+
+Faixa Atual | Próxima Faixa | Nº de aulas para estar apto
+
+Branca | Cinza | 40
+
+Cinza | Amarela | 50
+
+Amarela | Laranja | 60
+
+...
+
+Preta 1º Grau | 2º Grau | 365
+
+O administrador poderá alterar qualquer valor.
+
+Os valores devem ser salvos imediatamente.
+
+Não permitir valores negativos.
+
+Permitir apenas números inteiros.
+
+Caso a academia utilize apenas algumas faixas, mostrar somente as cadastradas.
+
+Banco
+
+Criar tabela:
+
+ConfiguracaoGraduacao
+
+Id
+
+AcademiaId
+
+FaixaOrigemId
+
+FaixaDestinoId
+
+QuantidadeAulas
+
+DataCadastro
+
+UltimaAlteracao
+
+Critério de cálculo
+
+Sempre que uma presença for confirmada:
+
+Incrementar contador do aluno.
+
+Comparar:
+
+Aulas Realizadas >= QuantidadeConfigurada
+
+Caso verdadeiro:
+
+AlunoAptoGraduacao = true
+
+13.2 Contador regressivo para Professores e ADM
+Objetivo
+
+Durante a confirmação de presença, informar quanto falta para o aluno tornar-se apto.
+
+Na lista de presença
+
+Ao lado do nome do aluno deverá aparecer:
+
+Exemplo:
+
+João Silva
+
+Faixa Azul
+
+✔ 78 aulas
+
+Faltam 22 aulas para estar apto.
+
+Quando atingir:
+
+✔ Apto para graduação
+
+Exibir em destaque verde.
+
+Nunca alterar automaticamente a faixa.
+
+Dashboard do Professor
+
+Adicionar indicador:
+
+Alunos Aptos para Graduação
+
+Quantidade
+
+Lista dos nomes
+
+Data da última graduação
+
+Quantidade total de aulas
+
+13.3 Contador para o aluno
+
+Na área do aluno deverá existir um card.
+
+Exemplo:
+
+Sua evolução
+
+Faixa Atual:
+
+Azul
+
+Aulas realizadas:
+
+78
+
+Meta:
+
+100
+
+Faltam:
+
+22 aulas
+
+Quando atingir:
+
+🎉 Você atingiu a quantidade mínima de aulas para estar apto à graduação.
+
+A graduação depende exclusivamente da avaliação do professor.
+
+Nunca mostrar previsão de data.
+
+Nunca prometer graduação.
+
+Critérios de Aceite
+
+✓ Alterar quantidade de aulas em tempo real.
+
+✓ Professor visualizar contador.
+
+✓ ADM visualizar contador.
+
+✓ Aluno visualizar progresso.
+
+✓ Atualização automática após confirmação da presença.
+
+FASE 14 — Posição da Semana
+Objetivo
+
+Permitir que professores e administradores publiquem uma técnica semanal.
+
+A técnica ficará visível para todos os alunos.
+
+Cadastro
+
+Criar menu
+
+Conteúdo
+
+↓
+
+Posição da Semana
+
+Campos:
+
+Título
+
+Descrição
+
+Imagem
+
+Vídeo do YouTube (opcional)
+
+Data inicial
+
+Data final
+
+Publicado
+
+Autor
+
+Regras
+
+Somente uma posição ativa por vez.
+
+Ao cadastrar nova posição ativa:
+
+Desativar automaticamente a anterior.
+
+Permitir agendamento.
+
+Área do Aluno
+
+Na tela inicial da presença exibir:
+
+🥋 Posição da Semana
+
+Imagem
+
+Título
+
+Descrição
+
+Botão
+
+Saiba mais
+
+Caso exista vídeo:
+
+Abrir modal.
+
+Critérios
+
+Professor publica.
+
+Aluno visualiza automaticamente.
+
+Imagem responsiva.
+
+FASE 15 — Mensagens Automáticas de Aniversário
+Objetivo
+
+Automatizar felicitações de aniversário.
+
+Configuração
+
+Criar menu
+
+Configurações
+
+↓
+
+Mensagens Automáticas
+
+Opções:
+
+☑ Enviar aniversário para alunos
+
+☑ Enviar aniversário para professores
+
+☑ Enviar WhatsApp
+
+☑ Enviar Push
+
+☑ Enviar Email
+
+Mensagem padrão:
+
+Exemplo:
+
+Olá {Nome}!
+
+Hoje é um dia muito especial!
+
+Toda nossa equipe deseja um feliz aniversário!
+
+Que sua caminhada no Jiu-Jitsu continue sendo cheia de conquistas!
+
+Parabéns!
+
+Equipe Nexus Dojo.
+
+Variáveis permitidas:
+
+{Nome}
+
+{Faixa}
+
+{Academia}
+
+{Professor}
+
+Agendamento
+
+Executar diariamente às 08:00.
+
+Buscar aniversariantes.
+
+Enviar automaticamente.
+
+Registrar log.
+
+Banco
+
+MensagemEnviada
+
+Tipo
+
+AlunoId
+
+ProfessorId
+
+Data
+
+Status
+
+Canal
+
+Critérios
+
+Não enviar duplicado.
+
+Registrar erro.
+
+Permitir desligar.
+
+FASE 16 — Administração de Feriados e Recessos
+Objetivo
+
+Centralizar todos os feriados e recessos da academia.
+
+Cadastro
+
+Criar menu
+
+Calendário
+
+↓
+
+Feriados
+
+Campos:
+
+Nome
+
+Data
+
+Recorrente
+
+Sim/Não
+
+Haverá aula?
+
+Sim/Não
+
+Mensagem personalizada (opcional)
+
+Base inicial
+
+Popular automaticamente:
+
+Ano Novo
+
+Carnaval
+
+Sexta-feira Santa
+
+Tiradentes
+
+Dia do Trabalho
+
+Corpus Christi
+
+Independência
+
+Nossa Senhora Aparecida
+
+Finados
+
+Proclamação da República
+
+Natal
+
+Ano Novo
+
+Regras
+
+Se
+
+Haverá aula = Não
+
+Então:
+
+Bloquear presença.
+
+Bloquear check-in.
+
+Mostrar aviso na agenda.
+
+Notificações
+
+Enviar:
+
+2 dias antes
+
+1 dia antes
+
+No dia
+
+Destinatários:
+
+Todos os alunos ativos.
+
+Todos professores ativos.
+
+Mensagem
+
+Exemplo
+
+Olá {Nome}.
+
+Informamos que no dia {Data} ocorrerá:
+
+{NomeFeriado}
+
+Não haverá aula nesta data.
+
+Retornaremos normalmente no próximo dia útil.
+
+Equipe {Academia}
+
+Configuração
+
+Permitir alterar mensagem padrão.
+
+Permitir desligar notificações.
+
+Critérios
+
+Não enviar mensagens duplicadas.
+
+Registrar logs.
+
+Bloquear agenda.
+
+FASE 17 — Sugestões, Reclamações e Feedback dos Alunos
+Objetivo
+
+Criar um canal direto entre aluno, professor e administração.
+
+Área do aluno
+
+Novo menu:
+
+Fale Conosco
+
+Campos:
+
+Tipo
+
+Sugestão
+
+Elogio
+
+Reclamação
+
+Dúvida
+
+Título
+
+Mensagem
+
+Destinatário
+
+Professor
+
+Administrador
+
+Professor + Administrador
+
+Anexos (opcional)
+
+Enviar
+
+Regras
+
+Independentemente da escolha:
+
+Administrador SEMPRE recebe.
+
+Professor recebe somente quando selecionado.
+
+Administração
+
+Criar painel.
+
+Filtros:
+
+Não lidas
+
+Respondidas
+
+Pendentes
+
+Por professor
+
+Por aluno
+
+Por tipo
+
+Resposta
+
+Professor e ADM podem responder.
+
+Toda conversa deve permanecer registrada.
+
+Formato semelhante a chat.
+
+Área do aluno
+
+Exibir histórico.
+
+Status:
+
+Recebida
+
+Em análise
+
+Respondida
+
+Encerrada
+
+Banco
+
+Feedback
+
+FeedbackMensagem
+
+FeedbackHistorico
+
+Notificações
+
+Quando houver resposta:
+
+Enviar Push.
+
+Enviar WhatsApp (caso habilitado).
+
+Enviar Email.
+
+Auditoria
+
+Registrar:
+
+Quem criou.
+
+Quem respondeu.
+
+Data.
+
+IP.
+
+Critérios
+
+✓ Conversa completa registrada.
+
+✓ ADM sempre visualiza tudo.
+
+✓ Professor somente mensagens direcionadas.
+
+✓ Histórico permanente.
+
+✓ Busca por palavras.
+
+✓ Exportação PDF.
+
+✓ Exportação Excel.
+
+Requisitos Gerais para Todas as Novas Fases
+
+Todas as funcionalidades implementadas deverão seguir o padrão arquitetural existente no sistema e respeitar os seguintes requisitos:
+
+Interface responsiva para desktop, tablet e dispositivos móveis.
+Controle de permissões por perfil (Administrador, Professor e Aluno).
+Registro de auditoria para todas as inclusões, alterações e exclusões.
+Histórico de alterações quando aplicável.
+Validação de campos obrigatórios e mensagens de erro amigáveis.
+Padronização visual conforme o design system do Nexus Dojo.
+Notificações configuráveis e desacopladas da regra de negócio, permitindo futura integração com WhatsApp, e-mail, push e outros canais.
+Cobertura por testes unitários, testes de integração e testes end-to-end (E2E).
+Performance adequada para academias com grande volume de alunos, evitando consultas desnecessárias e utilizando paginação, cache e índices quando apropriado.
+Todas as novas telas devem seguir o mesmo padrão de navegação, componentes, acessibilidade e experiência do usuário já implementados nas fases anteriores.
+
+Essas fases complementam o MVP atual e elevam o sistema de um gerenciador operacional para uma plataforma completa de gestão e relacionamento entre academia, professores e alunos.
