@@ -1964,7 +1964,7 @@ e a comparação contra essa meta. Toda exibição de faixa reaproveita
 criar nenhum componente novo. O sistema nunca gradua automaticamente — só
 sinaliza aptidão; a decisão continua sendo exclusiva do professor.
 
-- [ ] **13.1 — Migration + tela "Configurações → Graduação" (meta de aulas por transição de faixa)**
+- [x] **13.1 — Migration + tela "Configurações → Graduação" (meta de aulas por transição de faixa)**
   Critério de pronto: nova tabela (ex: `belt_graduation_requirements`:
   school_id, belt_system_id, from_belt_id nullable para a primeira faixa,
   to_belt_id, required_classes, created_at/updated_at) com RLS (leitura
@@ -1975,6 +1975,33 @@ sinaliza aptidão; a decisão continua sendo exclusiva do professor.
   alterada; validação: inteiro >= 0, sem negativos. Mesmo padrão de tela
   "configurar valores default de uma tabela" já usado em
   `app/(admin)/medals/points` (Fase 12.2).
+  Migration `20260721090000_belt_graduation_requirements.sql` aplicada no
+  Supabase compartilhado (`nexusdojo-dev`). Ajuste em relação ao
+  planejamento original: `from_belt_id` acabou **não nullable** — cada
+  linha representa "a partir desta faixa, quantas aulas para a próxima"
+  (`unique(belt_system_id, from_belt_id)`), então toda faixa que tem uma
+  "próxima" gera uma linha; só a última faixa de cada `belt_system` fica
+  sem linha (não há próxima faixa a configurar), sem necessidade de nulo.
+  Transições derivadas dinamicamente do `ordering` de `belts` (Fase 2.2),
+  não hardcoded. Lógica pura em `modules/graduation/requirements-rules.ts`
+  (`buildBeltTransitions`, sem import `@/`) + I/O em
+  `modules/graduation/requirements.ts` + tela em
+  `app/(admin)/graduation/settings/{page,actions,requirements-form}.tsx`;
+  novo grupo de nav "Configurações" em `ADMIN_NAV`
+  (`components/layout/nav-config.ts`). Faixas exibidas com
+  `BeltWithPreview` (mesmo componente usado no resto do sistema).
+  Verificado ponta a ponta com Playwright contra o Supabase compartilhado:
+  login admin, tela lista Jiu-Jitsu Adulto e Jiu-Jitsu Kids com as faixas
+  ilustradas, editar "Branca → Azul" para 40 e sair do campo salva
+  imediatamente (toast "Meta salva.") e persiste no banco; dado de teste
+  removido ao final. `tsc --noEmit` e `eslint` limpos.
+  > Nota de ambiente: o servidor dev neste ambiente (disco de rede) está
+  > excepcionalmente lento — compilações de rota e ate a hidratacao do
+  > formulario de login levaram 15-30s+ por requisicao durante a
+  > verificacao. Um clique de teste antes da hidratacao terminar caiu no
+  > submit nativo do HTML (GET com credenciais na querystring), não é bug
+  > de produto; resolvido no script de verificação com um buffer de
+  > espera antes de interagir, não precisou de nenhuma mudança de código.
 
 - [ ] **13.2 — Cálculo de aptidão e indicador para professor/admin**
   Critério de pronto: função pura nova (sem import `@/`, mesma convenção
