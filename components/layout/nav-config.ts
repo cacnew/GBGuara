@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Globe2,
   LayoutDashboard,
+  Settings,
   ShieldCheck,
   UserCircle,
   Users,
@@ -90,6 +91,12 @@ export const ADMIN_NAV: NavGroup[] = [
     icon: Globe2,
     collapsible: true,
     children: [{ label: "Gestao da Landing Page", href: "/landing" }],
+  },
+  {
+    label: "Configuracoes",
+    icon: Settings,
+    collapsible: true,
+    children: [{ label: "Graduacao", href: "/graduation/settings" }],
   },
   {
     label: "Administracao",

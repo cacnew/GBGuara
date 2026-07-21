@@ -218,6 +218,68 @@ export type Database = {
           },
         ]
       }
+      belt_graduation_requirements: {
+        Row: {
+          belt_system_id: string
+          created_at: string
+          from_belt_id: string
+          id: string
+          required_classes: number
+          school_id: string
+          to_belt_id: string
+          updated_at: string
+        }
+        Insert: {
+          belt_system_id: string
+          created_at?: string
+          from_belt_id: string
+          id?: string
+          required_classes?: number
+          school_id: string
+          to_belt_id: string
+          updated_at?: string
+        }
+        Update: {
+          belt_system_id?: string
+          created_at?: string
+          from_belt_id?: string
+          id?: string
+          required_classes?: number
+          school_id?: string
+          to_belt_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "belt_graduation_requirements_belt_system_id_fkey"
+            columns: ["belt_system_id"]
+            isOneToOne: false
+            referencedRelation: "belt_systems"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "belt_graduation_requirements_from_belt_id_fkey"
+            columns: ["from_belt_id"]
+            isOneToOne: false
+            referencedRelation: "belts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "belt_graduation_requirements_to_belt_id_fkey"
+            columns: ["to_belt_id"]
+            isOneToOne: false
+            referencedRelation: "belts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "belt_graduation_requirements_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       belts: {
         Row: {
           belt_system_id: string
