@@ -3,6 +3,10 @@
 import { requireStudent } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { PRESENT_STATUSES } from "@/lib/attendance/constants";
+import {
+  getGraduationEligibilityByStudentIds,
+  type StudentGraduationStatus,
+} from "@/modules/graduation/eligibility";
 
 const COUNTED_STATUSES: readonly string[] = PRESENT_STATUSES;
 
@@ -28,6 +32,7 @@ export type StudentDashboard = {
   monthlyCounts: number[]; // 12 posições, jan..dez
   trainedDates: string[]; // todas as datas treinadas no ano (para o calendário)
   history: AttendanceHistoryEntry[]; // histórico completo do ano, mais recente primeiro
+  graduation: StudentGraduationStatus | null; // null quando não há meta configurada (Fase 13.1)
 };
 
 /**
@@ -104,11 +109,18 @@ export async function getStudentDashboard(year: number): Promise<StudentDashboar
     });
   }
 
+  const eligibilityByStudentId = await getGraduationEligibilityByStudentIds(
+    profile.schoolId,
+    [profile.id],
+  );
+  const eligibility = eligibilityByStudentId.get(profile.id) ?? null;
+
   return {
     currentDegree: student?.current_degree ?? 0,
     beltTimeline,
     monthlyCounts,
     trainedDates,
     history,
+    graduation: eligibility && eligibility.requiredClasses !== null ? eligibility : null,
   };
 }

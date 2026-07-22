@@ -53,6 +53,34 @@ export function PainelClient({
     <div className="flex flex-1 flex-col gap-6 p-4 text-foreground md:p-6">
       <h1 className="font-heading text-2xl font-semibold">Painel</h1>
 
+      {dashboard.graduation && currentBelt && (
+        <section className="space-y-3">
+          <h2 className="font-heading text-lg font-semibold">Sua evolução</h2>
+          <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
+            <div className="flex items-center gap-2">
+              <BeltPreview name={currentBelt.name} className="h-5 w-14" />
+              <span className="text-sm font-medium">
+                {currentBelt.name} · grau {dashboard.currentDegree}
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {dashboard.graduation.attendancesSinceLastGraduation} de{" "}
+              {dashboard.graduation.requiredClasses} aulas desde a última graduação
+            </p>
+            {dashboard.graduation.isEligible ? (
+              <p className="rounded-md bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                Você atingiu a quantidade mínima de aulas para estar apto à graduação.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Faltam <strong className="text-foreground">{dashboard.graduation.remaining}</strong>{" "}
+                aula{dashboard.graduation.remaining === 1 ? "" : "s"} para atingir a meta.
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
       <section className="space-y-3">
         <h2 className="font-heading text-lg font-semibold">
           Total de treinos em {year}

@@ -2043,7 +2043,7 @@ sinaliza aptidão; a decisão continua sendo exclusiva do professor.
   > em navegador quando o ambiente estiver mais estável, especialmente o
   > badge na chamada com sinalização e o card do dashboard do professor.
 
-- [ ] **13.3 — Card "Sua evolução" no painel do aluno**
+- [x] **13.3 — Card "Sua evolução" no painel do aluno**
   Critério de pronto: no painel do aluno (`/aluno/painel`, Fase 9.8), novo
   card com faixa atual, aulas realizadas, meta da transição atual, quantas
   faltam, e mensagem de conquista ("Você atingiu a quantidade mínima de
@@ -2051,6 +2051,25 @@ sinaliza aptidão; a decisão continua sendo exclusiva do professor.
   prevista nem promessa de graduação. Aluno sem meta configurada para a
   própria transição (13.1 vazio) não mostra o card, em vez de quebrar ou
   mostrar meta zero.
+  `modules/students/dashboard.ts` (`getStudentDashboard`) passou a
+  reaproveitar `getGraduationEligibilityByStudentIds` (Fase 13.2, mesma
+  função usada na chamada com sinalização e no dashboard do professor) para
+  o próprio aluno, expondo `graduation: StudentGraduationStatus | null` —
+  `null` quando não há meta configurada para a transição atual (sem quebrar
+  nem mostrar meta zero). `painel-client.tsx` ganhou a seção "Sua evolução"
+  (faixa atual com `BeltPreview`, "N de M aulas desde a última graduação",
+  mensagem de conquista em destaque verde quando atingida, ou "faltam N
+  aulas" caso contrário), condicionada a `dashboard.graduation` e à faixa
+  atual existirem.
+  `tsc --noEmit` e `eslint` limpos.
+  Verificado ponta a ponta com Playwright (spec temporário, não
+  permanente — testes formais ficam para a 13.4) contra o Supabase
+  compartilhado, logado como `aluno@nexusdojo.dev`: (1) meta acima das
+  aulas do aluno → card mostra "N de M aulas" e "Faltam X aulas para
+  atingir a meta."; (2) meta exatamente atingida → mensagem de conquista
+  visível; (3) sem meta configurada para a transição → card ausente. Dados
+  de teste (linha temporária em `belt_graduation_requirements`) restaurados
+  ao final. Sem erros de console.
 
 - [ ] **13.4 — Testes das regras de negócio**
   Critério de pronto: testes unitários da função de elegibilidade (13.2)
