@@ -17,6 +17,16 @@
   - escola: `Gracie Barra Dev`
   - admin dev: `admin@nexusdojo.dev`
   - senha dev: `TestSenha123!`
+- Contas de demonstracao no ambiente compartilhado (todas com a mesma senha
+  `TestSenha123!`):
+  - Admin: `admin@nexusdojo.dev` (Admin NexusDojo)
+  - Aluno: `aluno@nexusdojo.dev` (Aluno — reservada para testes e2e ao vivo,
+    nao entra na geracao em massa de dados de demonstracao)
+  - Professor: `professor@nexusdojo.dev` (Professor Demo)
+  - Professor: `rafael.mendes@demo.nexusdojo.dev` (Professor Rafael Mendes)
+  - Professor: `bruno.almeida@demo.nexusdojo.dev` (Professor Bruno Almeida)
+  - Professora: `camila.duarte@demo.nexusdojo.dev` (Professora Camila Duarte)
+  - Professora: `laura.santos@demo.nexusdojo.dev` (Professora Laura Santos)
 - Seeds automaticos por trigger validados no remoto:
   - 1 unidade
   - 7 modalidades
