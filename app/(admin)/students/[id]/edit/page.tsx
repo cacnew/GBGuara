@@ -20,6 +20,7 @@ import { StudentEditTabs } from "./student-edit-tabs";
 import { ResetPasswordButton } from "../reset-password/reset-password-button";
 import { LaunchMedalForStudentButton } from "@/components/medals/launch-for-student-button";
 import { getStaffMedalLaunchFormData } from "@/modules/medals/staff-launch";
+import { getGraduationEligibilityByStudentIds } from "@/modules/graduation/eligibility";
 
 export default async function EditStudentPage({
   params,
@@ -97,25 +98,16 @@ export default async function EditStudentPage({
   }));
 
   const graduationReferenceDate = student.last_graduation_date ?? student.enrollment_date;
-  const { data: graduationAttendances } = await supabase
-    .from("attendances")
-    .select("class_sessions!inner(date, class_groups!inner(modality_id))")
-    .eq("student_id", student.id)
-    .eq("status", "presente")
-    .gte("class_sessions.date", graduationReferenceDate);
-
-  const currentModalityId = student.belts?.belt_systems?.modality_id ?? null;
-  const validGraduationAttendanceDates = new Set(
-    (graduationAttendances ?? [])
-      .filter((attendance) => {
-        if (!currentModalityId) return true;
-        return (
-          attendance.class_sessions?.class_groups?.modality_id === currentModalityId
-        );
-      })
-      .map((attendance) => attendance.class_sessions?.date)
-      .filter((date): date is string => Boolean(date)),
-  );
+  // Reaproveita o mesmo cálculo em lote da Fase 13.2
+  // (`getGraduationEligibilityByStudentIds`) em vez de duplicar a query
+  // aqui — a versão antiga filtrava só `status = "presente"`, subcontando
+  // presenças confirmadas pela chamada com sinalização (Fase 9.5, que
+  // gera `confirmed`/`added_by_instructor`).
+  const eligibilityByStudent = await getGraduationEligibilityByStudentIds(profile.schoolId, [
+    student.id,
+  ]);
+  const attendancesSinceLastGraduation =
+    eligibilityByStudent.get(student.id)?.attendancesSinceLastGraduation ?? 0;
 
   const daysSinceLastGraduation = Math.floor(
     (new Date().getTime() - new Date(`${graduationReferenceDate}T00:00:00Z`).getTime()) /
@@ -210,7 +202,7 @@ export default async function EditStudentPage({
             }))}
             teachers={teachers ?? []}
             history={graduationHistory}
-            attendancesSinceLastGraduation={validGraduationAttendanceDates.size}
+            attendancesSinceLastGraduation={attendancesSinceLastGraduation}
             daysSinceLastGraduation={daysSinceLastGraduation}
           />
         }

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PRESENT_STATUSES } from "@/lib/attendance/constants";
+import { getGraduationEligibilityByStudentIds } from "@/modules/graduation/eligibility";
 
 export type RecentSession = { id: string; className: string; date: string };
 export type RecentStudent = { id: string; name: string; enrollmentDate: string };
@@ -31,6 +32,12 @@ export type RecentLessonContent = {
   content: string;
   date: string;
 };
+export type EligibleGraduationStudent = {
+  id: string;
+  name: string;
+  lastGraduationDate: string | null;
+  attendancesSinceLastGraduation: number;
+};
 
 export type TeacherDashboardData = {
   metrics: {
@@ -38,6 +45,7 @@ export type TeacherDashboardData = {
     upcomingClasses: number;
     pendingGraduationSuggestions: number;
     attentionStudents: number;
+    eligibleForGraduation: number;
   };
   upcomingClasses: UpcomingClass[];
   recentSessions: RecentSession[];
@@ -46,6 +54,7 @@ export type TeacherDashboardData = {
   attentionStudents: AttentionStudent[];
   pendingGraduationSuggestions: PendingGraduationSuggestion[];
   recentLessonContents: RecentLessonContent[];
+  eligibleForGraduation: EligibleGraduationStudent[];
 };
 
 function toDateOnly(date: Date) {
@@ -75,7 +84,10 @@ function formatShortDate(dateOnly: string) {
   return `${day}/${month}`;
 }
 
-export async function getTeacherDashboardData(email: string): Promise<TeacherDashboardData> {
+export async function getTeacherDashboardData(
+  email: string,
+  schoolId: string,
+): Promise<TeacherDashboardData> {
   const supabase = await createClient();
 
   const { data: teacher } = await supabase
@@ -239,12 +251,39 @@ export async function getTeacherDashboardData(email: string): Promise<TeacherDas
   const todayOnly = toDateOnly(new Date());
   const classesToday = upcomingClasses.filter((item) => item.date === todayOnly).length;
 
+  // Alunos aptos para graduação (Fase 13.2) — escopo é toda a escola, não
+  // só os 30 alunos mais recentes usados acima em `attentionStudents`.
+  const { data: activeStudentRows } = await supabase
+    .from("students")
+    .select("id, name")
+    .eq("status", "ativo");
+
+  const eligibilityByStudent = await getGraduationEligibilityByStudentIds(
+    schoolId,
+    (activeStudentRows ?? []).map((row) => row.id),
+  );
+
+  const eligibleForGraduation: EligibleGraduationStudent[] = (activeStudentRows ?? [])
+    .map((row) => {
+      const eligibility = eligibilityByStudent.get(row.id);
+      if (!eligibility?.isEligible) return null;
+      return {
+        id: row.id,
+        name: row.name,
+        lastGraduationDate: eligibility.lastGraduationDate,
+        attendancesSinceLastGraduation: eligibility.attendancesSinceLastGraduation,
+      };
+    })
+    .filter((student): student is EligibleGraduationStudent => Boolean(student))
+    .sort((a, b) => (a.lastGraduationDate ?? "").localeCompare(b.lastGraduationDate ?? ""));
+
   return {
     metrics: {
       classesToday,
       upcomingClasses: upcomingClasses.length,
       pendingGraduationSuggestions: pendingGraduationSuggestions.length,
       attentionStudents: attentionStudents.length,
+      eligibleForGraduation: eligibleForGraduation.length,
     },
     upcomingClasses,
     recentSessions,
@@ -253,5 +292,6 @@ export async function getTeacherDashboardData(email: string): Promise<TeacherDas
     attentionStudents,
     pendingGraduationSuggestions,
     recentLessonContents,
+    eligibleForGraduation,
   };
 }

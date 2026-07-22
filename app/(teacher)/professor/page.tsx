@@ -11,7 +11,7 @@ function formatDate(value: string) {
 
 export default async function TeacherDashboardPage() {
   const profile = await getCurrentUserProfile();
-  const data = profile ? await getTeacherDashboardData(profile.email) : null;
+  const data = profile ? await getTeacherDashboardData(profile.email, profile.schoolId) : null;
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-6 text-foreground">
@@ -27,7 +27,7 @@ export default async function TeacherDashboardPage() {
 
       {data && (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             <MetricCard label="Aulas hoje" value={data.metrics.classesToday} />
             <MetricCard
               label="Proximas aulas"
@@ -41,6 +41,10 @@ export default async function TeacherDashboardPage() {
             <MetricCard
               label="Sugestoes de graduacao"
               value={data.metrics.pendingGraduationSuggestions}
+            />
+            <MetricCard
+              label="Alunos aptos para graduacao"
+              value={data.metrics.eligibleForGraduation}
             />
           </div>
 
@@ -76,6 +80,22 @@ export default async function TeacherDashboardPage() {
                 secondary: `${suggestion.suggestedBeltName} · grau ${suggestion.suggestedDegree}`,
                 trailing: formatDate(suggestion.date),
                 href: `/professor/students/${suggestion.studentId}`,
+              }))}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <SummaryList
+              title="Alunos aptos para graduacao"
+              emptyMessage="Nenhum aluno apto para graduacao no momento."
+              items={data.eligibleForGraduation.slice(0, 5).map((student) => ({
+                id: student.id,
+                primary: student.name,
+                secondary: `${student.attendancesSinceLastGraduation} aulas desde a ultima graduacao`,
+                trailing: student.lastGraduationDate
+                  ? formatDate(student.lastGraduationDate)
+                  : "Nunca graduado",
+                href: `/professor/students/${student.id}`,
               }))}
             />
           </div>

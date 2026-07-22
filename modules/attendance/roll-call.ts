@@ -3,6 +3,10 @@
 import { requireUser } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { PRESENT_STATUSES } from "@/lib/attendance/constants";
+import {
+  getGraduationEligibilityByStudentIds,
+  type StudentGraduationStatus,
+} from "@/modules/graduation/eligibility";
 
 export type RollCallAttendance = {
   attendanceId: string;
@@ -15,6 +19,7 @@ export type RollCallAttendance = {
   status: string;
   signaledAt: string | null;
   confirmedAt: string | null;
+  graduationEligibility: StudentGraduationStatus | null;
 };
 
 export type RollCallResult = { error?: string };
@@ -41,7 +46,13 @@ export async function getSessionRollCall(
     .eq("school_id", profile.schoolId)
     .order("signaled_at", { ascending: true });
 
-  return (data ?? []).map((a) => ({
+  const rows = data ?? [];
+  const eligibilityByStudent = await getGraduationEligibilityByStudentIds(
+    profile.schoolId,
+    rows.map((a) => a.student_id),
+  );
+
+  return rows.map((a) => ({
     attendanceId: a.id,
     studentId: a.student_id,
     studentName: a.students?.name ?? "",
@@ -52,6 +63,7 @@ export async function getSessionRollCall(
     status: a.status,
     signaledAt: a.signaled_at,
     confirmedAt: a.confirmed_at,
+    graduationEligibility: eligibilityByStudent.get(a.student_id) ?? null,
   }));
 }
 

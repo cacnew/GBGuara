@@ -12,6 +12,35 @@ import {
   revertToSignaled,
   type RollCallAttendance,
 } from "@/modules/attendance/roll-call";
+import type { StudentGraduationStatus } from "@/modules/graduation/eligibility";
+
+/**
+ * Indicador de aptidão para graduação (Fase 13.2) — nunca altera a
+ * faixa, só informa o professor durante a chamada. Sem meta configurada
+ * para a transição atual (`requiredClasses === null`), não mostra nada.
+ */
+function GraduationEligibilityBadge({
+  eligibility,
+}: {
+  eligibility: StudentGraduationStatus | null;
+}) {
+  if (!eligibility || eligibility.requiredClasses === null) return null;
+
+  if (eligibility.isEligible) {
+    return (
+      <span className="text-xs font-semibold text-green-600 dark:text-green-400">
+        ✓ Apto para graduação
+      </span>
+    );
+  }
+
+  return (
+    <span className="text-xs text-muted-foreground">
+      {eligibility.attendancesSinceLastGraduation} aulas · faltam {eligibility.remaining} para
+      apto
+    </span>
+  );
+}
 
 export function RollCallClient({
   sessionId,
@@ -108,6 +137,7 @@ export function RollCallClient({
         status: "added_by_instructor",
         signaledAt: null,
         confirmedAt: new Date().toISOString(),
+        graduationEligibility: null,
       },
     ]);
     refreshList();
@@ -141,7 +171,10 @@ export function RollCallClient({
                 key={a.attendanceId}
                 className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3 text-sm"
               >
-                <span className="min-w-0 truncate font-medium">{a.studentName}</span>
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{a.studentName}</p>
+                  <GraduationEligibilityBadge eligibility={a.graduationEligibility} />
+                </div>
                 <button
                   type="button"
                   onClick={() => handleConfirm(a.attendanceId)}
@@ -204,6 +237,7 @@ export function RollCallClient({
                       ? "Marcado presente (chamada rápida)"
                       : "Confirmado"}
                 </p>
+                <GraduationEligibilityBadge eligibility={a.graduationEligibility} />
               </div>
               {a.status === "confirmed" && (
                 <button
