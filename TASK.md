@@ -2003,7 +2003,7 @@ sinaliza aptidão; a decisão continua sendo exclusiva do professor.
   > de produto; resolvido no script de verificação com um buffer de
   > espera antes de interagir, não precisou de nenhuma mudança de código.
 
-- [ ] **13.2 — Cálculo de aptidão e indicador para professor/admin**
+- [x] **13.2 — Cálculo de aptidão e indicador para professor/admin**
   Critério de pronto: função pura nova (sem import `@/`, mesma convenção
   já documentada nas Fases 9.11/12.9 para não quebrar o vitest — ex:
   `modules/graduation/eligibility-rules.ts`) que compara as presenças
@@ -2015,6 +2015,33 @@ sinaliza aptidão; a decisão continua sendo exclusiva do professor.
   altera a faixa automaticamente; (b) novo indicador no dashboard do
   professor (Fase 7.2): "Alunos aptos para graduação" (quantidade + lista
   com nome, data da última graduação, total de aulas).
+  `modules/graduation/eligibility-rules.ts` (`computeGraduationEligibility`,
+  puro) + `modules/graduation/eligibility.ts`
+  (`getGraduationEligibilityByStudentIds`, bulk — mesmo padrão de
+  `attentionStudents` em `app/(teacher)/professor/queries.ts`, uma query de
+  alunos + uma query de presenças agrupada em memória, sem N+1). Integrado
+  em (a) `modules/attendance/roll-call.ts`/`roll-call-client.tsx` (badge
+  ao lado do nome, tanto na lista de sinalizados quanto na de presentes);
+  (b) `app/(teacher)/professor/queries.ts`/`page.tsx` (novo card "Alunos
+  aptos para graduação", escopo em todos os alunos ativos da escola, não
+  só os 30 mais recentes usados por `attentionStudents`).
+  Bug real encontrado e corrigido de passagem: o contador da Fase 6.3
+  (`app/(admin)/students/[id]/edit/page.tsx`) filtrava só
+  `status = "presente"`, subcontando presenças confirmadas pela chamada
+  com sinalização (Fase 9.5, que gera `confirmed`/`added_by_instructor`,
+  não `"presente"`). Página passou a reaproveitar
+  `getGraduationEligibilityByStudentIds` (que usa `PRESENT_STATUSES`)
+  em vez de duplicar a query, corrigindo a contagem e eliminando a
+  duplicação ao mesmo tempo.
+  `tsc --noEmit` e `eslint` limpos.
+  > Nota: a verificação end-to-end em navegador (Playwright) não foi
+  > concluída nesta sessão — o servidor de dev (disco de rede) ficou
+  > excepcionalmente instável durante a tentativa (rotas levando de 6s a
+  > 3+ minutos para compilar, processos em background sendo encerrados
+  > sem causa aparente). Commit feito com base em verificação estática
+  > (`tsc --noEmit`/`eslint` limpos + revisão manual da lógica). Validar
+  > em navegador quando o ambiente estiver mais estável, especialmente o
+  > badge na chamada com sinalização e o card do dashboard do professor.
 
 - [ ] **13.3 — Card "Sua evolução" no painel do aluno**
   Critério de pronto: no painel do aluno (`/aluno/painel`, Fase 9.8), novo
