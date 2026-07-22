@@ -11,13 +11,17 @@ export function AvatarUpload({
   entityId,
   currentUrl,
   hint,
+  label = "Foto",
+  shape = "circle",
   onUploaded,
 }: {
   schoolId: string;
-  entityType: "students" | "teachers";
+  entityType: "students" | "teachers" | "weekly_positions";
   entityId: string;
   currentUrl: string | null;
   hint?: string;
+  label?: string;
+  shape?: "circle" | "square";
   onUploaded: (url: string) => void;
 }) {
   const [preview, setPreview] = useState<string | null>(currentUrl);
@@ -55,9 +59,15 @@ export function AvatarUpload({
 
   return (
     <div className="space-y-1.5">
-      <Label>Foto</Label>
+      <Label>{label}</Label>
       <div className="flex items-center gap-3">
-        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+        <div
+          className={
+            shape === "circle"
+              ? "h-16 w-16 shrink-0 overflow-hidden rounded-full border border-border bg-muted"
+              : "h-20 w-32 shrink-0 overflow-hidden rounded-lg border border-border bg-muted"
+          }
+        >
           {preview && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -74,7 +84,7 @@ export function AvatarUpload({
           disabled={isUploading}
           onClick={() => inputRef.current?.click()}
         >
-          {isUploading ? "Enviando..." : "Trocar foto"}
+          {isUploading ? "Enviando..." : `Trocar ${label.toLowerCase()}`}
         </Button>
         <input
           ref={inputRef}

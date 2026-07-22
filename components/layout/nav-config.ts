@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Award,
   Bell,
+  BookOpen,
   CalendarCheck,
   CalendarDays,
   ClipboardList,
@@ -87,6 +88,12 @@ export const ADMIN_NAV: NavGroup[] = [
     ],
   },
   {
+    label: "Conteudo",
+    icon: BookOpen,
+    collapsible: true,
+    children: [{ label: "Posicao da Semana", href: "/content/weekly-positions" }],
+  },
+  {
     label: "Site publico",
     icon: Globe2,
     collapsible: true,
@@ -130,6 +137,12 @@ export const TEACHER_NAV: NavGroup[] = [
       { label: "Aprovacoes", href: "/professor/medals/approvals" },
       { label: "Ranking", href: "/professor/medals/ranking" },
     ],
+  },
+  {
+    label: "Conteudo",
+    icon: BookOpen,
+    collapsible: true,
+    children: [{ label: "Posicao da Semana", href: "/professor/content/weekly-positions" }],
   },
 ];
 

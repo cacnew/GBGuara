@@ -2141,12 +2141,38 @@ Fase 8.1 (fotos de aluno/professor).
   existentes passando (nenhuma regressão), select via service role client
   confirma a tabela acessível no ambiente compartilhado.
 
-- [ ] **14.2 — Tela staff de cadastro ("Conteúdo → Posição da Semana")**
-  Critério de pronto: nova área staff (admin e professor, mesmo padrão de
-  acesso `requireUser()` aceitando os dois papéis já usado nas Fases
-  10.7/12.3) para criar/editar/listar posições, com upload de imagem
-  (Storage), campo de vídeo do YouTube opcional, datas de início/fim,
-  toggle "publicado".
+- [x] **14.2 — Tela staff de cadastro ("Conteúdo → Posição da Semana")**
+  `modules/weekly-positions/positions.ts` (`"use server"`, funções
+  exportadas direto, mesmo padrão de `modules/medals/events.ts` Fase 12.3):
+  `getWeeklyPositions`/`getWeeklyPosition`/`createWeeklyPosition`/
+  `updateWeeklyPosition`, todas via `requireUser()` (admin OU professor).
+  Regra "só uma ativa por vez" implementada em
+  `deactivateOtherPublishedPositions` — ao salvar com `published: true`,
+  desativa qualquer outra posição publicada da escola antes do
+  insert/update; chamadas sequenciais na mesma server action (não uma
+  transação de banco de fato), mesmo padrão já usado em `endContract`
+  (Fase 5.4/7.9).
+  `components/weekly-positions/{position-form,position-list}.tsx`
+  (compartilhados) + páginas espelhadas em `(admin)/content/weekly-positions`
+  e `(teacher)/professor/content/weekly-positions` (list/new/[id]/edit,
+  mesmo padrão de `(admin)/medals/events`). Upload de imagem reaproveita o
+  bucket `avatars` já existente (Fase 8.1) com um novo prefixo
+  `{school_id}/weekly_positions/...` — a RLS de `storage.objects` só checa
+  o primeiro nível do path (`school_id`), então nenhuma migration de
+  Storage nova foi necessária; `components/forms/avatar-upload.tsx` ganhou
+  props opcionais `label`/`shape` (`"circle" | "square"`) para reaproveitar
+  o mesmo componente de upload com preview retangular em vez de circular.
+  Item de menu novo "Conteúdo → Posição da Semana" em `ADMIN_NAV` e
+  `TEACHER_NAV` (`components/layout/nav-config.ts`).
+  Confirmado com Playwright contra o Supabase compartilhado (login admin →
+  lista vazia → nova posição com upload de imagem real → lista mostra o
+  item com badge "Publicada" → criar uma segunda posição publicada
+  desativa a primeira automaticamente, confirmado tanto na UI quanto
+  consultando a tabela diretamente → tela de edição carrega os dados
+  salvos corretamente). Dados de teste e objetos de Storage criados na
+  verificação foram removidos ao final. Sem erros de console.
+  `tsc --noEmit` limpo, `npm test` com as 8 suítes/57 testes existentes
+  passando (nenhuma regressão).
 
 - [ ] **14.3 — Exibição na área do aluno**
   Critério de pronto: card "🥋 Posição da Semana" na tela inicial do aluno
