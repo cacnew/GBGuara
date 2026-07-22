@@ -88,6 +88,26 @@ professor/admin aprova ou rejeita; ranking anual soma pontos por nível.
 | `app/(student)/aluno/medalhas`, `app/(student)/aluno/ranking` | Telas do aluno |
 | `scripts/seed-medals.mjs` | Dados de demonstração |
 
+## Configurações da Academia e meta de graduação (Fase 13)
+
+Primeiro grupo de nav "Configurações" do projeto, exclusivo do
+administrador. Admin configura, por transição de faixa de cada
+`belt_system` da escola, uma meta de nº de aulas para o aluno estar apto à
+próxima faixa — incremento sobre o contador de presenças desde a última
+graduação já existente (Fase 6.3). O sistema nunca gradua automaticamente:
+a meta só alimenta um indicador de aptidão (chamada, dashboard do
+professor e painel do aluno), a decisão continua sendo exclusiva do
+professor.
+
+| Arquivo | Conteudo |
+|---|---|
+| `modules/graduation/requirements-rules.ts` / `requirements.ts` | Transições de faixa derivadas do `ordering` de `belts` (I/O + lógica pura) |
+| `modules/graduation/eligibility-rules.ts` / `eligibility.ts` | Aptidão para graduação, individual e em lote (I/O + lógica pura) |
+| `app/(admin)/graduation/settings/*` | Tela "Configurações → Graduação" (meta por transição) |
+| `modules/attendance/roll-call.ts` | Badge de aptidão na chamada com sinalização |
+| `app/(teacher)/professor/*` | Card "Alunos aptos para graduação" no dashboard do professor |
+| `modules/students/dashboard.ts` / `app/(student)/aluno/painel/*` | Card "Sua evolução" no painel do aluno |
+
 ## Landing publica atual
 
 A raiz `/` e uma landing institucional gerenciavel pelo admin. A gestao fica

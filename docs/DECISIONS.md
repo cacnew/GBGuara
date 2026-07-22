@@ -1542,3 +1542,67 @@ explica o "porquê", não o "o quê" (isso já está no código/commits).
   nunca apaga dado histórico. Por isso `listMedalEventOptions` ganhou um
   parâmetro `activeOnly` (default `true` para lançamento) em vez de duas
   funções separadas.
+
+## Meta de aulas por transição de faixa (Fase 13.1)
+
+- `belt_graduation_requirements`: uma linha por transição real do
+  `belt_system` da escola (`from_belt_id` → `to_belt_id`), derivada
+  dinamicamente do `ordering` de `belts` (Fase 2.2) — nunca hardcoded, e
+  nunca as 21 combinações teóricas do catálogo IBJJF inteiro. `from_belt_id`
+  acabou não nullable (ajuste em relação ao planejamento original): só a
+  última faixa de cada `belt_system` fica sem linha (não há "próxima"), sem
+  precisar de nulo para representar "primeira faixa".
+- RLS: leitura liberada para staff e aluno da própria escola (aluno precisa
+  da própria meta para o card "Sua evolução", Fase 13.3); escrita liberada
+  para qualquer staff da escola (`current_school_id()`, sem checar `role`)
+  — o "admin-only" fica a cargo da aplicação (`requireRole("admin")` em
+  `app/(admin)/graduation/settings/actions.ts`), mesmo padrão já usado em
+  `medal_point_rules` (Fase 12.1/12.2). Ver nota de teste na Fase 13.4.
+- Tela salva cada transição imediatamente ao perder o foco (sem botão
+  "Salvar" geral), mesmo padrão de "configurar valores default de uma
+  tabela" já usado em `app/(admin)/medals/points` (Fase 12.2).
+
+## Aptidão para graduação (Fase 13.2)
+
+- Lógica pura em `modules/graduation/eligibility-rules.ts`
+  (`computeGraduationEligibility`), sem import `@/` — mesma convenção das
+  Fases 9.11/12.9 para não quebrar o vitest. Bulk em
+  `modules/graduation/eligibility.ts`
+  (`getGraduationEligibilityByStudentIds`), mesmo padrão de
+  `attentionStudents` (`app/(teacher)/professor/queries.ts`): uma query de
+  alunos + uma de presenças agrupada em memória, sem N+1 — reaproveitada
+  depois pelo painel do aluno (Fase 13.3).
+- `requiredClasses: null` (meta não configurada para a transição) nunca
+  bloqueia nem quebra a tela — só nunca marca apto. O sistema nunca gradua
+  automaticamente; o indicador é só apoio, a decisão continua do professor.
+- Bug real corrigido de passagem: o contador da Fase 6.3 filtrava só
+  `status = "presente"`, subcontando presenças confirmadas pela chamada com
+  sinalização (Fase 9.5, que gera `confirmed`/`added_by_instructor`). A
+  ficha do aluno passou a reaproveitar `getGraduationEligibilityByStudentIds`
+  (que usa `PRESENT_STATUSES`) em vez de duplicar a query.
+
+## Card "Sua evolução" no painel do aluno (Fase 13.3)
+
+- `getStudentDashboard` reaproveita a mesma
+  `getGraduationEligibilityByStudentIds` da Fase 13.2 para o próprio aluno
+  (`[profile.id]`) em vez de duplicar a regra de contagem — mesma fonte de
+  verdade usada na chamada e no dashboard do professor.
+- Card oculto por completo (não mostra meta zero) quando não há meta
+  configurada para a transição atual do aluno — tratado como "recurso
+  ainda não configurado pelo admin", não como erro.
+- Mensagem de conquista nunca promete data ou graduação automática — só
+  "atingiu a quantidade mínima de aulas para estar apto", decisão do
+  professor continua fora do sistema.
+
+## Testes das regras de negócio de graduação (Fase 13.4)
+
+- Achado ao escrever o teste de integração: a policy de escrita de
+  `belt_graduation_requirements` (Fase 13.1) libera qualquer staff da
+  escola, não só admin — o critério original desta subtarefa presumia que
+  a RLS sozinha bloqueasse professor. Em vez de embutir uma asserção falsa
+  (professor bloqueado por RLS, o que não é verdade), o teste foi ajustado
+  para confirmar o comportamento real: aluno é bloqueado por RLS (insert
+  com erro, update filtrado silenciosamente); admin e professor escrevem
+  normalmente via RLS direta; o "admin-only" de fato só existe na
+  aplicação (`requireRole("admin")`). Mesmo padrão já documentado
+  explicitamente na nota da própria Fase 13.1 — não é uma regressão.

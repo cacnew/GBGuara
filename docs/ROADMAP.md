@@ -20,6 +20,7 @@ arquivo que deve ser consultado para saber "o que já foi feito". Este
 | 10 | Módulo do Aluno 2 | Reset de senha pelo admin, financeiro do aluno (leitura), cobrança Pix/QR Code pelo admin, dossiê do aluno |
 | 11 | Landing page institucional | Landing pública (`/`) gerenciável pelo admin (`/landing`), conteúdo/imagens/professores/horários vindos do Supabase |
 | 12 | Sistema de Medalhas e Ranking | Catálogo de eventos, lançamento de medalha pelo aluno com aprovação do staff, ranking anual com histórico por ano |
+| 13 | Configurações Gerais da Academia | Meta de aulas por transição de faixa, indicador de aptidão para graduação (chamada, dashboard do professor, painel do aluno) |
 
 ## MVP 1A vs MVP 1B
 
@@ -32,10 +33,10 @@ arquivo que deve ser consultado para saber "o que já foi feito". Este
 - **MVP 2** = Fases 9 e 10 (Módulo do Aluno completo: login próprio,
   agenda, financeiro, dossiê). Aprovado pelo usuário em 2026-07-11
   (`modules/modulo_aluno.md`/`modulo_aluno2.md`).
-- Fase 11 (landing institucional) e Fase 12 (medalhas e ranking) foram
-  aprovadas depois, fora da sequência numerada original do MVP 2, mas
-  seguem a mesma fonte de verdade (`TASK.md`) e o mesmo protocolo de
-  execução do `CLAUDE.md`.
+- Fase 11 (landing institucional), Fase 12 (medalhas e ranking) e Fase 13
+  (configurações gerais da academia) foram aprovadas depois, fora da
+  sequência numerada original do MVP 2, mas seguem a mesma fonte de
+  verdade (`TASK.md`) e o mesmo protocolo de execução do `CLAUDE.md`.
 - **MVP 3** (pagamento online, currículo técnico, IA, etc.) está fora de
   escopo até novo aviso — ver seção 19 do documento mestre e o rodapé do
   `TASK.md`.
@@ -73,3 +74,12 @@ aluno, já aprovado direto. Ranking anual soma pontos por nível (ouro/
 prata/bronze/participação, configurável por escola ou por evento) de
 todos os alunos, com histórico por ano e filtro por evento. Detalhamento
 completo em `TASK.md`, seção `Fase 12 — Sistema de Medalhas e Ranking`.
+
+## Extra: configurações gerais da academia (Fase 13)
+
+Primeiro grupo de nav "Configurações", exclusivo do admin. Meta de nº de
+aulas configurável por transição de faixa de cada `belt_system` da
+escola; indicador de aptidão (apto/faltam N) na chamada com sinalização,
+no dashboard do professor e no painel do aluno — nunca gradua
+automaticamente, é só apoio à decisão do professor. Detalhamento completo
+em `TASK.md`, seção `Fase 13 — Configurações Gerais da Academia`.
