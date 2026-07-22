@@ -2451,6 +2451,66 @@ export type Database = {
           },
         ]
       }
+      weekly_positions: {
+        Row: {
+          created_at: string
+          created_by_user_id: string | null
+          description: string
+          end_date: string | null
+          id: string
+          image_url: string
+          published: boolean
+          school_id: string
+          start_date: string
+          title: string
+          updated_at: string
+          youtube_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id?: string | null
+          description: string
+          end_date?: string | null
+          id?: string
+          image_url: string
+          published?: boolean
+          school_id: string
+          start_date: string
+          title: string
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string | null
+          description?: string
+          end_date?: string | null
+          id?: string
+          image_url?: string
+          published?: boolean
+          school_id?: string
+          start_date?: string
+          title?: string
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_positions_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_positions_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       birthday_students: {

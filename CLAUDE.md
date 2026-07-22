@@ -13,6 +13,17 @@
 - Nao colar service role, senha do banco ou JWTs neste arquivo.
 - O schema remoto ja recebeu todas as migrations do projeto via
   `npx supabase db push --db-url ...`.
+- O projeto nao tem conexao direta habilitada (`db.<ref>.supabase.co` nao
+  resolve DNS) e o CLI local nao esta linkado a conta dona do projeto
+  (`supabase link`/management API falham silenciosamente, mesmo problema ja
+  registrado na Fase 9.1 para `supabase gen types`). Use sempre o Session
+  Pooler para `db push`, host `aws-1-sa-east-1.pooler.supabase.com:5432`,
+  usuario `postgres.wxxjgogzcbgffkyfywvm`, senha = `SUPABASE_DB_PASSWORD`
+  de `.env.local`. Ex.:
+  `npx supabase db push --db-url "postgresql://postgres.wxxjgogzcbgffkyfywvm:$SUPABASE_DB_PASSWORD@aws-1-sa-east-1.pooler.supabase.com:5432/postgres"`
+  (rode `--dry-run` primeiro para conferir quais migrations estao
+  pendentes). O warning de Docker sobre `pg-delta catalog`/edge-runtime
+  nesse comando e apenas cache local ausente — nao impede o push.
 - Setup inicial criado no Supabase web:
   - escola: `Gracie Barra Dev`
   - admin dev: `admin@nexusdojo.dev`

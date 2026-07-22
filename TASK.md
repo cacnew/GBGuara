@@ -2113,13 +2113,33 @@ Baseado em `melhorias/Especificacoes_GB_Bandeirante.txt`. Funcionalidade
 sistema. Upload de imagem reaproveita o Supabase Storage já configurado na
 Fase 8.1 (fotos de aluno/professor).
 
-- [ ] **14.1 — Migration: `weekly_positions` (técnica da semana)**
-  Critério de pronto: tabela `weekly_positions` (school_id, title,
-  description, image_url, youtube_url nullable, start_date, end_date
-  nullable, published boolean, created_by_user_id, created_at/updated_at)
-  com RLS (staff insere/edita; aluno só lê publicadas); regra "só uma ativa
-  por vez" garantida na aplicação — ao publicar uma nova posição ativa, a
-  anterior da mesma escola é desativada na mesma transação.
+- [x] **14.1 — Migration: `weekly_positions` (técnica da semana)**
+  `supabase/migrations/20260722090000_create_weekly_positions.sql`: tabela
+  `weekly_positions` (school_id, title, description, image_url —
+  obrigatórios; youtube_url, end_date — opcionais; start_date obrigatório;
+  published boolean default false; created_by_user_id; created_at/updated_at
+  com trigger `set_updated_at`, mesmo padrão de `belt_graduation_requirements`
+  Fase 13.1). RLS: staff (`current_school_id()`) lê/insere/edita todas as
+  posições da própria escola (inclusive rascunho/agendada, para a tela de
+  cadastro da 14.2); aluno (`current_student_school_id()`) só lê
+  `published = true`. Regra "só uma ativa por vez" fica para a aplicação
+  implementar na 14.2 (criação/edição da posição ativa), não é constraint de
+  banco — mesmo padrão já usado em "apenas um contrato ativo por aluno"
+  (Fase 5.4).
+  Aplicada no Supabase compartilhado (`nexusdojo-dev`) via
+  `supabase db push --db-url`. Descoberta operacional desta sessão: o
+  projeto não tem conexão direta habilitada nem o CLI local linkado à conta
+  dona do projeto (mesma limitação da Fase 9.1) — a conexão só funciona via
+  Session Pooler no host `aws-1-sa-east-1.pooler.supabase.com`, documentado
+  em `CLAUDE.md` para não precisar redescobrir nas próximas fases com
+  migration.
+  `database.types.ts` recebeu o mesmo patch manual cirúrgico das Fases
+  9.1/9.2/10.1 (tabela `weekly_positions` completa em Row/Insert/Update/
+  Relationships) — regen completo via `db:types` segue pendente de
+  Docker/token de management API.
+  Verificado: `tsc --noEmit` limpo, `npm test` com as 8 suítes/57 testes
+  existentes passando (nenhuma regressão), select via service role client
+  confirma a tabela acessível no ambiente compartilhado.
 
 - [ ] **14.2 — Tela staff de cadastro ("Conteúdo → Posição da Semana")**
   Critério de pronto: nova área staff (admin e professor, mesmo padrão de
