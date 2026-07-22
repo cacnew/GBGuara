@@ -2071,12 +2071,38 @@ sinaliza aptidão; a decisão continua sendo exclusiva do professor.
   de teste (linha temporária em `belt_graduation_requirements`) restaurados
   ao final. Sem erros de console.
 
-- [ ] **13.4 — Testes das regras de negócio**
+- [x] **13.4 — Testes das regras de negócio**
   Critério de pronto: testes unitários da função de elegibilidade (13.2)
   cobrindo aluno sem meta configurada, aluno exatamente na meta, aluno
   acima da meta, múltiplas transições; teste de integração confirmando que
   só admin edita `belt_graduation_requirements` (RLS) e que professor/aluno
   só leem.
+  `modules/graduation/eligibility-rules.test.ts` (6 testes unitários,
+  mesmo padrão de `modules/students/eligibility.test.ts`): sem meta
+  configurada (`requiredClasses: null`, nunca quebra), abaixo/exatamente
+  na/acima da meta, meta zero (`0 >= 0` já é apto), e uma tabela com 4
+  transições de faixa diferentes calculadas de forma independente.
+  `tests/integration/graduation-requirements-rules.test.ts` (4 testes,
+  mesmo padrão de `tests/integration/medals-rules.test.ts`, contra o
+  Supabase compartilhado): aluno não insere nem atualiza
+  `belt_graduation_requirements` (RLS bloqueia com erro no insert, filtra
+  silenciosamente no update) mas lê a meta configurada por staff; admin
+  escreve normalmente.
+  > Achado ao escrever o teste: a policy de escrita (Fase 13.1) libera
+  > qualquer staff da escola (`current_school_id()`, sem checar `role`) —
+  > o "admin-only" é reforçado só na aplicação
+  > (`requireRole("admin")` em `app/(admin)/graduation/settings/actions.ts`),
+  > não na RLS. O critério original desta subtarefa presumia que a RLS
+  > sozinha bloqueasse professor; o teste foi ajustado para confirmar o
+  > comportamento real (4º teste: professor/staff não-admin também escreve
+  > via RLS direta) em vez de embutir uma asserção falsa. Mesmo padrão já
+  > documentado explicitamente na nota da Fase 13.1 — não é uma regressão,
+  > é a decisão de design já tomada ali.
+  Suíte completa: `npm test` → 8 arquivos, 57 testes, todos passando.
+  `tsc --noEmit` e `eslint` limpos. Dados de teste (linha temporária em
+  `belt_graduation_requirements`) restaurados/removidos ao final — tabela
+  confirmada vazia após a suíte.
+  Com a 13.4, a Fase 13 (Configurações Gerais da Academia) está completa.
 
 ---
 
