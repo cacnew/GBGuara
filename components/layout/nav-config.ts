@@ -103,7 +103,10 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Configuracoes",
     icon: Settings,
     collapsible: true,
-    children: [{ label: "Graduacao", href: "/graduation/settings" }],
+    children: [
+      { label: "Graduacao", href: "/graduation/settings" },
+      { label: "Mensagens Automaticas", href: "/settings/birthday-messages" },
+    ],
   },
   {
     label: "Administracao",

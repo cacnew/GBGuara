@@ -2288,13 +2288,36 @@ como fonte de dados.
   `supabase db push --db-url`. `tsc --noEmit` limpo, `npm test` com as 9
   suítes/61 testes existentes passando (nenhuma regressão).
 
-- [ ] **15.2 — Tela "Configurações → Mensagens Automáticas"**
-  Critério de pronto: tela admin com toggles (enviar para alunos / enviar
-  para professores, habilitar/desabilitar), editor do template de mensagem
-  com as variáveis `{Nome}`/`{Faixa}`/`{Academia}`/`{Professor}`
-  (substituição de texto simples, função pura nova sem I/O), preview do
-  resultado antes de salvar; mesmo padrão de tela de configuração simples
-  das Fases 12.2/13.1.
+- [x] **15.2 — Tela "Configurações → Mensagens Automáticas"**
+  `modules/birthday-messages/template.ts` (`renderBirthdayMessageTemplate`,
+  pura, sem I/O — `String.replaceAll` das 4 variáveis) + `modules/
+  birthday-messages/settings.ts` (`getBirthdayMessageSettings`, mesmo
+  padrão de `getMedalPointRules`/Fase 12.2: preenche defaults em memória —
+  incluindo o texto padrão da especificação — quando a escola ainda não
+  tem nenhuma linha salva). `app/(admin)/settings/birthday-messages/
+  {page,birthday-messages-form,actions}.tsx`: 3 toggles (alunos/
+  professores/habilitar — os toggles de canal WhatsApp/Push/Email do
+  documento original ficaram de fora, conforme decisão já registrada na
+  introdução da Fase 15), chips clicáveis que inserem a variável na
+  posição do cursor do textarea, pré-visualização ao vivo (recalculada a
+  cada tecla com dados de exemplo, chamando a função pura do client sem
+  round-trip nenhum) e `updateBirthdayMessageSettings` (upsert por
+  `school_id`, mesmo padrão staff-wide RLS + `requireRole("admin")` da
+  15.1). Item de menu "Configurações → Mensagens Automáticas" adicionado
+  em `ADMIN_NAV` (`components/layout/nav-config.ts`).
+  Confirmado com Playwright (viewport 390×844) contra o Supabase
+  compartilhado, com verificação cruzada direta no banco porque a máquina
+  estava sob carga pesada nesta sessão (compilação do dev server
+  chegando a levar minutos, toast de sucesso não renderizou a tempo do
+  timeout do teste): tela renderiza os 3 toggles e o template padrão;
+  clicar em `{Faixa}` insere a variável exatamente na posição do cursor
+  (`"Oi {Nome}, parabens!" + clique` → `"Oi {Nome}, parabens!{Faixa}"`);
+  preview mostra `"Oi Maria Silva, parabens!Faixa Azul"` corretamente;
+  salvar persistiu no banco (`enabled: true`, template exatamente como
+  editado) apesar do teste ter estourado o timeout esperando o toast —
+  confirmado consultando a tabela diretamente. Dado de teste removido ao
+  final. `tsc --noEmit` limpo, `npm test` com as 9 suítes/61 testes
+  existentes passando (nenhuma regressão).
 
 - [ ] **15.3 — Job diário de disparo (Vercel Cron)**
   Critério de pronto: rota de API protegida por segredo/`Authorization`
