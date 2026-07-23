@@ -2319,15 +2319,59 @@ como fonte de dados.
   final. `tsc --noEmit` limpo, `npm test` com as 9 suítes/61 testes
   existentes passando (nenhuma regressão).
 
-- [ ] **15.3 — Job diário de disparo (Vercel Cron)**
-  Critério de pronto: rota de API protegida por segredo/`Authorization`
-  header, agendada via `vercel.json` (`crons`) para rodar 1x ao dia; busca
-  aniversariantes do dia (reaproveitando a mesma query da Fase 8.4), monta
-  a mensagem a partir do template (15.2) e envia via `sendWhatsAppMessage`
-  (Fase 8.3) para quem tiver telefone cadastrado e configuração habilitada;
-  grava em `sent_birthday_messages` (sucesso ou erro) e nunca reenvia
-  duplicado no mesmo dia (constraint da 15.1); desligar a configuração
-  (15.2) impede qualquer envio.
+- [x] **15.3 — Job diário de disparo (Vercel Cron)**
+  `modules/birthday-messages/job.ts` (`runBirthdayMessageJob`): diferente
+  das Server Actions do resto do projeto, não depende de `next/headers` —
+  usa `createAdminClient()` (service_role) diretamente, então é uma função
+  comum chamável tanto pela rota de API quanto (a partir da 15.4)
+  diretamente em teste de integração, sem precisar replicar a lógica
+  manualmente como aconteceu com `closeRollCall`/
+  `deactivateOtherPublishedPositions`. Busca só escolas com
+  `birthday_message_settings.enabled = true`; para cada uma, filtra
+  alunos/professores ativos com `birth_date` cujo `MM-DD` bate com hoje
+  (comparação de substring na string `date`, não `new Date()` — mesma
+  lição do bug 7.8, evita desvio de fuso) e monta as variáveis
+  `{Nome}/{Faixa}/{Academia}/{Professor}` (`{Professor}` resolve o
+  professor principal do aluno via `students.main_teacher_id`; fica vazio
+  nas mensagens para professor, que não se aplica). Duplicidade: checagem
+  primária via `select` em `sent_birthday_messages` antes de enviar (a
+  unique constraint da 15.1 é a rede de segurança para corrida, não o
+  mecanismo principal). `app/api/cron/birthday-messages/route.ts`
+  (primeira rota de API do projeto): protegida por
+  `Authorization: Bearer ${CRON_SECRET}`, sem sessão de usuário.
+  `vercel.json` novo (`crons`, `"0 11 * * *"` — Vercel Cron roda em UTC;
+  11:00 UTC = 08:00 BRT, horário pedido na especificação). `CRON_SECRET`
+  adicionado ao `.env.example`.
+  Confirmado manualmente ponta a ponta contra o Supabase compartilhado
+  (dev server local + `curl` direto na rota, mais confiável que Playwright
+  para uma rota de API): (1) sem header/com segredo errado → 401; (2)
+  aluno com aniversário hoje (data alterada temporariamente) + config
+  habilitada → `{"schoolsProcessed":1,"sent":0,"failed":2,"skipped":0}` —
+  os 2 "failed" batem (o aluno de teste + uma aluna do seed cujo
+  aniversário real coincidiu com o dia do teste), ambos com
+  `error_message` "Integração com WhatsApp não configurada" porque
+  `EVOLUTION_API_URL`/`EVOLUTION_API_KEY` não estão configuradas neste
+  ambiente — comportamento correto, só falta credencial real; (3) rodar
+  de novo no mesmo dia → `{"skipped":2,"failed":0}`, sem duplicar linha
+  em `sent_birthday_messages` (confirmado contando linhas no banco); (4)
+  fluxo de professor testado trocando a configuração para
+  `notify_teachers` → linha logada com `recipient_type: "professor"`,
+  `teacher_id` preenchido, `student_id` nulo, respeitando o check
+  constraint da 15.1; (5) desligar `enabled` → próxima execução retorna
+  `schoolsProcessed: 0`, nenhuma linha nova. Todos os dados de teste
+  (configuração, log de envio, `birth_date` temporário de aluno/professor)
+  removidos/revertidos ao final.
+  **Bug real cometido e corrigido nesta sessão**: ao adicionar
+  `CRON_SECRET` no `.env.local` via `>>`, a linha anterior
+  (`NEXT_PUBLIC_APP_URL=...`) não tinha quebra de linha final, então o
+  valor novo colou direto no fim daquela linha em vez de virar uma
+  variável própria — `dotenv` carregava tudo como parte de
+  `NEXT_PUBLIC_APP_URL` e `CRON_SECRET` nunca existia (rota sempre
+  retornava 401 mesmo com o header certo). Corrigido inserindo a quebra
+  de linha faltante; vale como lembrete geral de sempre conferir se um
+  arquivo termina em nova linha antes de usar `>>`/append nele.
+  `tsc --noEmit` limpo, `npm test` com as 9 suítes/61 testes existentes
+  passando (nenhuma regressão).
 
 - [ ] **15.4 — Testes**
   Critério de pronto: testes unitários da substituição de variáveis no
