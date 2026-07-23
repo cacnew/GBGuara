@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { formatDateOnly } from "@/lib/dates/format";
 import { signalAttendance, cancelSignal, type AgendaClass } from "@/modules/students/agenda";
+import type { WeeklyPositionDetail } from "@/modules/weekly-positions/positions";
+import { WeeklyPositionCard } from "@/components/weekly-positions/weekly-position-card";
 
 const WEEKDAY_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
@@ -29,11 +31,13 @@ export function AgendaClient({
   daysWithClasses,
   selectedDate,
   classes,
+  weeklyPosition,
 }: {
   weekDates: string[];
   daysWithClasses: string[];
   selectedDate: string;
   classes: AgendaClass[];
+  weeklyPosition: WeeklyPositionDetail | null;
 }) {
   const router = useRouter();
   const [showOnlyMine, setShowOnlyMine] = useState(false);
@@ -86,6 +90,8 @@ export function AgendaClient({
           </button>
         </div>
       </div>
+
+      {weeklyPosition && <WeeklyPositionCard position={weeklyPosition} />}
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         {weekDates.map((date) => {

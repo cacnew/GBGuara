@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUser } from "@/lib/permissions";
+import { requireUser, requireStudent } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/modules/audit/log";
 import type { WeeklyPositionFormInput } from "@/lib/validations/weekly-position";
@@ -191,4 +191,39 @@ export async function updateWeeklyPosition(
 
   revalidatePositionPaths();
   return { id };
+}
+
+/**
+ * Fase 14.3: card "Posição da Semana" na agenda do aluno. RLS já restringe
+ * o select a posições `published = true` da própria escola (Fase 14.1) —
+ * aqui filtramos também a vigência (`start_date`/`end_date`), que fica a
+ * cargo da aplicação, não do banco.
+ */
+export async function getActiveWeeklyPositionForStudent(): Promise<WeeklyPositionDetail | null> {
+  await requireStudent();
+  const supabase = await createClient();
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { data } = await supabase
+    .from("weekly_positions")
+    .select("id, title, description, image_url, youtube_url, start_date, end_date, published")
+    .eq("published", true)
+    .lte("start_date", today)
+    .or(`end_date.is.null,end_date.gte.${today}`)
+    .order("start_date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    title: data.title,
+    description: data.description,
+    imageUrl: data.image_url,
+    youtubeUrl: data.youtube_url,
+    startDate: data.start_date,
+    endDate: data.end_date,
+    published: data.published,
+  };
 }

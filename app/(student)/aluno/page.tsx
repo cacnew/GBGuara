@@ -1,4 +1,5 @@
 import { getStudentAgenda, type AgendaClass } from "@/modules/students/agenda";
+import { getActiveWeeklyPositionForStudent } from "@/modules/weekly-positions/positions";
 import { AgendaClient } from "./agenda-client";
 
 function toISODate(date: Date): string {
@@ -28,7 +29,10 @@ export default async function StudentAgendaPage({
     return toISODate(d);
   });
 
-  const weekAgendas = await Promise.all(weekDates.map((d) => getStudentAgenda(d)));
+  const [weekAgendas, weeklyPosition] = await Promise.all([
+    Promise.all(weekDates.map((d) => getStudentAgenda(d))),
+    getActiveWeeklyPositionForStudent(),
+  ]);
   const daysWithClasses = weekDates.filter((_, i) => weekAgendas[i].length > 0);
   const selectedIndex = weekDates.indexOf(selectedDate);
   const classes: AgendaClass[] =
@@ -40,6 +44,7 @@ export default async function StudentAgendaPage({
       daysWithClasses={daysWithClasses}
       selectedDate={selectedDate}
       classes={classes}
+      weeklyPosition={weeklyPosition}
     />
   );
 }

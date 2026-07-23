@@ -2174,11 +2174,30 @@ Fase 8.1 (fotos de aluno/professor).
   `tsc --noEmit` limpo, `npm test` com as 8 suítes/57 testes existentes
   passando (nenhuma regressão).
 
-- [ ] **14.3 — Exibição na área do aluno**
-  Critério de pronto: card "🥋 Posição da Semana" na tela inicial do aluno
-  (agenda, Fase 9.6) com imagem, título, descrição resumida e botão "Saiba
-  mais"; se houver vídeo do YouTube, abre modal com o player embutido;
-  imagem responsiva em qualquer viewport.
+- [x] **14.3 — Exibição na área do aluno**
+  `getActiveWeeklyPositionForStudent` (`modules/weekly-positions/positions.ts`,
+  `requireStudent()`) filtra vigência na aplicação (`start_date <= hoje` e
+  `end_date` nulo ou `>= hoje`), reaproveitando a policy de select "só
+  publicadas" já existente (Fase 14.1) — mesma separação RLS/aplicação já
+  usada em `deactivateOtherPublishedPositions` (14.2).
+  `components/weekly-positions/weekly-position-card.tsx`: card novo
+  (imagem, título, descrição truncada em 2 linhas, botão "Saiba mais");
+  modal próprio (mesmo padrão visual de `components/ui/confirm-dialog.tsx`,
+  mas só com botão fechar — não uma confirmação) com iframe do YouTube
+  quando há vídeo. `lib/youtube.ts` (`getYoutubeVideoId`/
+  `getYoutubeEmbedUrl`, funções puras novas) extrai o ID de
+  `watch?v=`/`youtu.be/`/`embed/`/`shorts/`.
+  `app/(student)/aluno/page.tsx` busca a posição em paralelo com a agenda
+  da semana; `agenda-client.tsx` renderiza o card logo abaixo do
+  cabeçalho, antes do seletor de dias — só quando existe posição ativa.
+  Confirmado com Playwright (script temporário, removido ao final, viewport
+  390×844) contra o Supabase compartilhado: semeada uma posição publicada
+  de teste vigente hoje (removida ao final da verificação) → login como
+  `aluno@nexusdojo.dev` → card aparece na agenda com imagem/título/
+  descrição → "Saiba mais" abre modal com `<iframe src="https://www.
+  youtube.com/embed/...">` correto → fechar modal remove o iframe. Sem
+  erros de console. `tsc --noEmit` limpo, `npm test` com as 8 suítes/57
+  testes existentes passando (nenhuma regressão).
 
 - [ ] **14.4 — Testes**
   Critério de pronto: teste de integração confirmando que, ao publicar uma
