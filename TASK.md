@@ -2199,10 +2199,29 @@ Fase 8.1 (fotos de aluno/professor).
   erros de console. `tsc --noEmit` limpo, `npm test` com as 8 suítes/57
   testes existentes passando (nenhuma regressão).
 
-- [ ] **14.4 — Testes**
-  Critério de pronto: teste de integração confirmando que, ao publicar uma
-  nova posição ativa, a anterior é desativada automaticamente, e que o
-  aluno só enxerga a posição publicada dentro da vigência.
+- [x] **14.4 — Testes**
+  `tests/integration/weekly-positions-rules.test.ts` (novo, mesmo padrão de
+  `medals-rules.test.ts`/Fase 12.9 e `attendance-rules.test.ts`/Fase 9.11):
+  `deactivateOtherPublishedPositions` (Fase 14.2) é replicada diretamente
+  (não chamável fora de uma requisição Next.js, mesma limitação já
+  documentada para `closeRollCall`) — 2 testes cobrindo o fluxo de criação
+  (nova posição publicada desativa a anterior) e o de edição (marcar uma
+  posição existente como publicada desativa as demais, mantendo a própria
+  via `keepId`). Mais 2 testes de RLS/vigência como o aluno de verdade
+  (`asStudent`, mesmo padrão de sign-in dos outros arquivos de integração):
+  rascunho (`published=false`) é invisível independente de vigência (RLS
+  puro), e a mesma query de `getActiveWeeklyPositionForStudent` (Fase 14.3)
+  aplicada a 3 posições publicadas (vigente hoje, ainda não iniciada,
+  já encerrada) retorna só a vigente (filtro de aplicação, não RLS).
+  Snapshot/restore do estado `published` pré-existente da escola no
+  `beforeAll`/`afterAll`, já que a desativação em massa afeta a escola
+  inteira, não só as linhas criadas pelo teste — necessário por rodar
+  contra o Supabase compartilhado (`nexusdojo-dev`), não um banco isolado.
+  Confirmado: `npm test` com as 9 suítes/61 testes (57 + 4 novos) passando;
+  verificado manualmente que a tabela `weekly_positions` ficou vazia no
+  ambiente compartilhado após a execução (nenhum resíduo de teste).
+  `tsc --noEmit` limpo.
+  Com a 14.4, a Fase 14 (Posição da Semana) está completa.
 
 ---
 
