@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const teacherSchema = z.object({
   name: z.string().trim().min(2, "Nome muito curto"),
+  birthDate: z.string().optional().or(z.literal("")),
   phone: z.string().trim().optional().or(z.literal("")),
   email: z
     .string()

@@ -2324,6 +2324,7 @@ export type Database = {
       }
       teachers: {
         Row: {
+          birth_date: string | null
           created_at: string
           email: string | null
           id: string
@@ -2336,6 +2337,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          birth_date?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -2348,6 +2350,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          birth_date?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -2507,6 +2510,108 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      birthday_message_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          message_template: string
+          notify_students: boolean
+          notify_teachers: boolean
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          message_template?: string
+          notify_students?: boolean
+          notify_teachers?: boolean
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          message_template?: string
+          notify_students?: boolean
+          notify_teachers?: boolean
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "birthday_message_settings_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sent_birthday_messages: {
+        Row: {
+          channel: string
+          created_at: string
+          date: string
+          error_message: string | null
+          id: string
+          recipient_type: string
+          school_id: string
+          status: string
+          student_id: string | null
+          teacher_id: string | null
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          date: string
+          error_message?: string | null
+          id?: string
+          recipient_type: string
+          school_id: string
+          status: string
+          student_id?: string | null
+          teacher_id?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          date?: string
+          error_message?: string | null
+          id?: string
+          recipient_type?: string
+          school_id?: string
+          status?: string
+          student_id?: string | null
+          teacher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sent_birthday_messages_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sent_birthday_messages_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sent_birthday_messages_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
             referencedColumns: ["id"]
           },
         ]

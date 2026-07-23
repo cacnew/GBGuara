@@ -19,7 +19,7 @@ export default async function EditTeacherPage({
   const supabase = await createClient();
   const { data: teacher } = await supabase
     .from("teachers")
-    .select("id, name, phone, email, photo_url, status, notes")
+    .select("id, name, birth_date, phone, email, photo_url, status, notes")
     .eq("id", id)
     .single();
 
@@ -65,6 +65,7 @@ export default async function EditTeacherPage({
         schoolId={profile.schoolId}
         defaultValues={{
           name: teacher.name,
+          birthDate: teacher.birth_date ?? "",
           phone: teacher.phone ?? "",
           email: teacher.email ?? "",
           photoUrl: teacher.photo_url ?? "",

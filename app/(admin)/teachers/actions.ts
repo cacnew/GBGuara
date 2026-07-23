@@ -24,6 +24,7 @@ export async function createTeacherProfile(
     .insert({
       school_id: profile.schoolId,
       name: parsed.data.name,
+      birth_date: parsed.data.birthDate || null,
       phone: parsed.data.phone || null,
       email: parsed.data.email || null,
       photo_url: parsed.data.photoUrl || null,
@@ -67,6 +68,7 @@ export async function updateTeacherProfile(
     .from("teachers")
     .update({
       name: parsed.data.name,
+      birth_date: parsed.data.birthDate || null,
       phone: parsed.data.phone || null,
       email: parsed.data.email || null,
       photo_url: parsed.data.photoUrl || null,

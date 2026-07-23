@@ -2240,17 +2240,53 @@ verdade, o mecanismo de disparo precisa ser revisto antes de iniciar 15.3.
 A lista de aniversariantes do mês (Fase 8.4) já existe e é reaproveitada
 como fonte de dados.
 
-- [ ] **15.1 — Migration: configuração e log de mensagens automáticas**
-  Critério de pronto: tabela `birthday_message_settings` (school_id,
-  notify_students boolean default true, notify_teachers boolean default
-  true, enabled boolean default false — desligado até o admin configurar,
-  message_template text com default igual ao exemplo da especificação) +
-  tabela `sent_birthday_messages` (school_id, recipient_type enum
-  aluno/professor, student_id nullable, teacher_id nullable, date, channel
-  default 'whatsapp', status, error_message nullable) com RLS (leitura/
-  escrita só admin nas settings; log só leitura staff). Unique constraint
-  em `(recipient_type, student_id/teacher_id, date)` para impedir
-  duplicidade de envio no mesmo dia.
+- [x] **15.1 — Migration: configuração e log de mensagens automáticas**
+  `supabase/migrations/20260723090000_create_birthday_messages.sql`:
+  `birthday_message_settings` (singleton por escola, `unique(school_id)`,
+  `enabled` nasce `false`, `message_template` já com o texto padrão da
+  especificação) + `sent_birthday_messages` (log append-only, `channel`
+  restrito a `'whatsapp'` por enquanto — mesmo estilo de check constraint
+  já usado em `payment_method`/`category` em outras tabelas financeiras,
+  revisitar quando push/e-mail entrarem em escopo). RLS: `staff can
+  select/insert/update own school birthday_message_settings` (mesmo
+  padrão de `belt_graduation_requirements`/Fase 13.1 — RLS é staff-wide
+  por `school_id`, admin-only fica a cargo de `requireRole("admin")` na
+  aplicação/Fase 15.2, já que não há motivo de nenhum outro papel ler essa
+  configuração); `sent_birthday_messages` só tem policy de select para
+  staff — sem policy de insert para `authenticated` (mesmo padrão de
+  `notifications`/Fase 9.2), porque quem escreve é o job da Fase 15.3 via
+  `service_role`.
+  **Gap descoberto nesta sessão**: a especificação pede notificar também
+  professores, mas `teachers` nunca teve campo de data de nascimento (só
+  `students.birth_date`, Fase 2.3/8.4). Confirmado com o usuário:
+  `teachers.birth_date` (nullable) adicionado nesta mesma migration, com
+  campo novo "Data de nascimento (opcional)" nos formulários de
+  cadastro/edição de professor (`app/(admin)/teachers/{new/form,[id]/
+  edit/form,[id]/edit/page}.tsx`, `lib/validations/teacher.ts`,
+  `actions.ts`) — sem isso o toggle `notify_teachers` nunca teria de onde
+  ler a data.
+  **Bug real encontrado e corrigido**: a constraint
+  `unique(recipient_type, student_id, teacher_id, date)` da tabela de
+  log, testada manualmente contra o Supabase compartilhado antes de
+  seguir para a 15.2, não bloqueava duplicatas — em SQL, `NULL` nunca é
+  igual a `NULL`, então uma constraint composta com uma coluna sempre
+  `NULL` (`teacher_id` em toda linha de aluno, `student_id` em toda linha
+  de professor) nunca detecta duplicata para nenhuma das duas categorias.
+  Corrigido em `20260723091500_fix_sent_birthday_messages_unique.sql`:
+  índice único sobre `(recipient_type, coalesce(student_id, teacher_id),
+  date)`, que nunca é `NULL` (garantido pelo check constraint da tabela).
+  Confirmado manualmente após a correção: inserir a mesma linha duas
+  vezes (aluno e, separadamente, professor) agora falha com `23505`;
+  aluno e professor com mesma data não colidem entre si. Dados de teste
+  usados na verificação removidos ao final.
+  `database.types.ts` recebeu o mesmo patch manual cirúrgico das fases
+  anteriores (`birth_date` em `teachers`, tabelas
+  `birthday_message_settings`/`sent_birthday_messages` completas) — regen
+  completo via `db:types` segue pendente de Docker/token de management
+  API.
+  Migrations aplicadas no Supabase compartilhado (`nexusdojo-dev`) via
+  `supabase db push --db-url`. `tsc --noEmit` limpo, `npm test` com as 9
+  suítes/61 testes existentes passando (nenhuma regressão).
 
 - [ ] **15.2 — Tela "Configurações → Mensagens Automáticas"**
   Critério de pronto: tela admin com toggles (enviar para alunos / enviar

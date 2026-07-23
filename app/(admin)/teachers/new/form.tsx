@@ -66,6 +66,11 @@ export function NewTeacherProfileForm({ schoolId }: { schoolId: string }) {
       </div>
 
       <div className="space-y-1.5">
+        <Label htmlFor="birthDate">Data de nascimento (opcional)</Label>
+        <Input id="birthDate" type="date" {...register("birthDate")} />
+      </div>
+
+      <div className="space-y-1.5">
         <Label htmlFor="phone">Telefone (opcional)</Label>
         <Input
           id="phone"
