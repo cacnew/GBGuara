@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWhatsAppMessage } from "@/lib/evolution/client";
 import { renderBirthdayMessageTemplate, type BirthdayMessageVariables } from "./template";
+import { isBirthdayToday } from "./recipients";
 import type { Database } from "@/lib/supabase/database.types";
 
 type AdminClient = SupabaseClient<Database>;
@@ -29,7 +30,6 @@ export async function runBirthdayMessageJob(
   supabase: AdminClient = createAdminClient(),
 ): Promise<BirthdayMessageJobSummary> {
   const today = todayISO ?? new Date().toISOString().slice(0, 10);
-  const monthDay = today.slice(5, 10);
 
   const summary: BirthdayMessageJobSummary = {
     schoolsProcessed: 0,
@@ -64,7 +64,7 @@ export async function runBirthdayMessageJob(
         .not("birth_date", "is", null);
 
       for (const student of students ?? []) {
-        if (!student.birth_date || student.birth_date.slice(5, 10) !== monthDay) continue;
+        if (!isBirthdayToday(student.birth_date, today)) continue;
 
         const faixa = student.belts?.name
           ? student.current_degree > 0
@@ -99,7 +99,7 @@ export async function runBirthdayMessageJob(
         .not("birth_date", "is", null);
 
       for (const teacher of teachers ?? []) {
-        if (!teacher.birth_date || teacher.birth_date.slice(5, 10) !== monthDay) continue;
+        if (!isBirthdayToday(teacher.birth_date, today)) continue;
 
         const outcome = await sendBirthdayMessage(supabase, {
           schoolId: settings.school_id,

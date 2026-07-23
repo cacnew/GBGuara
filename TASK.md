@@ -2373,11 +2373,45 @@ como fonte de dados.
   `tsc --noEmit` limpo, `npm test` com as 9 suítes/61 testes existentes
   passando (nenhuma regressão).
 
-- [ ] **15.4 — Testes**
-  Critério de pronto: testes unitários da substituição de variáveis no
-  template e da lógica de "quem deve receber hoje" (pura, sem I/O); teste
-  de integração confirmando que rodar o job duas vezes no mesmo dia não
-  duplica envio (constraint) e que desligar a configuração impede envio.
+- [x] **15.4 — Testes**
+  A lógica de "quem faz aniversário hoje" estava embutida inline em
+  `job.ts` (`birth_date.slice(5,10) !== monthDay`, duplicada para aluno e
+  professor) — extraída para `modules/birthday-messages/recipients.ts`
+  (`isBirthdayToday`, pura) para virar testável, mesmo padrão de extração
+  já usado em `signal-rules.ts`/`eligibility.ts` (Fase 9.11). `job.ts`
+  refatorado para importar em vez de duplicar a comparação, sem mudança de
+  comportamento.
+  `modules/birthday-messages/template.test.ts` (5 testes: substituição
+  simples, múltiplas ocorrências da mesma variável, texto sem variáveis,
+  variável com valor vazio, chaves desconhecidas não tocadas) e
+  `modules/birthday-messages/recipients.test.ts` (6 testes: mesmo mês/dia
+  com anos diferentes, dia diferente, mês diferente, `birth_date` nulo,
+  29/fevereiro em ano bissexto vs. não-bissexto).
+  `tests/integration/birthday-messages-job.test.ts`: chama
+  `runBirthdayMessageJob` diretamente (função comum desde a 15.3, sem
+  `next/headers`) contra o Supabase compartilhado, com `todayISO` fixo
+  (`2026-03-15`, não a data real do sistema) para não depender nem colidir
+  com aniversariantes reais do seed. Aluno de teste criado sem telefone
+  (`phone: null`) para o outcome ser deterministicamente `failed` com "Sem
+  telefone cadastrado", independente de `EVOLUTION_API_URL`/
+  `EVOLUTION_API_KEY` estarem configuradas neste ambiente. 2 testes:
+  (1) rodar o job 2x no mesmo dia gera só 1 linha em
+  `sent_birthday_messages` (mesmo id nas duas consultas — sem duplicar);
+  (2) desligar `birthday_message_settings.enabled` e rodar de novo não
+  gera nenhuma linha nova para o aluno de teste. Configuração original da
+  escola (se existia) e aluno de teste restaurados/removidos no
+  `afterAll`; confirmado por consulta direta ao banco depois da suíte que
+  não sobrou nenhum resíduo.
+  **Ajuste de infraestrutura necessário**: `job.ts` importa módulos via
+  alias `@/...` (ex: `@/lib/supabase/admin`), que o Next.js resolve
+  nativamente mas o Vitest não — `npx vitest run` no teste de integração
+  falhava com `Cannot find package '@/lib/supabase/admin'` antes de
+  qualquer teste rodar. Corrigido adicionando `resolve.alias` em
+  `vitest.config.ts` (mesmo mapeamento `@/*` → raiz do projeto do
+  `tsconfig.json`); necessário para o `job.ts` ser chamável diretamente em
+  teste como o comentário da 15.3 já previa.
+  `tsc --noEmit` limpo, `npm test` com as 12 suítes/74 testes passando
+  (61 anteriores + 13 novos, nenhuma regressão).
 
 ---
 
