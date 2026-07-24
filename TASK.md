@@ -2425,14 +2425,33 @@ manualmente ano a ano. Reaproveita o mesmo mecanismo de disparo diário da
 Fase 15.3 (Vercel Cron) para os avisos antecipados — mesma dependência de a
 produção rodar na Vercel, e mesma limitação de canal (só WhatsApp).
 
-- [ ] **16.1 — Migration + seed de feriados nacionais**
-  Critério de pronto: tabela `holidays` (school_id, name, date, recurring
-  boolean, has_class boolean default false, custom_message nullable,
-  created_at/updated_at) com RLS (staff lê/escreve, aluno só lê);
-  script/seed que popula automaticamente os feriados nacionais fixos e
-  móveis (calculados) do ano corrente e do próximo para escolas já
-  existentes, e via trigger/função para escolas novas (mesmo padrão de
-  seed automático das Fases 1/2/5/12.1).
+- [x] **16.1 — Migration + seed de feriados nacionais**
+  `supabase/migrations/20260724090000_create_holidays.sql`: tabela
+  `holidays` (school_id, name, date, recurring boolean default true,
+  has_class boolean default false, custom_message nullable,
+  created_at/updated_at, `unique(school_id, date)`) com RLS (staff lê/
+  escreve/apaga por `current_school_id()`; aluno só lê por
+  `current_student_school_id()`, mesmo padrão da Fase 14.1).
+  `public.easter_date(year)` calcula a Páscoa via algoritmo de
+  Meeus/Jones/Butcher (Gregoriano); `public.seed_national_holidays(school_id,
+  year)` insere os 9 feriados nacionais fixos + Carnaval (Páscoa-47),
+  Sexta-feira Santa (Páscoa-2) e Corpus Christi (Páscoa+60), idempotente via
+  `on conflict (school_id, date) do nothing`. Trigger
+  `schools_create_default_holidays` semeia ano corrente + próximo para
+  escola nova (mesmo padrão consolidado das Fases 2.1/2.2/5.3); bloco `do $$`
+  faz o backfill para escolas já existentes.
+  `database.types.ts` recebeu o mesmo patch manual cirúrgico das Fases
+  9.1/9.2/10.1 (tabela `holidays` adicionada à mão) — regen completo via
+  `db:types` segue pendente de Docker/token de management API.
+  Verificado com scripts temporários contra o Supabase compartilhado
+  (removidos depois do teste): algoritmo de Páscoa conferido para
+  2024-2028 contra datas conhecidas (31/03, 20/04, 05/04, 28/03, 16/04);
+  offsets de Carnaval/Sexta Santa/Corpus Christi de 2026 batem com o
+  calendário oficial (17/02, 03/04, 04/06); escola real do ambiente
+  (`Gracie Barra Guará`) recebeu 24 feriados (12 × 2 anos) após o push;
+  escola temporária criada via `insert` confirmou que o trigger gera os
+  mesmos 24 feriados automaticamente, e o `on delete cascade` limpou tudo
+  ao apagar a escola de teste.
 
 - [ ] **16.2 — Tela "Calendário → Feriados"**
   Critério de pronto: CRUD staff (admin) dos feriados/recessos da escola —

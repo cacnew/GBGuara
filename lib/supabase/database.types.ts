@@ -2616,6 +2616,50 @@ export type Database = {
           },
         ]
       }
+      holidays: {
+        Row: {
+          created_at: string
+          custom_message: string | null
+          date: string
+          has_class: boolean
+          id: string
+          name: string
+          recurring: boolean
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_message?: string | null
+          date: string
+          has_class?: boolean
+          id?: string
+          name: string
+          recurring?: boolean
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_message?: string | null
+          date?: string
+          has_class?: boolean
+          id?: string
+          name?: string
+          recurring?: boolean
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holidays_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       birthday_students: {
