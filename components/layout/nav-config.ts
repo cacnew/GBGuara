@@ -39,6 +39,7 @@ export const ADMIN_NAV: NavGroup[] = [
       { label: "Turmas do dia", href: "/today" },
       { label: "Historico de chamadas", href: "/classes/sessions" },
       { label: "Turmas e horarios", href: "/classes" },
+      { label: "Feriados", href: "/calendar/holidays" },
     ],
   },
   {

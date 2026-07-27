@@ -2453,12 +2453,33 @@ produção rodar na Vercel, e mesma limitação de canal (só WhatsApp).
   mesmos 24 feriados automaticamente, e o `on delete cascade` limpou tudo
   ao apagar a escola de teste.
 
-- [ ] **16.2 — Tela "Calendário → Feriados"**
+- [x] **16.2 — Tela "Calendário → Feriados"**
   Critério de pronto: CRUD staff (admin) dos feriados/recessos da escola —
   nome, data, recorrente, haverá aula (sim/não), mensagem personalizada
   opcional; feriados calculados automaticamente (16.1) aparecem
   pré-cadastrados e podem ser editados (ex: marcar "haverá aula" numa data
   que normalmente não teria).
+  `modules/holidays/holidays.ts`: Server Actions `getHolidays`/`getHoliday`/
+  `createHoliday`/`updateHoliday`/`deleteHoliday`, todas atrás de
+  `requireRole("admin")` e escopadas por `school_id`; conflito de data
+  (`unique(school_id, date)` da 16.1) tratado como erro amigável
+  ("Já existe um feriado cadastrado nesta data."); cada mutação grava
+  `logAuditEvent` (mesmo padrão consolidado das fases anteriores).
+  `lib/validations/holiday.ts`: schema Zod (`holidaySchema`) com nome,
+  data, `recurring`/`hasClass` booleanos e mensagem opcional.
+  `app/(admin)/calendar/holidays/{page,new/page,[id]/edit/page}.tsx` +
+  `components/holidays/{holiday-list,holiday-form}.tsx`: listagem em
+  tabela (data, nome, recorrente, haverá aula, ações editar/excluir com
+  `ConfirmDialog`), formulário compartilhado entre criar/editar via
+  react-hook-form + zodResolver. Item "Feriados" adicionado ao grupo
+  Operação em `components/layout/nav-config.ts`
+  (`/calendar/holidays`).
+  Verificado com `npm run build` (rotas `/calendar/holidays`,
+  `/calendar/holidays/new`, `/calendar/holidays/[id]/edit` compiladas sem
+  erro) e manualmente via Playwright contra o Supabase compartilhado
+  (login admin → nav Operação → Feriados → criar, editar "haverá aula",
+  excluir; feriados pré-cadastrados da 16.1 conferidos na listagem) —
+  script de verificação removido depois do teste, mesmo padrão da 16.1.
 
 - [ ] **16.3 — Bloqueio de presença/check-in em dia sem aula**
   Critério de pronto: quando `has_class = false` para a data, a
