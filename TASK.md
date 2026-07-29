@@ -2572,7 +2572,7 @@ confirmada: toggle só de UI, desabilitado, "em breve", sem infra nova
 nesta fase. Destinatário selecionável entre alunos + professores + leads
 (lista unificada com o papel de cada um), ou digitado manualmente.
 
-- [ ] **18.1 — Migration `ad_hoc_messages` + integração de e-mail (Resend)**
+- [x] **18.1 — Migration `ad_hoc_messages` + integração de e-mail (Resend)**
   Critério de pronto: tabela `ad_hoc_messages` (school_id, created_by,
   recipient_type enum aluno/professor/lead/manual, student_id/teacher_id/
   lead_id nullable, recipient_name, phone, email, channel enum
