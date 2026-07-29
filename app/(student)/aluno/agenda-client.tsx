@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { formatDateOnly } from "@/lib/dates/format";
 import { signalAttendance, cancelSignal, type AgendaClass } from "@/modules/students/agenda";
 import type { WeeklyPositionDetail } from "@/modules/weekly-positions/positions";
+import type { HolidayLookup } from "@/modules/holidays/lookup";
 import { WeeklyPositionCard } from "@/components/weekly-positions/weekly-position-card";
+import { HolidayNotice } from "@/components/holidays/holiday-notice";
 
 const WEEKDAY_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
@@ -32,12 +34,14 @@ export function AgendaClient({
   selectedDate,
   classes,
   weeklyPosition,
+  holiday,
 }: {
   weekDates: string[];
   daysWithClasses: string[];
   selectedDate: string;
   classes: AgendaClass[];
   weeklyPosition: WeeklyPositionDetail | null;
+  holiday: HolidayLookup;
 }) {
   const router = useRouter();
   const [showOnlyMine, setShowOnlyMine] = useState(false);
@@ -123,6 +127,8 @@ export function AgendaClient({
 
       <p className="text-sm text-muted-foreground">{formatDateOnly(selectedDate)}</p>
 
+      {holiday && <HolidayNotice name={holiday.name} customMessage={holiday.customMessage} />}
+
       <div className="flex flex-col gap-3">
         {visibleClasses.length === 0 && (
           <p className="text-sm text-muted-foreground">
@@ -131,13 +137,15 @@ export function AgendaClient({
         )}
 
         {visibleClasses.map((classItem) => {
-          const disabledReason = classItem.sessionClosed
-            ? "Chamada encerrada"
-            : !classItem.eligible
-              ? classItem.ineligibleReason
-              : classItem.capacity != null && classItem.occupied >= classItem.capacity && !classItem.signaled
-                ? "Turma lotada"
-                : null;
+          const disabledReason = holiday
+            ? "Sem aula hoje"
+            : classItem.sessionClosed
+              ? "Chamada encerrada"
+              : !classItem.eligible
+                ? classItem.ineligibleReason
+                : classItem.capacity != null && classItem.occupied >= classItem.capacity && !classItem.signaled
+                  ? "Turma lotada"
+                  : null;
 
           const isPendingThis = isPending && pendingId === classItem.classGroupId;
 

@@ -6,9 +6,23 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { openOrReuseClassSession } from "@/modules/classes/sessions";
 
-export function OpenSessionButton({ classGroupId }: { classGroupId: string }) {
+export function OpenSessionButton({
+  classGroupId,
+  blockedReason,
+}: {
+  classGroupId: string;
+  blockedReason?: string | null;
+}) {
   const router = useRouter();
   const [isOpening, setIsOpening] = useState(false);
+
+  if (blockedReason) {
+    return (
+      <Button size="sm" disabled title={blockedReason}>
+        Sem aula hoje
+      </Button>
+    );
+  }
 
   async function handleClick() {
     setIsOpening(true);

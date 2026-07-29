@@ -4,6 +4,7 @@ import { requireStudent } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateClassSession } from "@/modules/classes/session-materialization";
 import { checkEligibility } from "@/modules/students/eligibility";
+import { getHolidayForDate, type HolidayLookup } from "@/modules/holidays/lookup";
 import {
   OCCUPYING_STATUSES,
   checkSignalWindow,
@@ -120,6 +121,18 @@ export async function getStudentAgenda(date: string): Promise<AgendaClass[]> {
 }
 
 /**
+ * Feriado/recesso sem aula na data (Fase 16.3), pro dia selecionado da
+ * agenda — usado só pela página (Server Component) pra decidir se mostra
+ * o aviso; `signalAttendance` faz a própria checagem para bloquear de
+ * verdade, não depende deste helper.
+ */
+export async function getHolidayForSelectedDate(date: string): Promise<HolidayLookup> {
+  const profile = await requireStudent();
+  const supabase = await createClient();
+  return getHolidayForDate(supabase, profile.schoolId, date);
+}
+
+/**
  * Sinaliza presença do aluno numa turma/data (seção 3 da spec). Materializa
  * a sessão sob demanda (Fase 9.3) só depois de todas as validações
  * passarem, para não criar sessões vazias por tentativas inválidas.
@@ -130,6 +143,11 @@ export async function signalAttendance(
 ): Promise<SignalResult> {
   const profile = await requireStudent();
   const supabase = await createClient();
+
+  const holiday = await getHolidayForDate(supabase, profile.schoolId, date);
+  if (holiday) {
+    return { error: holiday.customMessage || `Sem aula hoje (${holiday.name}).` };
+  }
 
   const { data: classGroup } = await supabase
     .from("class_groups")

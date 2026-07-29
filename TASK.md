@@ -2481,12 +2481,31 @@ produção rodar na Vercel, e mesma limitação de canal (só WhatsApp).
   excluir; feriados pré-cadastrados da 16.1 conferidos na listagem) —
   script de verificação removido depois do teste, mesmo padrão da 16.1.
 
-- [ ] **16.3 — Bloqueio de presença/check-in em dia sem aula**
+- [x] **16.3 — Bloqueio de presença/check-in em dia sem aula**
   Critério de pronto: quando `has_class = false` para a data, a
   sinalização de presença do aluno (`modules/students/signal-rules.ts`,
   Fase 9.4) e a abertura de chamada do professor ficam bloqueadas para
   aquela data, com aviso visível na agenda do aluno (Fase 9.6) e na tela
   "Turmas do dia" (Fase 3.3).
+  Novo helper comum `modules/holidays/lookup.ts` (`getHolidayForDate`,
+  função plain sem `requireRole`, mesmo espírito de
+  `modules/classes/session-materialization.ts`) — reaproveitado pelos
+  dois lados via RLS já preparada na 16.1 (`staff can select own school
+  holidays` / `student can select own school holidays`). A checagem em si
+  não entrou em `signal-rules.ts` (que é lógica pura, sem `schoolId`/
+  banco) — foi inserida em `modules/students/agenda.ts:signalAttendance`
+  (bloqueia só a criação da sinalização, não `cancelSignal`) e em
+  `modules/classes/sessions.ts:openOrReuseClassSession`. Aviso visual novo
+  `components/holidays/holiday-notice.tsx` (não havia `Alert`/`Banner`
+  reutilizável no projeto) usado em `agenda-client.tsx` (Fase 9.6) e
+  `components/classes/todays-classes.tsx` (Fase 3.3, reaproveitado por
+  admin e professor); `OpenSessionButton` ganhou prop `blockedReason` pra
+  desabilitar "Abrir chamada" no client antes mesmo do clique.
+  Verificado com `tsc`/`eslint` limpos e Playwright manual contra o
+  Supabase compartilhado (feriado de teste criado para hoje, confirmado
+  aviso + botão desabilitado nos dois lados, depois removido e confirmado
+  que a tela volta ao normal) — script removido depois do teste, mesmo
+  padrão das Fases 16.1/16.2. Testes automatizados ficam para a 16.5.
 
 - [ ] **16.4 — Notificações de aviso (2 dias antes, 1 dia antes, no dia)**
   Critério de pronto: reaproveita o job diário da Fase 15.3 (mesma rota de

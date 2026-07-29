@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser, requireRole } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateClassSession } from "./session-materialization";
+import { getHolidayForDate } from "@/modules/holidays/lookup";
 
 export type OpenClassSessionResult = { sessionId?: string; error?: string };
 export type ClassSessionActionResult = { error?: string };
@@ -19,6 +20,11 @@ export async function openOrReuseClassSession(
   const profile = await requireUser();
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
+
+  const holiday = await getHolidayForDate(supabase, profile.schoolId, today);
+  if (holiday) {
+    return { error: holiday.customMessage || `Sem aula hoje (${holiday.name}).` };
+  }
 
   return getOrCreateClassSession({
     supabase,

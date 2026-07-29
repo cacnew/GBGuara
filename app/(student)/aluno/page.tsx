@@ -1,4 +1,8 @@
-import { getStudentAgenda, type AgendaClass } from "@/modules/students/agenda";
+import {
+  getStudentAgenda,
+  getHolidayForSelectedDate,
+  type AgendaClass,
+} from "@/modules/students/agenda";
 import { getActiveWeeklyPositionForStudent } from "@/modules/weekly-positions/positions";
 import { AgendaClient } from "./agenda-client";
 
@@ -29,9 +33,10 @@ export default async function StudentAgendaPage({
     return toISODate(d);
   });
 
-  const [weekAgendas, weeklyPosition] = await Promise.all([
+  const [weekAgendas, weeklyPosition, holiday] = await Promise.all([
     Promise.all(weekDates.map((d) => getStudentAgenda(d))),
     getActiveWeeklyPositionForStudent(),
+    getHolidayForSelectedDate(selectedDate),
   ]);
   const daysWithClasses = weekDates.filter((_, i) => weekAgendas[i].length > 0);
   const selectedIndex = weekDates.indexOf(selectedDate);
@@ -45,6 +50,7 @@ export default async function StudentAgendaPage({
       selectedDate={selectedDate}
       classes={classes}
       weeklyPosition={weeklyPosition}
+      holiday={holiday}
     />
   );
 }
