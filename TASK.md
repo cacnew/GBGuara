@@ -2586,7 +2586,7 @@ nesta fase. Destinatário selecionável entre alunos + professores + leads
   text })` espelhando o erro de config ausente de
   `lib/evolution/client.ts`; nova env var `EMAIL_FROM` em `.env.example`.
 
-- [ ] **18.2 — Tela "Mensagens Avulsas" + Server Action**
+- [x] **18.2 — Tela "Mensagens Avulsas" + Server Action**
   Critério de pronto: novo grupo "Comunicacao" em `ADMIN_NAV`
   (`components/layout/nav-config.ts`) com item "Mensagens Avulsas"
   (`/messages/ad-hoc`). Página busca alunos ativos + professores ativos +

@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Globe2,
   LayoutDashboard,
+  MessageSquare,
   Settings,
   ShieldCheck,
   UserCircle,
@@ -52,6 +53,12 @@ export const ADMIN_NAV: NavGroup[] = [
       { label: "Leads", href: "/leads" },
       { label: "Professores", href: "/teachers" },
     ],
+  },
+  {
+    label: "Comunicacao",
+    icon: MessageSquare,
+    collapsible: true,
+    children: [{ label: "Mensagens Avulsas", href: "/messages/ad-hoc" }],
   },
   {
     label: "Ensino",

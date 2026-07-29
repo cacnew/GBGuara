@@ -2660,6 +2660,96 @@ export type Database = {
           },
         ]
       }
+      ad_hoc_messages: {
+        Row: {
+          channel: string
+          created_at: string
+          created_by: string
+          email: string | null
+          error_message: string | null
+          id: string
+          lead_id: string | null
+          message: string
+          phone: string | null
+          recipient_name: string
+          recipient_type: string
+          school_id: string
+          status: string
+          student_id: string | null
+          teacher_id: string | null
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          created_by: string
+          email?: string | null
+          error_message?: string | null
+          id?: string
+          lead_id?: string | null
+          message: string
+          phone?: string | null
+          recipient_name: string
+          recipient_type: string
+          school_id: string
+          status: string
+          student_id?: string | null
+          teacher_id?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          error_message?: string | null
+          id?: string
+          lead_id?: string | null
+          message?: string
+          phone?: string | null
+          recipient_name?: string
+          recipient_type?: string
+          school_id?: string
+          status?: string
+          student_id?: string | null
+          teacher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_hoc_messages_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_hoc_messages_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_hoc_messages_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_hoc_messages_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_hoc_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       birthday_students: {
