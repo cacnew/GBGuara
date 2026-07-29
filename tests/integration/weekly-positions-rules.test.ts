@@ -38,6 +38,9 @@ function addDays(dateStr: string, days: number): string {
 
 const env = loadEnv();
 const hasEnv = Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY);
+// Conta dedicada por dev (ver docs/TEST_ACCOUNTS.md) — evita conflito com
+// outras suites rodando em paralelo contra a conta demo compartilhada.
+const STUDENT_EMAIL = env.TEST_STUDENT_EMAIL || "aluno@nexusdojo.dev";
 
 describe.skipIf(!hasEnv)("regras de negócio da Posição da Semana (integração)", () => {
   let admin: SupabaseClient;
@@ -99,7 +102,7 @@ describe.skipIf(!hasEnv)("regras de negócio da Posição da Semana (integraçã
     const { data: student } = await admin
       .from("students")
       .select("id, school_id")
-      .eq("email", "aluno@nexusdojo.dev")
+      .eq("email", STUDENT_EMAIL)
       .single();
     schoolId = student!.school_id;
 
@@ -122,7 +125,7 @@ describe.skipIf(!hasEnv)("regras de negócio da Posição da Semana (integraçã
       .eq("published", true);
     originallyPublishedIds = (alreadyPublished ?? []).map((p) => p.id);
 
-    asStudent = await signIn("aluno@nexusdojo.dev", "TestSenha123!");
+    asStudent = await signIn(STUDENT_EMAIL, "TestSenha123!");
   });
 
   afterAll(async () => {

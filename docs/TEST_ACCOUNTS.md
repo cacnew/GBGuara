@@ -1,11 +1,27 @@
 # Contas de teste
 
-Atualizado em 2026-07-19.
+Atualizado em 2026-07-27.
 
 Estas contas existem no Supabase remoto configurado em `.env.local` e devem
 ser usadas para separar testes manuais/e2e por desenvolvedor. Evite usar
 `aluno@nexusdojo.dev` em suites paralelas, porque essa conta demo compartilhada
 ja causou conflito entre testes de medalhas, presenca e reset de senha.
+
+## Variavel `TEST_STUDENT_EMAIL`
+
+Os arquivos em `tests/integration/*.test.ts` e `e2e/*.spec.ts` que precisam de
+uma conta de aluno le em `TEST_STUDENT_EMAIL` (definida em `.env.local`, nao
+commitada), com fallback para `aluno@nexusdojo.dev` quando a variavel nao
+esta definida (ex: CI sem `.env.local`). Cada dev deve setar essa variavel no
+proprio `.env.local` apontando para a sua conta dedicada:
+
+- Carlos/Codex: `TEST_STUDENT_EMAIL=aluno.teste.carlos@nexusdojo.dev`
+- Sergio: `TEST_STUDENT_EMAIL=aluno.teste.sergio@nexusdojo.dev`
+
+Isso evita que o codigo compartilhado (que roda para os dois devs) hardcode a
+conta de um dos dois. Ao adicionar um novo teste que precisa de uma conta de
+aluno, siga o mesmo padrao em vez de hardcodar `aluno@nexusdojo.dev` ou
+qualquer conta dedicada diretamente.
 
 ## Alunos dedicados
 

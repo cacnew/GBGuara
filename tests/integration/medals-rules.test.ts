@@ -29,6 +29,9 @@ function loadEnv(): Record<string, string> {
 
 const env = loadEnv();
 const hasEnv = Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY);
+// Conta dedicada por dev (ver docs/TEST_ACCOUNTS.md) — evita conflito com
+// outras suites rodando em paralelo contra a conta demo compartilhada.
+const STUDENT_EMAIL = env.TEST_STUDENT_EMAIL || "aluno@nexusdojo.dev";
 
 describe.skipIf(!hasEnv)("regras de negócio do sistema de medalhas (integração)", () => {
   let admin: SupabaseClient;
@@ -57,7 +60,7 @@ describe.skipIf(!hasEnv)("regras de negócio do sistema de medalhas (integraçã
     const { data: student } = await admin
       .from("students")
       .select("id, school_id")
-      .eq("email", "aluno@nexusdojo.dev")
+      .eq("email", STUDENT_EMAIL)
       .single();
     studentId = student!.id;
     schoolId = student!.school_id;
@@ -93,7 +96,7 @@ describe.skipIf(!hasEnv)("regras de negócio do sistema de medalhas (integraçã
       .single();
     eventId = event!.id;
 
-    asStudent = await signIn("aluno@nexusdojo.dev", "TestSenha123!");
+    asStudent = await signIn(STUDENT_EMAIL, "TestSenha123!");
     asStaff = await signIn("admin@nexusdojo.dev", "TestSenha123!");
   });
 

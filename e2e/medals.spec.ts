@@ -2,7 +2,6 @@ import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "node:fs";
 
-const STUDENT_EMAIL = "aluno@nexusdojo.dev";
 const STUDENT_PASSWORD = "TestSenha123!";
 const ADMIN_EMAIL = "admin@nexusdojo.dev";
 const ADMIN_PASSWORD = "TestSenha123!";
@@ -23,10 +22,14 @@ function loadEnv(): Record<string, string> {
   );
 }
 
+// Conta dedicada por dev (ver docs/TEST_ACCOUNTS.md) — evita conflito com
+// outras suites rodando em paralelo contra a conta demo compartilhada.
+const env = loadEnv();
+const STUDENT_EMAIL = env.TEST_STUDENT_EMAIL || "aluno@nexusdojo.dev";
+
 test("aluno lança medalha, staff aprova, e ela passa a constar no dossiê do aluno", async ({
   page,
 }) => {
-  const env = loadEnv();
   const admin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { autoRefreshToken: false, persistSession: false },
   });

@@ -35,6 +35,9 @@ function loadEnv(): Record<string, string> {
 
 const env = loadEnv();
 const hasEnv = Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY);
+// Conta dedicada por dev (ver docs/TEST_ACCOUNTS.md) — evita conflito com
+// outras suites rodando em paralelo contra a conta demo compartilhada.
+const STUDENT_EMAIL = env.TEST_STUDENT_EMAIL || "aluno@nexusdojo.dev";
 
 describe.skipIf(!hasEnv)("RLS de belt_graduation_requirements (integração, Fase 13.4)", () => {
   let admin: SupabaseClient;
@@ -72,7 +75,7 @@ describe.skipIf(!hasEnv)("RLS de belt_graduation_requirements (integração, Fas
     const { data: student } = await admin
       .from("students")
       .select("school_id, current_belt_id, belts(belt_system_id)")
-      .eq("email", "aluno@nexusdojo.dev")
+      .eq("email", STUDENT_EMAIL)
       .single();
     // O client de teste não usa os tipos gerados do Database (createClient
     // sem generic), então o TS infere `belts` como array mesmo sendo uma
@@ -103,7 +106,7 @@ describe.skipIf(!hasEnv)("RLS de belt_graduation_requirements (integração, Fas
     rowExistedBefore = Boolean(existing);
     originalRequiredClasses = existing?.required_classes ?? null;
 
-    asStudent = await signIn("aluno@nexusdojo.dev", "TestSenha123!");
+    asStudent = await signIn(STUDENT_EMAIL, "TestSenha123!");
     asAdmin = await signIn("admin@nexusdojo.dev", "TestSenha123!");
     asTeacher = await signIn("professor@nexusdojo.dev", "TestSenha123!");
   });

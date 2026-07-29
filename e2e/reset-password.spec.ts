@@ -4,7 +4,6 @@ import { readFileSync } from "node:fs";
 
 const ADMIN_EMAIL = "admin@nexusdojo.dev";
 const ADMIN_PASSWORD = "TestSenha123!";
-const STUDENT_EMAIL = "aluno@nexusdojo.dev";
 const ORIGINAL_PASSWORD = "TestSenha123!";
 
 function loadEnv(): Record<string, string> {
@@ -19,8 +18,12 @@ function loadEnv(): Record<string, string> {
   );
 }
 
+// Conta dedicada por dev (ver docs/TEST_ACCOUNTS.md) — evita conflito com
+// outras suites rodando em paralelo contra a conta demo compartilhada.
+const env = loadEnv();
+const STUDENT_EMAIL = env.TEST_STUDENT_EMAIL || "aluno@nexusdojo.dev";
+
 test("admin reseta senha do aluno; aluno é forçado a trocar no próximo login", async ({ page }) => {
-  const env = loadEnv();
   const admin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { autoRefreshToken: false, persistSession: false },
   });

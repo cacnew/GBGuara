@@ -1,6 +1,21 @@
 import { test, expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
 
-const STUDENT_EMAIL = "aluno@nexusdojo.dev";
+function loadEnv(): Record<string, string> {
+  return Object.fromEntries(
+    readFileSync(".env.local", "utf8")
+      .split("\n")
+      .filter((l) => l.includes("="))
+      .map((l) => {
+        const idx = l.indexOf("=");
+        return [l.slice(0, idx).trim(), l.slice(idx + 1).trim()];
+      }),
+  );
+}
+
+// Conta dedicada por dev (ver docs/TEST_ACCOUNTS.md) — evita conflito com
+// outras suites rodando em paralelo contra a conta demo compartilhada.
+const STUDENT_EMAIL = loadEnv().TEST_STUDENT_EMAIL || "aluno@nexusdojo.dev";
 const STUDENT_PASSWORD = "TestSenha123!";
 
 function escapeRegExp(value: string) {

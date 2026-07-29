@@ -33,6 +33,9 @@ function loadEnv(): Record<string, string> {
 
 const env = loadEnv();
 const hasEnv = Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY);
+// Conta dedicada por dev (ver docs/TEST_ACCOUNTS.md) — evita conflito com
+// outras suites rodando em paralelo contra a conta demo compartilhada.
+const STUDENT_EMAIL = env.TEST_STUDENT_EMAIL || "aluno@nexusdojo.dev";
 
 describe.skipIf(!hasEnv)("regras de negócio do módulo do aluno (integração)", () => {
   let admin: SupabaseClient;
@@ -52,7 +55,7 @@ describe.skipIf(!hasEnv)("regras de negócio do módulo do aluno (integração)"
     const { data: student } = await admin
       .from("students")
       .select("id, school_id")
-      .eq("email", "aluno@nexusdojo.dev")
+      .eq("email", STUDENT_EMAIL)
       .single();
     studentId = student!.id;
     schoolId = student!.school_id;
@@ -85,7 +88,7 @@ describe.skipIf(!hasEnv)("regras de negócio do módulo do aluno (integração)"
     const { data: signIn } = await createClient(
       env.NEXT_PUBLIC_SUPABASE_URL,
       env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    ).auth.signInWithPassword({ email: "aluno@nexusdojo.dev", password: "TestSenha123!" });
+    ).auth.signInWithPassword({ email: STUDENT_EMAIL, password: "TestSenha123!" });
 
     asStudent = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: `Bearer ${signIn!.session!.access_token}` } },

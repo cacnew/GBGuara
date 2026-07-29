@@ -35,6 +35,9 @@ function loadEnv(): Record<string, string> {
 
 const env = loadEnv();
 const hasEnv = Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY);
+// Conta dedicada por dev (ver docs/TEST_ACCOUNTS.md) — evita conflito com
+// outras suites rodando em paralelo contra a conta demo compartilhada.
+const STUDENT_EMAIL = env.TEST_STUDENT_EMAIL || "aluno@nexusdojo.dev";
 
 // Data fixa de teste (mês/dia usado como "hoje" na chamada do job) — não é
 // a data real do sistema, então não colide com aniversariantes reais.
@@ -56,7 +59,7 @@ describe.skipIf(!hasEnv)("job diário de mensagens de aniversário (integração
     const { data: referenceStudent } = await admin
       .from("students")
       .select("school_id, unit_id")
-      .eq("email", "aluno@nexusdojo.dev")
+      .eq("email", STUDENT_EMAIL)
       .single();
     schoolId = referenceStudent!.school_id;
     unitId = referenceStudent!.unit_id;
