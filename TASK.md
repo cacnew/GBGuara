@@ -2600,7 +2600,7 @@ nesta fase. Destinatário selecionável entre alunos + professores + leads
   habilitado, grava um log por canal em `ad_hoc_messages`, chama
   `logAuditEvent`, retorna erro por canal (sucesso parcial permitido).
 
-- [ ] **18.3 — Testes**
+- [x] **18.3 — Testes**
   Critério de pronto: teste de integração cobrindo validação (mensagem
   vazia, nenhum canal marcado, telefone/e-mail/assunto faltando com canal
   habilitado), envio com sucesso grava `status: "sent"` por canal, falha
