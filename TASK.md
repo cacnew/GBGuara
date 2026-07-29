@@ -2558,3 +2558,51 @@ canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
   Critério de pronto: teste de integração confirmando RLS (aluno não vê
   feedback de outro aluno; professor não vê feedback não direcionado a
   ele; admin vê tudo).
+
+## Fase 18 — Mensagens Avulsas (Admin) (2026-07-29)
+
+Pedido novo do usuário, fora da ordem original de planejamento: menu no
+perfil ADM para disparar uma mensagem avulsa (telefone/e-mail livre ou
+escolhendo um cadastro já existente) por WhatsApp e/ou e-mail. WhatsApp
+reaproveita `sendWhatsAppMessage` (`lib/evolution/client.ts`, Fase 8.3).
+Email não tinha nenhuma integração no projeto — decisão confirmada com o
+usuário em 2026-07-29: implementar envio real via Resend agora. Push não
+tem nenhuma infraestrutura (sem PWA/service worker/VAPID) — decisão
+confirmada: toggle só de UI, desabilitado, "em breve", sem infra nova
+nesta fase. Destinatário selecionável entre alunos + professores + leads
+(lista unificada com o papel de cada um), ou digitado manualmente.
+
+- [ ] **18.1 — Migration `ad_hoc_messages` + integração de e-mail (Resend)**
+  Critério de pronto: tabela `ad_hoc_messages` (school_id, created_by,
+  recipient_type enum aluno/professor/lead/manual, student_id/teacher_id/
+  lead_id nullable, recipient_name, phone, email, channel enum
+  whatsapp/email, message, status enum sent/failed, error_message,
+  created_at) — uma linha por canal enviado. RLS: select/insert para
+  `authenticated` restrito a `school_id = current_school_id()` (admin-only
+  reforçado na aplicação via `requireRole`, mesmo padrão de
+  `birthday_message_settings`/`modules/whatsapp/actions.ts`, não o padrão
+  de `sent_birthday_messages` que só grava via service_role). Dependência
+  `resend` adicionada; `lib/email/client.ts` com `sendEmail({ to, subject,
+  text })` espelhando o erro de config ausente de
+  `lib/evolution/client.ts`; nova env var `EMAIL_FROM` em `.env.example`.
+
+- [ ] **18.2 — Tela "Mensagens Avulsas" + Server Action**
+  Critério de pronto: novo grupo "Comunicacao" em `ADMIN_NAV`
+  (`components/layout/nav-config.ts`) com item "Mensagens Avulsas"
+  (`/messages/ad-hoc`). Página busca alunos ativos + professores ativos +
+  leads da escola e passa lista unificada para formulário client-side com
+  busca/filtro em memória (sem lib de Combobox, projeto não tem uma) que
+  autopreenche telefone/email ao selecionar um cadastro (editável, ou
+  digitação manual). Campos: telefone + toggle WhatsApp, e-mail + assunto
+  + toggle E-mail, mensagem compartilhada, toggle Push desabilitado com
+  aviso "em breve". Server Action `sendAdHocMessage`
+  (`modules/ad-hoc-messages/actions.ts`) valida, envia por canal
+  habilitado, grava um log por canal em `ad_hoc_messages`, chama
+  `logAuditEvent`, retorna erro por canal (sucesso parcial permitido).
+
+- [ ] **18.3 — Testes**
+  Critério de pronto: teste de integração cobrindo validação (mensagem
+  vazia, nenhum canal marcado, telefone/e-mail/assunto faltando com canal
+  habilitado), envio com sucesso grava `status: "sent"` por canal, falha
+  de configuração grava `status: "failed"` com `error_message`, e RLS
+  restringe leitura aos admins da própria escola.
