@@ -2660,6 +2660,70 @@ export type Database = {
           },
         ]
       }
+      sent_holiday_notifications: {
+        Row: {
+          channel: string
+          created_at: string
+          error_message: string | null
+          holiday_date: string
+          id: string
+          offset_days: number
+          recipient_type: string
+          school_id: string
+          status: string
+          student_id: string | null
+          teacher_id: string | null
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          holiday_date: string
+          id?: string
+          offset_days: number
+          recipient_type: string
+          school_id: string
+          status: string
+          student_id?: string | null
+          teacher_id?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          holiday_date?: string
+          id?: string
+          offset_days?: number
+          recipient_type?: string
+          school_id?: string
+          status?: string
+          student_id?: string | null
+          teacher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sent_holiday_notifications_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sent_holiday_notifications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sent_holiday_notifications_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_hoc_messages: {
         Row: {
           channel: string

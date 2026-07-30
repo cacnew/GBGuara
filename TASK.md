@@ -2507,13 +2507,57 @@ produção rodar na Vercel, e mesma limitação de canal (só WhatsApp).
   que a tela volta ao normal) — script removido depois do teste, mesmo
   padrão das Fases 16.1/16.2. Testes automatizados ficam para a 16.5.
 
-- [ ] **16.4 — Notificações de aviso (2 dias antes, 1 dia antes, no dia)**
+- [x] **16.4 — Notificações de aviso (2 dias antes, 1 dia antes, no dia)**
   Critério de pronto: reaproveita o job diário da Fase 15.3 (mesma rota de
   cron, nova responsabilidade) para verificar feriados nos próximos 2
   dias/1 dia/hoje e enviar aviso via WhatsApp (mesma limitação de canal da
   Fase 15) para alunos e professores ativos, usando template com variáveis
   `{Nome}`/`{Data}`/`{NomeFeriado}`/`{Academia}`, editável pelo admin
   (16.2); não enviar duplicado (mesmo padrão de log/constraint da 15.1).
+  Decisão confirmada com o usuário em 2026-07-30: sem tela/tabela de
+  configuração global nova — reaproveita o campo `holidays.custom_message`
+  já existente e editável na tela de 16.2 como corpo do aviso (variáveis
+  substituídas nele); quando vazio, usa `DEFAULT_HOLIDAY_NOTIFICATION_TEMPLATE`
+  fixo no código (`modules/holiday-notifications/template.ts`). Sem
+  `enabled` global — o controle já existe via `has_class = false` (16.1) e
+  a existência do próprio feriado cadastrado.
+  Migration `supabase/migrations/20260730090000_create_holiday_notifications.sql`:
+  `sent_holiday_notifications` (log append-only, service_role-only insert,
+  mesmo padrão de `sent_birthday_messages`/15.1) com índice único sobre
+  `(recipient_type, coalesce(student_id, teacher_id), holiday_date,
+  offset_days)` — diferente do aniversário (só `date`), aqui a chave
+  precisa incluir `offset_days` (0/1/2) porque um mesmo feriado dispara até
+  3 avisos distintos para a mesma pessoa; índice único já correto desde o
+  início (a 15.1 precisou de uma migration de correção separada por causa
+  do bug de `NULL` não colidir com `NULL`, ver
+  `20260723091500_fix_sent_birthday_messages_unique.sql`).
+  `modules/holiday-notifications/template.ts` (função pura
+  `renderHolidayNotificationTemplate`, mesmo padrão de
+  `renderBirthdayMessageTemplate`) e `modules/holiday-notifications/job.ts`
+  (`runHolidayNotificationJob`, service_role via `createAdminClient`,
+  chamável direto de teste como `runBirthdayMessageJob`) — percorre todas
+  as escolas (sem settings/`enabled` por escola) e, para os offsets
+  `[2, 1, 0]`, reaproveita `getHolidayForDate` (Fase 16.3) para achar
+  feriado sem aula na data alvo; quando encontra, envia para
+  alunos (`status = 'ativo'`) e professores (`status = 'active'`) via
+  `sendWhatsAppMessage`, com o mesmo fluxo de checagem de duplicidade →
+  telefone ausente (`failed`) → envio → log de `sent`/`failed` do job de
+  aniversário.
+  `app/api/cron/birthday-messages/route.ts` estendida para rodar os dois
+  jobs (`runBirthdayMessageJob` + `runHolidayNotificationJob`) na mesma
+  chamada — sem mudança em `vercel.json`.
+  `database.types.ts` recebeu o mesmo patch manual cirúrgico das Fases
+  9.1/9.2/10.1/16.1 (tabela `sent_holiday_notifications` adicionada à mão).
+  Verificado com `tsc --noEmit`, `eslint .` e `npm test` (78 testes, sem
+  regressão) limpos, `next build` compilando `/api/cron/birthday-messages`
+  sem erro, e teste manual (removido depois) contra o Supabase
+  compartilhado com escola/aluno/professor/feriados temporários (offsets 2
+  e 0 disparando 4 avisos `failed` — sem telefone, determinístico — e
+  offset 1 sem feriado não gerando nada; segunda execução no mesmo dia
+  gerando só `skipped`, confirmando anti-duplicidade; renderização de
+  template padrão e de `custom_message` conferida separadamente) — escola
+  temporária e todo o restante (cascade) removidos ao final, confirmado por
+  consulta direta ao banco depois do teste que não sobrou resíduo.
 
 - [ ] **16.5 — Testes**
   Critério de pronto: teste unitário do cálculo de datas móveis
