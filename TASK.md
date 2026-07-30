@@ -2559,11 +2559,38 @@ produção rodar na Vercel, e mesma limitação de canal (só WhatsApp).
   temporária e todo o restante (cascade) removidos ao final, confirmado por
   consulta direta ao banco depois do teste que não sobrou resíduo.
 
-- [ ] **16.5 — Testes**
+- [x] **16.5 — Testes**
   Critério de pronto: teste unitário do cálculo de datas móveis
   (Páscoa/Carnaval/Sexta Santa/Corpus Christi) para múltiplos anos; teste
   de integração confirmando bloqueio de sinalização/chamada em dia sem
   aula e liberação normal quando `has_class = true`.
+  `tests/integration/holidays-rules.test.ts` (9 testes, contra o Supabase
+  compartilhado, mesmo padrão `skipIf(!hasEnv)` dos demais testes de
+  integração). Datas móveis: sem equivalente em TS puro pra testar offline
+  (o cálculo vive inteiro em SQL, `public.easter_date`/
+  `public.seed_national_holidays`, Fase 16.1) — teste chama as funções
+  reais via `rpc`: `easter_date` conferido contra a data oficial da Páscoa
+  para 2024-2028 (mesmos valores já verificados manualmente na 16.1);
+  `seed_national_holidays` chamado para um ano novo (2030, fora do que o
+  trigger de escola já semeia) numa escola temporária, confirmando que
+  Carnaval/Sexta-feira Santa/Corpus Christi batem com
+  `easter_date(ano) -47/-2/+60`, e que rodar de novo pro mesmo ano não
+  duplica (idempotência, `on conflict do nothing`).
+  Bloqueio (Fase 16.3): `signalAttendance`/`openOrReuseClassSession` são
+  Server Actions com `"use server"` (dependem de `next/headers`, mesma
+  limitação de `attendance-rules.test.ts`) — as duas fazem exatamente a
+  mesma checagem (`getHolidayForDate(supabase, schoolId, date)`), então o
+  teste chama essa função direto, sob RLS real (aluno de teste via
+  `TEST_STUDENT_EMAIL` e staff via `admin@nexusdojo.dev`, mesmo padrão de
+  `medals-rules.test.ts`/`graduation-requirements-rules.test.ts`), numa
+  data controlada (`2026-08-10`, sem feriado real cadastrado): com
+  `has_class = false` retorna o feriado (bloqueia) pros dois papéis; com
+  `has_class = true` retorna `null` (libera) mesmo havendo feriado
+  cadastrado na data; sem feriado cadastrado também retorna `null`.
+  `tsc --noEmit`, `eslint .` e `npm test` (87 testes, 14 suítes, sem
+  regressão) limpos. Dados temporários (escola/feriados de teste) criados
+  e removidos ao final de cada teste/suíte; confirmado por consulta direta
+  ao banco depois da suíte que não sobrou resíduo.
 
 ---
 
