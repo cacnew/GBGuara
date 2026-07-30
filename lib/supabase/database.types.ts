@@ -2660,6 +2660,119 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          created_at: string
+          id: string
+          school_id: string
+          status: string
+          student_id: string
+          target: string
+          teacher_id: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          school_id: string
+          status?: string
+          student_id: string
+          target: string
+          teacher_id?: string | null
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          school_id?: string
+          status?: string
+          student_id?: string
+          target?: string
+          teacher_id?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_messages: {
+        Row: {
+          attachment_url: string | null
+          author_student_id: string | null
+          author_user_id: string | null
+          body: string
+          created_at: string
+          feedback_id: string
+          id: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          author_student_id?: string | null
+          author_user_id?: string | null
+          body: string
+          created_at?: string
+          feedback_id: string
+          id?: string
+        }
+        Update: {
+          attachment_url?: string | null
+          author_student_id?: string | null
+          author_user_id?: string | null
+          body?: string
+          created_at?: string
+          feedback_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_messages_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_messages_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_messages_author_student_id_fkey"
+            columns: ["author_student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sent_holiday_notifications: {
         Row: {
           channel: string

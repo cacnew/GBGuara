@@ -9,6 +9,11 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     exclude: ["**/node_modules/**", "e2e/**"],
+    // Default de 5s estourava sob carga (várias suítes de integração
+    // batendo no Supabase real em paralelo, Fase 17.1) — nenhum teste
+    // individual é lento, é contenção de rede quando os ~14 arquivos
+    // rodam juntos.
+    testTimeout: 20000,
   },
   resolve: {
     // Mesmo mapeamento do `tsconfig.json` (`@/*` -> raiz do projeto).

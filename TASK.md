@@ -2603,7 +2603,7 @@ anexada a um registro), reaproveitado como referência de convenção, não de
 código (é uma entidade nova, não uma nota interna). Mesma limitação de
 canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
 
-- [ ] **17.1 — Migration: `feedback` + `feedback_messages`**
+- [x] **17.1 — Migration: `feedback` + `feedback_messages`**
   Critério de pronto: tabela `feedback` (school_id, student_id, type enum
   sugestão/elogio/reclamação/dúvida, title, target enum
   professor/administrador/ambos, teacher_id nullable quando target inclui
@@ -2613,6 +2613,52 @@ canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
   thread de mensagens por feedback. RLS: aluno lê/cria só os próprios;
   admin lê/responde tudo; professor lê/responde só quando é o destinatário
   (`target` inclui professor E `teacher_id` bate, ou `target = ambos`).
+  `supabase/migrations/20260730100000_create_feedback.sql`. `feedback` sem
+  coluna de corpo/anexo próprio — a mensagem inicial do aluno também vira a
+  primeira linha de `feedback_messages` (thread em formato de chat, "Toda
+  conversa deve permanecer registrada" na especificação bruta — por isso
+  `feedback_messages` é append-only, sem policy de update/delete pra
+  nenhum papel). Sem seletor de professor específico na tela do aluno
+  (Fase 17.2) — `teacher_id` fica para a aplicação preencher a partir de
+  `students.main_teacher_id` quando `target` inclui professor; check
+  constraint (`target = 'administrador' or teacher_id is not null`)
+  garante isso no banco também.
+  Duas funções helper novas (`security definer`, mesmo padrão de
+  `current_school_id()`/`current_student_id()`): `current_user_is_admin()`
+  e `current_teacher_id()` (resolve por `teachers.email = users.email`,
+  mesma resolução ad-hoc já usada em
+  `app/(teacher)/professor/queries.ts:getTeacherDashboardData` — não há
+  vínculo direto entre `users` e `teachers` no projeto). Primeira vez que
+  uma policy do projeto precisa diferenciar admin de professor dentro do
+  banco (até aqui, essa distinção era só na aplicação via `requireRole`,
+  porque os dois sempre enxergavam as mesmas linhas nas tabelas
+  existentes) — decisão: RLS de verdade (não só filtro na aplicação),
+  porque diferente de outras tabelas onde staff sempre viu tudo, aqui um
+  professor não pode ver feedback endereçado só ao administrador (dado
+  sensível — reclamação sobre o próprio professor, por exemplo).
+  `feedback_messages` reaproveita a RLS de `feedback` via `exists`
+  (`select 1 from feedback where id = ...`) nas próprias policies, em vez
+  de duplicar a lógica de acesso.
+  `database.types.ts` recebeu o mesmo patch manual cirúrgico das Fases
+  9.1/9.2/10.1/16.1/16.4 (tabelas `feedback`/`feedback_messages`
+  adicionadas à mão).
+  Verificado com `tsc --noEmit`, `eslint .` e `npm test` (87 testes, sem
+  regressão) limpos, e teste manual (removido depois) contra o Supabase
+  compartilhado cobrindo os 3 valores de `target` com contas reais (aluno
+  de teste, `admin@nexusdojo.dev`, e dois professores reais — um com
+  `teachers.email` batendo o login para resolver `current_teacher_id()`,
+  outro sem — mais um professor temporário criado só para o teste ter dois
+  ids de professor distintos e não só null-vs-id): admin sempre lê;
+  professor só lê/responde quando é o alvo; professor errado não lê nem
+  consegue inserir mensagem; aluno não lê/edita feedback de outro aluno;
+  constraint bloqueia `target` de professor sem `teacher_id`. Dados
+  temporários removidos ao final, confirmado por consulta direta ao banco
+  que não sobrou resíduo.
+  **Ajuste incidental**: `vitest.config.ts` ganhou `testTimeout: 20000`
+  (default de 5s) — com mais suítes de integração rodando em paralelo
+  contra o Supabase real, um teste da 16.5 estourou o timeout default sob
+  carga (nenhum teste individual ficou mais lento, é contenção de rede
+  entre os ~14 arquivos); sem isso, a suíte fica intermitentemente flaky.
 
 - [ ] **17.2 — Tela do aluno "Fale Conosco"**
   Critério de pronto: novo item em `STUDENT_NAV`; formulário de criação
