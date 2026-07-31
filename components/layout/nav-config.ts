@@ -58,7 +58,10 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Comunicacao",
     icon: MessageSquare,
     collapsible: true,
-    children: [{ label: "Mensagens Avulsas", href: "/messages/ad-hoc" }],
+    children: [
+      { label: "Mensagens Avulsas", href: "/messages/ad-hoc" },
+      { label: "Fale Conosco", href: "/messages/fale-conosco" },
+    ],
   },
   {
     label: "Ensino",
@@ -154,6 +157,12 @@ export const TEACHER_NAV: NavGroup[] = [
     icon: BookOpen,
     collapsible: true,
     children: [{ label: "Posicao da Semana", href: "/professor/content/weekly-positions" }],
+  },
+  {
+    label: "Comunicacao",
+    icon: MessageSquare,
+    collapsible: true,
+    children: [{ label: "Fale Conosco", href: "/professor/fale-conosco" }],
   },
 ];
 

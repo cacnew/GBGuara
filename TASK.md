@@ -2696,11 +2696,59 @@ canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
   automatizado permanente adicionado (fica para a 17.7, que cobre RLS de
   feedback de ponta a ponta).
 
-- [ ] **17.3 — Painel staff de gestão**
+- [x] **17.3 — Painel staff de gestão**
   Critério de pronto: tela staff (admin sempre vê tudo; professor só os
   direcionados a ele) com filtros por status/professor/aluno/tipo;
   responder abre a mesma thread em formato de chat; ao decidir/responder,
   muda o status.
+  Mesmo padrão de tela duplicada admin/professor já usado por
+  `medals/approvals` (Fase 12.5): `app/(admin)/messages/fale-conosco/
+  {page,[id]/page}.tsx` e `app/(teacher)/professor/fale-conosco/
+  {page,[id]/page}.tsx`, ambas chamando o mesmo `modules/feedback/
+  staff-actions.ts` (`getStaffFeedback`, `getStaffFeedbackThread`,
+  `replyToFeedbackAsStaff`, `updateFeedbackStatus`) com `requireUser()` —
+  sem branch de `role` no código, o escopo admin-vê-tudo/professor-só-o-
+  seu é inteiramente resolvido pela RLS da Fase 17.1
+  (`current_user_is_admin()`/`current_teacher_id()`), reforçado por
+  `eq(school_id)` de defesa em profundidade.
+  `components/feedback/staff-feedback-list.tsx` (client): filtros por
+  status/tipo/aluno (texto) aplicados em memória, mesmo padrão de
+  `ApprovalQueue`; filtro de professor só aparece quando há mais de um
+  professor distinto nos itens recebidos — para o professor logado (RLS
+  só devolve os próprios direcionados) isso o esconde sozinho, sem
+  checar `role` explicitamente.
+  Thread reaproveita o `FeedbackThread` da Fase 17.2 sem alteração
+  (`onReply` aceita tanto `replyToFeedback` quanto
+  `replyToFeedbackAsStaff`, mesma assinatura). Responder como staff move
+  o status para `respondida` automaticamente (a menos que já esteja
+  `encerrada`); `components/feedback/feedback-status-control.tsx` (novo)
+  cobre a mudança manual de status (`em_analise`/`encerrada`/etc, "ao
+  decidir" do critério de pronto).
+  Item "Fale Conosco" adicionado a `ADMIN_NAV` (grupo Comunicacao,
+  reaproveitando o grupo já criado na Fase 18) e a `TEACHER_NAV` (novo
+  grupo Comunicacao).
+  Verificado com `tsc --noEmit`, `eslint .` (limpos) e `npm test` (87
+  testes, sem regressão) e teste manual (removido depois) contra o
+  Supabase compartilhado com contas reais: aluno cria feedback
+  direcionado a um professor específico (`camila.duarte@demo.nexusdojo.dev`,
+  única professora do ambiente com login E `teachers.email` batendo,
+  necessário para `current_teacher_id()` resolver) → admin vê na lista e
+  responde (thread + mudança de status confirmadas direto no banco,
+  contornando um falso negativo do próprio script de teste que buscava a
+  palavra "Respondida" no HTML inteiro da página, inclusive dentro das
+  `<option>` do seletor de status) → professora destinatária vê o item e
+  responde → outro professor (`bruno.almeida@demo.nexusdojo.dev`, sem
+  `teachers.email` correspondente neste ambiente) não vê o item na lista
+  nem consegue acessar a thread diretamente pela URL (RLS retorna null,
+  página responde 404 limpo) → admin muda status manualmente para
+  "Encerrada" com sucesso. Dados temporários e vínculo de
+  `main_teacher_id` de teste removidos ao final.
+  **Achado não bloqueante**: aviso de hydration mismatch
+  (`style={{caret-color:"transparent"}}`) no console ao carregar as
+  telas novas — reproduzido tanto no `Input` (Base UI) quanto num
+  `<textarea>` puro já existentes desde a Fase 17.2/Fase 12.5, portanto
+  pré-existente no projeto e fora do escopo desta subtarefa; não afeta
+  funcionalidade.
 
 - [ ] **17.4 — Notificações de resposta**
   Critério de pronto: ao staff responder, aluno recebe notificação in-app
