@@ -13,6 +13,7 @@ export type NotificationPayload = {
   dueDate?: string;
   eventName?: string;
   reason?: string;
+  feedbackTitle?: string;
 };
 
 export type StudentNotification = {

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
+import { sendWhatsAppMessage } from "@/lib/evolution/client";
 import type { FeedbackActionResult, FeedbackThreadMessage } from "@/modules/feedback/student-actions";
 
 export type StaffFeedbackListItem = {
@@ -121,7 +122,7 @@ export async function replyToFeedbackAsStaff(
 
   const { data: feedback } = await supabase
     .from("feedback")
-    .select("id, status")
+    .select("id, status, title, student_id, students(phone)")
     .eq("id", feedbackId)
     .eq("school_id", profile.schoolId)
     .maybeSingle();
@@ -146,6 +147,25 @@ export async function replyToFeedbackAsStaff(
       .eq("id", feedbackId);
 
     if (statusError) return { error: statusError.message };
+  }
+
+  // Notificação da resposta (17.4) — in-app sempre; WhatsApp só quando o
+  // aluno tem telefone cadastrado. Mesma limitação de canal da Fase 15
+  // (sem push/e-mail ainda). Melhor esforço: falha em notificar não
+  // desfaz a resposta já registrada acima.
+  await supabase.from("notifications").insert({
+    school_id: profile.schoolId,
+    student_id: feedback.student_id,
+    type: "feedback_replied",
+    payload: { feedbackTitle: feedback.title },
+  });
+
+  if (feedback.students?.phone) {
+    await sendWhatsAppMessage({
+      schoolId: profile.schoolId,
+      phone: feedback.students.phone,
+      text: `Você recebeu uma resposta no Fale Conosco: "${feedback.title}". Acesse o app para conferir.`,
+    });
   }
 
   revalidatePath(`/messages/fale-conosco/${feedbackId}`);

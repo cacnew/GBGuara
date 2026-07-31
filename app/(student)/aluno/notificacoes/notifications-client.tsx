@@ -15,6 +15,7 @@ const TITLE_BY_TYPE: Record<string, string> = {
   charge_sent: "Nova cobrança disponível",
   medal_approved: "Medalha aprovada",
   medal_rejected: "Lançamento de medalha rejeitado",
+  feedback_replied: "Você recebeu uma resposta no Fale Conosco",
 };
 
 function formatMoney(value: number) {
@@ -81,7 +82,9 @@ export function NotificationsClient({
               {!n.readAt && <span className="size-2 shrink-0 rounded-full bg-primary" />}
             </div>
             <p className="text-muted-foreground">
-              {n.type === "charge_sent" ? (
+              {n.type === "feedback_replied" ? (
+                <>{n.payload.feedbackTitle}</>
+              ) : n.type === "charge_sent" ? (
                 <>
                   Parcela {n.payload.installmentNumber}
                   {n.payload.amount !== undefined ? ` · ${formatMoney(n.payload.amount)}` : ""}

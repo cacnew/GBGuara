@@ -2750,11 +2750,43 @@ canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
   pré-existente no projeto e fora do escopo desta subtarefa; não afeta
   funcionalidade.
 
-- [ ] **17.4 — Notificações de resposta**
+- [x] **17.4 — Notificações de resposta**
   Critério de pronto: ao staff responder, aluno recebe notificação in-app
   (reaproveitando `notifications`, mesmo padrão das Fases 9.5/12.5) e
   WhatsApp (mesma limitação de canal da Fase 15 — sem push/e-mail nesta
   fase).
+  Disparo direto dentro de `replyToFeedbackAsStaff`
+  (`modules/feedback/staff-actions.ts`): a query de busca do feedback
+  passou a trazer `student_id`, `title` e `students(phone)`; após o
+  insert da mensagem e a atualização de status, insere em `notifications`
+  (`type: "feedback_replied"`, `payload: { feedbackTitle }`, mesmo
+  formato de `medals/approvals`/`roll-call`) e, se o aluno tiver telefone
+  cadastrado, chama `sendWhatsAppMessage` (Fase 8.3) com uma mensagem
+  curta contendo só o título do feedback (sem reproduzir o corpo da
+  resposta via WhatsApp). Sem helper genérico "notificar aluno" — segue
+  o padrão já estabelecido no projeto (Fase 9.5/12.5/15) de cada feature
+  disparar suas próprias notificações; não existia um helper
+  compartilhado para promover a um módulo próprio nesta subtarefa.
+  Melhor esforço: nenhuma das duas chamadas tem erro verificado/
+  propagado — falha ao notificar não desfaz nem reporta erro na resposta
+  já registrada (mesmo padrão de `closeRollCall`, que também não checa
+  erro do insert em `notifications`).
+  `modules/students/notifications.ts` (`NotificationPayload`) ganhou o
+  campo `feedbackTitle`; `notifications-client.tsx` ganhou a entrada
+  `feedback_replied` em `TITLE_BY_TYPE` e um branch de descrição
+  mostrando o título do feedback.
+  Verificado com `tsc --noEmit`, `eslint .` (limpos) e `npm test` (87
+  testes, sem regressão) e teste manual (removido depois) contra o
+  Supabase compartilhado: staff responde → linha em `notifications`
+  criada com `type`/`payload` corretos → aluno vê a notificação com
+  título e descrição certos em `/aluno/notificacoes`. Ambiente de
+  desenvolvimento não tem `EVOLUTION_API_URL`/`EVOLUTION_API_KEY`
+  configurados (`.env.local` vazio) — confirmado que o fluxo inteiro
+  continua funcionando sem erro nesse caso (retorno gracioso de
+  `sendWhatsAppMessage`, sem exceção), mas o envio real via WhatsApp em
+  si não pôde ser confirmado ponta a ponta neste ambiente (mesma
+  limitação já registrada em outras fases que dependem da Evolution
+  API). Sem erros de console.
 
 - [ ] **17.5 — Auditoria**
   Critério de pronto: toda criação/resposta grava em `audit_logs` via
