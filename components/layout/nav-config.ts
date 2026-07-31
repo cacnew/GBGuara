@@ -168,5 +168,6 @@ export const STUDENT_NAV: NavGroup[] = [
   { label: "Minha Academia", href: "/aluno/academia", icon: Users },
   { label: "Financeiro", href: "/aluno/financeiro", icon: Wallet },
   { label: "Notificações", href: "/aluno/notificacoes", icon: Bell },
+  { label: "Fale Conosco", href: "/aluno/fale-conosco", icon: MessageSquare },
   { label: "Perfil", href: "/aluno/perfil", icon: UserCircle },
 ];

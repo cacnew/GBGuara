@@ -21,6 +21,10 @@ const STATUS_STYLES: Record<string, string> = {
   pausado: "bg-slate-500/10 text-slate-700 ring-slate-600/20",
   paused: "bg-slate-500/10 text-slate-700 ring-slate-600/20",
   trancado: "bg-slate-500/10 text-slate-700 ring-slate-600/20",
+  recebida: "bg-sky-500/10 text-sky-700 ring-sky-600/20",
+  em_analise: "bg-amber-500/10 text-amber-700 ring-amber-600/20",
+  respondida: "bg-emerald-500/10 text-emerald-700 ring-emerald-600/20",
+  encerrada: "bg-muted text-muted-foreground ring-border",
 };
 
 export function StatusBadge({

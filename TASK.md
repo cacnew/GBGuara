@@ -2660,12 +2660,41 @@ canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
   carga (nenhum teste individual ficou mais lento, é contenção de rede
   entre os ~14 arquivos); sem isso, a suíte fica intermitentemente flaky.
 
-- [ ] **17.2 — Tela do aluno "Fale Conosco"**
+- [x] **17.2 — Tela do aluno "Fale Conosco"**
   Critério de pronto: novo item em `STUDENT_NAV`; formulário de criação
   (tipo, título, mensagem, destinatário, anexo opcional reaproveitando
   Storage da Fase 8.1); listagem com histórico e status (recebida/em
   análise/respondida/encerrada); abrir um item mostra a conversa em
   formato de chat e permite responder.
+  Item "Fale Conosco" adicionado ao `STUDENT_NAV`
+  (`components/layout/nav-config.ts`). `app/(student)/aluno/fale-conosco/
+  {page,new/page,[id]/page}.tsx` + `components/feedback/{feedback-form,
+  feedback-thread,attachment-upload}.tsx` + `modules/feedback/
+  {student-actions,labels}.ts` + `lib/validations/feedback.ts`.
+  `modules/feedback/student-actions.ts` cobre `getMyFeedback` (listagem,
+  só os próprios via RLS da Fase 17.1), `getMyFeedbackThread` (thread
+  completa), `createFeedback` (cria `feedback` + primeira
+  `feedback_messages` numa chamada; quando `target` inclui professor,
+  resolve `teacher_id` a partir de `students.main_teacher_id` — sem
+  seletor de professor na tela, conforme decidido na 17.1; bloqueia com
+  mensagem clara se o aluno não tiver professor principal cadastrado) e
+  `replyToFeedback` (nova mensagem na thread existente).
+  `StatusBadge` ganhou as 4 cores de status do feedback
+  (`components/ui/status-badge.tsx`).
+  Bucket de Storage dedicado (`supabase/migrations/
+  20260730110000_create_feedback_attachments_bucket.sql`, público, sem
+  restrição de mime type, 10MB, mesmo padrão de `avatars` da Fase 8.1);
+  aplicado no Supabase compartilhado (confirmado via
+  `supabase migration list`). `AttachmentUpload` sobe direto pelo client
+  para `{school_id}/feedback/{student_id}-{timestamp}.{ext}` e devolve a
+  URL pública para o formulário.
+  Verificado com `tsc --noEmit`, `eslint .` (limpos) e `npm test` (87
+  testes, sem regressão). Validado end-to-end com Playwright contra o dev
+  server real (login do aluno → lista vazia → criar mensagem → thread
+  mostra a primeira mensagem → responder → volta pra lista e mostra o
+  item com status "Recebida") — sem erros de console. Sem teste
+  automatizado permanente adicionado (fica para a 17.7, que cobre RLS de
+  feedback de ponta a ponta).
 
 - [ ] **17.3 — Painel staff de gestão**
   Critério de pronto: tela staff (admin sempre vê tudo; professor só os
