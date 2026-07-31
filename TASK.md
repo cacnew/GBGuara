@@ -2788,12 +2788,46 @@ canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
   limitação já registrada em outras fases que dependem da Evolution
   API). Sem erros de console.
 
-- [ ] **17.5 — Auditoria**
+- [x] **17.5 — Auditoria**
   Critério de pronto: toda criação/resposta grava em `audit_logs` via
   `logAuditEvent` (quem criou, quem respondeu, data). Captura de IP fica
   fora de escopo nesta subtarefa — o sistema não tem hoje nenhuma captura
   de IP em nenhum outro fluxo; registrar essa limitação em vez de inventar
   uma captação nova sem necessidade comprovada.
+  IP não é capturado, consistente com todo o resto do projeto (nenhum
+  outro fluxo audita IP hoje).
+  Três pontos de log, um por evento de "criação/resposta" da thread:
+  `createFeedback` → `feedback_created`; `replyToFeedback` (aluno
+  responde na própria thread) → `feedback_student_replied`; ambos em
+  `modules/feedback/student-actions.ts`. `replyToFeedbackAsStaff` →
+  `feedback_staff_replied` em `modules/feedback/staff-actions.ts`. Todos
+  com `entity_type: "feedback"`/`entity_id: feedback.id`, melhor
+  esforço (erro no log não desfaz a ação já registrada).
+  Achado ao implementar: `logAuditEvent` (`modules/audit/log.ts`) exigia
+  `userId: string`, mas aluno não é uma linha de `public.users` — não
+  havia como atribuir autoria a uma ação de aluno. Ajustado o tipo para
+  `userId: string | null`; quando `null`, "quem criou/respondeu" vai em
+  `changes.studentId`/`changes.studentName` (gravado pelo próprio
+  caller). A policy de insert existente em `audit_logs` (Fase 7.4) só
+  cobria staff (`current_school_id()`); migration nova
+  (`20260731090000_audit_logs_student_insert.sql`, aplicada no Supabase
+  compartilhado) adiciona policy equivalente para aluno via
+  `current_student_school_id()` — sem essa policy, o insert do aluno
+  seria bloqueado silenciosamente pela RLS.
+  `app/(admin)/audit/page.tsx`: rótulos novos em `ACTION_LABEL`
+  (`feedback_created`, `feedback_student_replied`,
+  `feedback_staff_replied`); coluna "Usuario" ganhou fallback
+  `studentActorName(changes)` antes de cair em "Sistema" — sem isso, toda
+  ação de aluno apareceria como "Sistema" (rótulo até então reservado a
+  ações automatizadas, ex: jobs), o que violaria o "quem criou" do
+  critério de pronto.
+  Verificado com `tsc --noEmit`, `eslint .` (limpos), `npm test` (87
+  testes, sem regressão) e teste manual (removido depois) contra o
+  Supabase compartilhado: aluno cria feedback → aluno responde na
+  própria thread → admin responde → os 3 registros aparecem em
+  `audit_logs` com `action`/`user_id`/`changes` corretos, e a tela
+  `/audit` mostra os rótulos certos e o nome do aluno (não "Sistema")
+  nos dois eventos de aluno. Dados de teste removidos ao final.
 
 - [ ] **17.6 — Exportação PDF/Excel**
   Critério de pronto: no painel staff (17.3), exportar o histórico

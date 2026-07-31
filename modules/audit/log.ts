@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function logAuditEvent(params: {
   supabase: Awaited<ReturnType<typeof createClient>>;
   schoolId: string;
-  userId: string;
+  userId: string | null;
   entityType: string;
   entityId: string;
   action: string;

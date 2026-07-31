@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { sendWhatsAppMessage } from "@/lib/evolution/client";
+import { logAuditEvent } from "@/modules/audit/log";
 import type { FeedbackActionResult, FeedbackThreadMessage } from "@/modules/feedback/student-actions";
 
 export type StaffFeedbackListItem = {
@@ -148,6 +149,15 @@ export async function replyToFeedbackAsStaff(
 
     if (statusError) return { error: statusError.message };
   }
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: profile.id,
+    entityType: "feedback",
+    entityId: feedbackId,
+    action: "feedback_staff_replied",
+  });
 
   // Notificação da resposta (17.4) — in-app sempre; WhatsApp só quando o
   // aluno tem telefone cadastrado. Mesma limitação de canal da Fase 15

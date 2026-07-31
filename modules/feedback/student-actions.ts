@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireStudent } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
+import { logAuditEvent } from "@/modules/audit/log";
 import type { FeedbackFormInput } from "@/lib/validations/feedback";
 
 export type StudentFeedbackListItem = {
@@ -157,6 +158,20 @@ export async function createFeedback(input: FeedbackFormInput): Promise<Feedback
     return { error: messageError.message };
   }
 
+  // Auditoria (17.5): sem user_id (aluno não é `users`), então "quem
+  // criou" vai em `changes` — a policy de insert de aluno em
+  // `audit_logs` (Fase 17.5) cobre esse caso. Melhor esforço: erro aqui
+  // não desfaz o feedback já criado.
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: null,
+    entityType: "feedback",
+    entityId: feedback.id,
+    action: "feedback_created",
+    changes: { studentId: profile.id, studentName: profile.name, type: input.type, target: input.target },
+  });
+
   revalidatePath("/aluno/fale-conosco");
   return { id: feedback.id };
 }
@@ -193,6 +208,16 @@ export async function replyToFeedback(
   });
 
   if (error) return { error: error.message };
+
+  await logAuditEvent({
+    supabase,
+    schoolId: profile.schoolId,
+    userId: null,
+    entityType: "feedback",
+    entityId: feedbackId,
+    action: "feedback_student_replied",
+    changes: { studentId: profile.id, studentName: profile.name },
+  });
 
   revalidatePath(`/aluno/fale-conosco/${feedbackId}`);
   return {};

@@ -17,7 +17,22 @@ const ACTION_LABEL: Record<string, string> = {
   attendance_created: "Presenca registrada",
   attendance_deleted: "Presenca removida",
   graduation_created: "Graduacao registrada",
+  feedback_created: "Feedback criado pelo aluno",
+  feedback_student_replied: "Feedback respondido pelo aluno",
+  feedback_staff_replied: "Feedback respondido pela equipe",
 };
+
+/**
+ * Ações de aluno (ex: Fase 17.5) não têm `user_id` (aluno não é
+ * `public.users`) — "quem" fica em `changes.studentName`, gravado pelo
+ * próprio caller. Sem isso, a coluna cairia no fallback genérico
+ * "Sistema", que sugeriria automação em vez de uma ação do aluno.
+ */
+function studentActorName(changes: unknown): string | null {
+  if (!changes || typeof changes !== "object") return null;
+  const studentName = (changes as Record<string, unknown>).studentName;
+  return typeof studentName === "string" ? studentName : null;
+}
 
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -86,7 +101,9 @@ export default async function AuditPage({
                   {formatDateTime(log.created_at)}
                 </td>
                 <td className="p-3">
-                  <p className="font-bold">{log.users?.name ?? "Sistema"}</p>
+                  <p className="font-bold">
+                    {log.users?.name ?? studentActorName(log.changes) ?? "Sistema"}
+                  </p>
                   {log.users?.email && (
                     <p className="text-xs text-muted-foreground">{log.users.email}</p>
                   )}
