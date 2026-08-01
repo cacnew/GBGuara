@@ -2861,10 +2861,38 @@ canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
   sem erros de console em nenhum dos dois cliques. Feedback de teste
   removido do banco ao final.
 
-- [ ] **17.7 — Testes**
+- [x] **17.7 — Testes**
   Critério de pronto: teste de integração confirmando RLS (aluno não vê
   feedback de outro aluno; professor não vê feedback não direcionado a
   ele; admin vê tudo).
+  Novo `tests/integration/feedback-rls.test.ts`, mesmo padrão de
+  `ad-hoc-messages.test.ts`/`graduation-requirements-rules.test.ts`:
+  clients autenticados de verdade (`signInWithPassword`) contra o
+  Supabase compartilhado, insert via service role (bypassa RLS no
+  insert, isola o teste na policy de SELECT que é o alvo desta
+  subtarefa), cleanup em `afterEach`/`afterAll` por prefixo de título.
+  Três casos, um por policy da Fase 17.1: aluno só vê o próprio
+  (`TEST_STUDENT_EMAIL` vs `aluno@nexusdojo.dev` como segundo aluno —
+  pulado via `skipIf` estático, calculado antes do `beforeAll`, se as
+  duas contas coincidirem, ex: dev sem `TEST_STUDENT_EMAIL`
+  configurado); professor só vê o que tem `teacher_id` batendo; admin vê
+  tudo da escola independente de `target`.
+  Contas de professor não seguem `TEST_STUDENT_EMAIL` (esse padrão
+  cobre só aluno) — reaproveita as duas contas já validadas
+  manualmente na Fase 17.3: `camila.duarte@demo.nexusdojo.dev` (única
+  professora com `teachers.email` batendo com o login neste ambiente,
+  necessário para `current_teacher_id()` resolver) como caso positivo;
+  `bruno.almeida@demo.nexusdojo.dev` (sem `teachers.email`
+  correspondente, `current_teacher_id()` retorna null) como caso
+  negativo — mesma limitação de ambiente já registrada na Fase 17.3,
+  não um teste "professor X vê o seu, professor Y com identidade
+  própria não vê o de X" mais fino, porque só existe uma conta de
+  professor que resolve `current_teacher_id()` neste Supabase
+  compartilhado hoje.
+  Verificado com `tsc --noEmit`, `eslint .` (limpos) e `npm test` (90
+  testes — 87 + 3 novos —, sem regressão); confirmado sem dados
+  residuais no Supabase compartilhado após a suíte (`feedback` sem
+  nenhuma linha com o prefixo de título do teste).
 
 ## Fase 18 — Mensagens Avulsas (Admin) (2026-07-29)
 
