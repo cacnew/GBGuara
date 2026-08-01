@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDateOnly } from "@/lib/dates/format";
+import { exportFeedbackToCsv, exportFeedbackToPdf } from "@/lib/export/feedback-export";
 import {
   FEEDBACK_STATUS_LABELS,
   FEEDBACK_TARGET_LABELS,
@@ -98,6 +100,24 @@ export function StaffFeedbackList({
             ))}
           </select>
         )}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={!filtered.length}
+          onClick={() => exportFeedbackToCsv(filtered)}
+        >
+          Exportar CSV
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={!filtered.length}
+          onClick={() => exportFeedbackToPdf(filtered)}
+        >
+          Exportar PDF
+        </Button>
       </div>
 
       <div className="space-y-2">

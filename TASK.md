@@ -2829,9 +2829,37 @@ canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
   `/audit` mostra os rótulos certos e o nome do aluno (não "Sistema")
   nos dois eventos de aluno. Dados de teste removidos ao final.
 
-- [ ] **17.6 — Exportação PDF/Excel**
+- [x] **17.6 — Exportação PDF/Excel**
   Critério de pronto: no painel staff (17.3), exportar o histórico
   filtrado da tela atual em PDF e em Excel/CSV.
+  Geração 100% client-side em `lib/export/feedback-export.ts` — exporta
+  o array `filtered` já computado por `useMemo` em
+  `staff-feedback-list.tsx` (mesmos filtros de status/tipo/aluno/
+  professor aplicados na tela, sem round-trip ao servidor). Duas novas
+  dependências: `jspdf` + `jspdf-autotable` (projeto não tinha nenhuma
+  lib de PDF; não havia nada a reaproveitar — confirmado via busca no
+  repo). CSV não usa lib nova (`Blob` + link de download).
+  CSV usa `;` como delimitador (não `,`): Excel em locale pt-BR trata
+  vírgula como separador decimal, então `,` quebraria a abertura direta
+  do arquivo sem "Texto para colunas"; BOM UTF-8 no início evita acentos
+  corrompidos ao abrir no Excel.
+  Dois botões "Exportar CSV"/"Exportar PDF" adicionados à barra de
+  filtros existente em `staff-feedback-list.tsx`, desabilitados quando
+  a lista filtrada está vazia. Colunas exportadas: Título, Aluno, Tipo,
+  Destino, Professor (`-` quando null), Status, Data — mesmos
+  `FEEDBACK_*_LABELS` (`modules/feedback/labels.ts`) já usados na
+  renderização da lista, para não duplicar mapeamento de enum.
+  Verificado com `tsc --noEmit`, `eslint .` (limpos) e `npm test` (87
+  testes, sem regressão) e teste manual via Playwright script
+  (removido depois) contra o Supabase compartilhado: login como admin
+  → `/messages/fale-conosco` sem feedback (botões desabilitados,
+  confirmado por screenshot) → inserido 1 feedback de teste via
+  service role → clique em "Exportar CSV" gera download com header e
+  linha corretos (delimitador `;`, acentuação certa) → clique em
+  "Exportar PDF" gera PDF com tabela renderizada corretamente (título,
+  colunas, acentuação pt-BR intacta, conferido lendo o PDF gerado) →
+  sem erros de console em nenhum dos dois cliques. Feedback de teste
+  removido do banco ao final.
 
 - [ ] **17.7 — Testes**
   Critério de pronto: teste de integração confirmando RLS (aluno não vê
