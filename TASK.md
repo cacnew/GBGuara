@@ -2901,15 +2901,40 @@ canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
   verificado) e responde (status muda para "Respondida") → aluno vê a
   resposta. Cleanup via service role em `finally` (feedback + a
   notificação de resposta), mesmo padrão de `medals.spec.ts`.
-  Passa em `chromium` e `webkit`. Falha em `firefox` — investigado e
-  confirmado **não é regressão desta mudança**: `medals.spec.ts`
-  (já existente, sem alteração) falha com o mesmo sintoma no mesmo
-  `--project=firefox` deste ambiente (`ChunkLoadError` do HMR client
-  do Turbopack no console do browser, servidor dev não termina de
-  hidratar a página a tempo, formulário cai para submit nativo
-  GET antes do React anexar o handler). Achado de ambiente
-  (dev server + Turbopack + Firefox), não de código da Fase 17;
-  registrado aqui para o outro dev não re-investigar do zero.
+  Passa em `chromium` e `webkit`. Falha em `firefox` — investigado a
+  fundo (a pedido do usuário) e **causa raiz confirmada, não é bug do
+  app nem regressão desta mudança**:
+
+  **Causa raiz:** incompatibilidade do Firefox com o runtime de dev
+  (Fast Refresh/HMR) do `next dev`, não com o código da aplicação.
+  Reproduz de forma determinística sempre que um teste faz
+  `page.goto()` para uma rota nova enquanto a página anterior — já
+  hidratada, com sua própria conexão WebSocket de HMR aberta — ainda
+  está sendo desmontada; o Firefox aborta em massa as requisições da
+  navegação seguinte (`NS_BINDING_ABORTED`, inclusive no próprio
+  documento HTML), o `ChunkLoadError` do HMR client é consequência
+  disso, não a causa. Só aparece a partir da 2ª navegação top-level
+  dentro do mesmo contexto de browser (a 1ª, ex: `/login` direto num
+  contexto novo, sempre funciona).
+  Hipóteses eliminadas por teste direto: cache do Turbopack corrompido
+  (`.next` de 1,1GB nunca limpo — falha igual com `.next` limpo do
+  zero); Service Worker (`skipWaiting`/`clients.claim()`, ver
+  `public/sw.js`) atropelando requisições (falha igual com `sw.js`
+  bloqueado via `context.route`); bug específico do Turbopack (falha
+  igual, e pior, com `next dev --webpack`). **Confirmado com build de
+  produção** (`next build && next start`): o mesmo fluxo, no mesmo
+  Firefox, completa sem erro (só 3 requisições de prefetch órfãs
+  abortadas, sem `ChunkLoadError`, form submete corretamente via
+  client-side) — prova que o app está correto e o problema é
+  exclusivo do dev server.
+  `medals.spec.ts` (já existente, sem nenhuma alteração) falha com o
+  mesmo sintoma no mesmo `--project=firefox` deste ambiente, mesma
+  causa — não é algo introduzido pela Fase 17.
+  Decisão (2026-08-02): só documentar aqui; nenhuma mudança em
+  `playwright.config.ts`. `chromium`+`webkit` seguem como sinal
+  confiável dos specs e2e locais; `firefox` local contra `next dev`
+  é estruturalmente instável para specs multi-navegação e pode ser
+  ignorado ao investigar falhas — não re-investigar do zero.
 
 ## Fase 18 — Mensagens Avulsas (Admin) (2026-07-29)
 
