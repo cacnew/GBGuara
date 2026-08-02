@@ -2894,6 +2894,23 @@ canal de notificação da Fase 15 (só WhatsApp + in-app, sem push/e-mail).
   residuais no Supabase compartilhado após a suíte (`feedback` sem
   nenhuma linha com o prefixo de título do teste).
 
+  **Cobertura e2e adicional (pedido do usuário, fora do critério de
+  pronto acima):** novo `e2e/fale-conosco.spec.ts` (Playwright), fluxo
+  completo em navegador real — aluno cria feedback → staff (admin) vê
+  no painel, exporta CSV e PDF (Fase 17.6, conteúdo do arquivo baixado
+  verificado) e responde (status muda para "Respondida") → aluno vê a
+  resposta. Cleanup via service role em `finally` (feedback + a
+  notificação de resposta), mesmo padrão de `medals.spec.ts`.
+  Passa em `chromium` e `webkit`. Falha em `firefox` — investigado e
+  confirmado **não é regressão desta mudança**: `medals.spec.ts`
+  (já existente, sem alteração) falha com o mesmo sintoma no mesmo
+  `--project=firefox` deste ambiente (`ChunkLoadError` do HMR client
+  do Turbopack no console do browser, servidor dev não termina de
+  hidratar a página a tempo, formulário cai para submit nativo
+  GET antes do React anexar o handler). Achado de ambiente
+  (dev server + Turbopack + Firefox), não de código da Fase 17;
+  registrado aqui para o outro dev não re-investigar do zero.
+
 ## Fase 18 — Mensagens Avulsas (Admin) (2026-07-29)
 
 Pedido novo do usuário, fora da ordem original de planejamento: menu no
