@@ -10,6 +10,8 @@ const ACTION_LABEL: Record<string, string> = {
   payment_registered: "Pagamento registrado",
   partial_payment_registered: "Pagamento parcial",
   payment_refunded: "Pagamento estornado",
+  payment_confirmed_gateway: "Pagamento confirmado (gateway)",
+  payment_refunded_gateway: "Pagamento estornado (gateway)",
   installment_canceled: "Parcela cancelada",
   contract_finished: "Contrato encerrado",
   contract_paused: "Contrato pausado",

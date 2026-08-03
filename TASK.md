@@ -3101,13 +3101,71 @@ forte):
   verificada ponta a ponta neste ambiente por falta de credencial —
   fica para quando houver uma chave de sandbox configurada.
 
-- [ ] **19.3 — Webhook de confirmação de pagamento**
+- [x] **19.3 — Webhook de confirmação de pagamento**
   Critério de pronto: rota de API (`app/api/webhooks/asaas/route.ts`)
   recebe eventos do Asaas (pagamento confirmado/vencido/estornado), valida
   a autenticidade do webhook (token configurado no painel do Asaas),
   atualiza `payment_gateway_charges.status` e `contract_installments.status`
   correspondente, idempotente (mesmo evento reprocessado não duplica
   efeito).
+  Achado ao implementar: toda baixa de pagamento no sistema
+  (`registerInstallmentPayment`) também grava um `financial_movements`
+  (senão os relatórios financeiros não bateriam), mas essa função exige
+  sessão de admin (`requireRole`), que o webhook não tem. Decisão
+  confirmada com o usuário: registrar `financial_movements` também a
+  partir do webhook, então extraí o núcleo de
+  `registerInstallmentPayment`/`refundInstallmentPayment` (sem o
+  `requireRole`) para `modules/finance/payment-core.ts` — um módulo
+  **sem** `"use server"` de propósito, porque essa diretiva torna toda
+  função exportada uma Server Action e passar um client do Supabase como
+  argumento arriscaria a checagem de serialização; mesma separação já
+  usada por `modules/birthday-messages/job.ts` (job/rota de API chamando
+  uma função comum). `modules/finance/payment-actions.ts` ficou com
+  wrappers finos (`requireRole` + validação + delega pro core).
+  `applyInstallmentPayment`/`applyInstallmentRefund` recebem `userId`
+  (`null` no caso do webhook) e `auditAction` (strings novas
+  `payment_confirmed_gateway`/`payment_refunded_gateway`, rótulos
+  adicionados em `ACTION_LABEL` do `/audit`) — `userId: null` renderiza
+  como "Sistema" no audit, o que é o rótulo correto aqui (diferente do
+  caso de aluno da Fase 17.5, que precisou de um override).
+  Webhook não usa o `event` do payload — só o `payment.status`, mapeado
+  via `mapAsaasStatus` (Fase 19.2) para decidir a ação, independente do
+  nome do evento que o Asaas mandou.
+  Idempotência: compara o status mapeado com `installment_charges.
+  gateway_status` já gravado; se igual, é reentrega do mesmo evento —
+  só atualiza `raw_payload`, sem reaplicar pagamento/estorno.
+  Confirmação de pagamento sempre paga o `remaining_amount` integral da
+  parcela (cobrança do gateway é 1:1 com o valor restante da parcela,
+  sem pagamento parcial via gateway); estorno sempre estorna o
+  `paid_amount` integral. Conta financeira resolvida por
+  `charge_type` → tipo de `financial_accounts` (`pix`→`pix`,
+  `cartao`→`card`, `boleto`→`bank`) — todas já seedadas em toda escola
+  desde a Fase 5.3, sem precisar de conta nova "Asaas"; se a conta não
+  existir (ex: removida manualmente), o webhook responde 500 e o Asaas
+  reenvia depois, sem marcar a cobrança como processada com um buraco
+  no financeiro.
+  Evento "vencido" (`overdue`) só atualiza `installment_charges.
+  gateway_status` — `contract_installments.status = 'overdue'` nunca é
+  gravado em lugar nenhum do projeto hoje (parcela vencida é derivada
+  por uma view, `overdue_students`, comparando `due_date` com a data
+  atual), então não há um "correspondente" a atualizar ali; gravar isso
+  seria inventar um comportamento novo sem necessidade comprovada.
+  Autenticação por header `asaas-access-token` (convenção do Asaas, não
+  `Bearer` como a rota de cron) contra `ASAAS_WEBHOOK_TOKEN`, nova env
+  var em `.env.example`.
+  Verificado com `tsc --noEmit`, `eslint .` e `npm test` (90 testes, sem
+  regressão) limpos, e teste manual contra o dev server local (`.env.local`
+  com um token de teste, removido depois — não há credencial real do
+  Asaas neste ambiente): sem token/com token errado → 401; charge
+  desconhecida (`asaas_charge_id` não cadastrado) → `{ ignored: true }`;
+  fluxo completo com uma parcela `pending` real e uma linha de
+  `installment_charges` de teste → webhook `PAYMENT_CONFIRMED` marca a
+  parcela como `paid`, cria 1 `financial_movements` (`income`) → reenvio
+  do mesmo evento devolve `alreadyProcessed: true` sem duplicar o
+  movimento (conferido: continua só 1 linha). Estado da parcela e dados
+  de teste restaurados/removidos ao final. Chamada real do Asaas ao
+  webhook não pôde ser verificada ponta a ponta neste ambiente por falta
+  de credencial — fica para quando houver conta de sandbox configurada.
 
 - [ ] **19.4 — Tela: gerar cobrança via gateway**
   Critério de pronto: na tela de cobrança do aluno/contrato (admin), opção
