@@ -3019,13 +3019,54 @@ forte):
 
 ## Fase 19 — Pagamento Online via Gateway (Asaas)
 
-- [ ] **19.1 — Migration: integração com o Asaas**
+- [x] **19.1 — Migration: integração com o Asaas**
   Critério de pronto: nova tabela (ex: `payment_gateway_charges`)
   relacionando `contract_installments` a uma cobrança no Asaas
   (`asaas_customer_id`, `asaas_charge_id`, `method` pix/boleto/cartão,
   `status`, `raw_payload` jsonb para auditoria), RLS restrita a
   `school_id = current_school_id()`; novas env vars `ASAAS_API_KEY`/
   `ASAAS_ENV` (sandbox/produção) em `.env.example`.
+  Decisão confirmada com o usuário: estende `installment_charges`
+  (Fase 10.6, cobrança manual Pix/EMV) em vez de criar tabela nova —
+  essa tabela já é a fonte que a tela do aluno e (futuramente) a régua
+  de cobrança (Fase 20) consultam para saber a cobrança mais recente de
+  uma parcela; uma tabela paralela exigiria join em duas fontes.
+  Migration `20260803090000_installment_charges_asaas_gateway.sql`:
+  `charge_type` ganha `'cartao'` (antes só `pix`/`boleto`); colunas
+  novas `asaas_customer_id`, `asaas_charge_id` (índice único parcial,
+  `where asaas_charge_id is not null`, usado pelo webhook da 19.3 para
+  localizar a linha), `gateway_status` (`pending`/`confirmed`/
+  `overdue`/`refunded`, `null` para cobranças do fluxo manual antigo
+  sem gateway), `gateway_invoice_url` (link de fatura do Asaas para
+  boleto/cartão) e `raw_payload` jsonb (snapshot do último webhook,
+  auditoria). `pix_payload` já existente passa a também guardar o
+  copia-e-cola retornado pelo Asaas quando `charge_type = 'pix'` via
+  gateway — mesmo formato EMV, mesma renderização de QR Code já
+  existente, sem coluna nova. Sem alteração de RLS: as policies de
+  select/insert existentes são por linha, não por coluna; a escrita do
+  webhook (Fase 19.3) vai rodar via client de service_role (bypassa
+  RLS), mesmo padrão de outros jobs do projeto.
+  `asaas_customer_id` fica por linha (não em `students`/`contracts`)
+  porque `contracts.financial_responsible_id` é polimórfico (aluno,
+  responsável ou "outro", sem FK) — não há uma única tabela dona do
+  "pagador" hoje; reaproveitar o customer_id de uma cobrança anterior
+  do mesmo responsável (evitar recriar cliente no Asaas a cada
+  cobrança) fica para a lógica de aplicação da Fase 19.2.
+  Nome real da constraint de `charge_type` (`installment_charges_
+  charge_type_check`) confirmado via `supabase db query` antes do
+  `DROP CONSTRAINT`, para não arriscar duplicar constraint
+  silenciosamente com um nome adivinhado errado.
+  `lib/supabase/database.types.ts` atualizado manualmente para as
+  colunas novas — `supabase gen types` (`--local` e `--db-url`) exige
+  Docker/Podman para introspecção via `postgres-meta`, indisponível
+  neste ambiente (mesma limitação já registrada na Fase 9.1).
+  Aplicado no Supabase compartilhado via `db push` (`--dry-run`
+  primeiro). Verificado: `tsc --noEmit`, `eslint .` e `npm test` (90
+  testes, sem regressão) limpos; colunas e constraints conferidas
+  direto no banco via `supabase db query`; insert manual de teste com
+  `charge_type: 'cartao'` e todas as colunas novas preenchidas
+  confirmou a constraint e os tipos — removido logo depois, sem dado
+  residual.
 
 - [ ] **19.2 — Client Asaas**
   Critério de pronto: `lib/asaas/client.ts` com funções para criar cliente

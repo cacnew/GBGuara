@@ -1110,36 +1110,51 @@ export type Database = {
       installment_charges: {
         Row: {
           amount: number
+          asaas_charge_id: string | null
+          asaas_customer_id: string | null
           charge_type: string
           contract_installment_id: string
           created_at: string
+          gateway_invoice_url: string | null
+          gateway_status: string | null
           id: string
           pix_key: string | null
           pix_payload: string | null
+          raw_payload: Json | null
           school_id: string
           sent_at: string
           sent_by: string | null
         }
         Insert: {
           amount: number
+          asaas_charge_id?: string | null
+          asaas_customer_id?: string | null
           charge_type?: string
           contract_installment_id: string
           created_at?: string
+          gateway_invoice_url?: string | null
+          gateway_status?: string | null
           id?: string
           pix_key?: string | null
           pix_payload?: string | null
+          raw_payload?: Json | null
           school_id: string
           sent_at?: string
           sent_by?: string | null
         }
         Update: {
           amount?: number
+          asaas_charge_id?: string | null
+          asaas_customer_id?: string | null
           charge_type?: string
           contract_installment_id?: string
           created_at?: string
+          gateway_invoice_url?: string | null
+          gateway_status?: string | null
           id?: string
           pix_key?: string | null
           pix_payload?: string | null
+          raw_payload?: Json | null
           school_id?: string
           sent_at?: string
           sent_by?: string | null
