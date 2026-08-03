@@ -708,19 +708,24 @@ pré-geradas para o ano inteiro.
 
 ## Fora de escopo até novo aviso (não criar subtarefas para isso ainda)
 
-Pagamento online via gateway (cartão online, boleto com gateway real,
-integração Asaas), régua automática de cobrança, check-in por QR
-Code, currículo técnico, avaliação qualitativa, campeonatos/eventos/
-seminários, multiunidade com telas próprias, IA, catraca física,
-marketplace, white label, app nativo — ver seção 19 do
-`NEXUSDOJO_PROJECT.md`. Só entram no `TASK.md` quando o usuário aprovar
-formalmente o início do MVP 2/MVP 3.
+Nada pendente nesta lista no momento — ver histórico de itens promovidos
+abaixo. Novos itens só entram no `TASK.md` quando o usuário aprovar
+formalmente.
 
 > "Área do aluno/responsável" foi promovida e removida desta lista em
 > 2026-07-11 — ver Fase 9 acima.
 > "Pix automático" foi promovido e removido desta lista em 2026-07-14 —
 > geração local de Pix copia-e-cola (EMV) + QR Code, sem gateway, ver
 > Fase 10.6 abaixo.
+> Pagamento online via gateway, régua automática de cobrança, check-in
+> por QR Code, currículo técnico, avaliação qualitativa, campeonatos/
+> eventos/seminários, multiunidade com telas próprias, análise de
+> evasão/frequência (IA), catraca física, marketplace e white label
+> foram promovidos e removidos desta lista em 2026-08-03 — planejamento
+> completo do MVP 3 na seção `MVP 3 — Planejamento` e Fases 19-31
+> abaixo. "Ranking interno" (item original da seção 19 do
+> `NEXUSDOJO_PROJECT.md`) não precisou ser promovido — já foi entregue
+> na Fase 12 (Sistema de Medalhas e Ranking).
  
 ---
 
@@ -2983,3 +2988,314 @@ nesta fase. Destinatário selecionável entre alunos + professores + leads
   habilitado), envio com sucesso grava `status: "sent"` por canal, falha
   de configuração grava `status: "failed"` com `error_message`, e RLS
   restringe leitura aos admins da própria escola.
+
+## MVP 3 — Planejamento (2026-08-03)
+
+Planejado em conjunto com o usuário a partir da lista "fora de escopo até
+novo aviso" (ver seção 19 do `NEXUSDOJO_PROJECT.md`), com o usuário optando
+por incluir todos os itens da lista no MVP 3. Ordem das Fases 19-31 abaixo
+definida por dependência técnica, não por prioridade de negócio — a Fase
+19 (pagamento online) destrava a régua de cobrança (Fase 20) e o
+marketplace (Fase 29); as demais são majoritariamente independentes entre
+si. "Ranking interno" (item da lista original) não entra aqui porque já
+foi entregue na Fase 12 (Sistema de Medalhas e Ranking).
+
+Decisões já travadas nesta sessão de planejamento (não reabrir sem motivo
+forte):
+- Gateway de pagamento (Fase 19): **Asaas** — foco em cobrança recorrente
+  B2B, mais adequado a mensalidade recorrente que Mercado Pago.
+- Análise de evasão/frequência (Fase 28): **heurística baseada em regras**,
+  sem modelo de ML nem LLM — mais rápido de entregar e mais fácil de
+  explicar ao usuário final.
+- Catraca física (Fase 30) e app nativo (Fase 31): **sem fabricante/
+  abordagem escolhidos ainda** — ficam com escopo exploratório aberto; a
+  única subtarefa de cada uma por enquanto é a própria decisão, antes de
+  detalhar o resto.
+- Demais fases (21-27, 29) têm só o nível de detalhe de "Critério de
+  pronto" por subtarefa (mesmo padrão de planejamento pré-execução usado
+  desde a Fase 0) — detalhes finos de UI/regra de negócio ainda ambíguos
+  serão confirmados com o usuário ao iniciar cada subtarefa, não inferidos
+  agora.
+
+## Fase 19 — Pagamento Online via Gateway (Asaas)
+
+- [ ] **19.1 — Migration: integração com o Asaas**
+  Critério de pronto: nova tabela (ex: `payment_gateway_charges`)
+  relacionando `contract_installments` a uma cobrança no Asaas
+  (`asaas_customer_id`, `asaas_charge_id`, `method` pix/boleto/cartão,
+  `status`, `raw_payload` jsonb para auditoria), RLS restrita a
+  `school_id = current_school_id()`; novas env vars `ASAAS_API_KEY`/
+  `ASAAS_ENV` (sandbox/produção) em `.env.example`.
+
+- [ ] **19.2 — Client Asaas**
+  Critério de pronto: `lib/asaas/client.ts` com funções para criar cliente
+  (`createAsaasCustomer`), criar cobrança (`createAsaasCharge`, pix/boleto/
+  cartão) e consultar status, seguindo o mesmo padrão de erro-ausência-de-
+  config de `lib/evolution/client.ts`/`lib/email/client.ts` (retorno
+  gracioso, sem lançar exceção, quando `ASAAS_API_KEY` não está
+  configurada).
+
+- [ ] **19.3 — Webhook de confirmação de pagamento**
+  Critério de pronto: rota de API (`app/api/webhooks/asaas/route.ts`)
+  recebe eventos do Asaas (pagamento confirmado/vencido/estornado), valida
+  a autenticidade do webhook (token configurado no painel do Asaas),
+  atualiza `payment_gateway_charges.status` e `contract_installments.status`
+  correspondente, idempotente (mesmo evento reprocessado não duplica
+  efeito).
+
+- [ ] **19.4 — Tela: gerar cobrança via gateway**
+  Critério de pronto: na tela de cobrança do aluno/contrato (admin), opção
+  de gerar cobrança via Asaas (Pix, boleto ou cartão) além do Pix manual
+  copia-e-cola já existente (Fase 10.6, que continua disponível); aluno vê
+  o link/QR Code de pagamento gerado no próprio financeiro.
+
+- [ ] **19.5 — Testes**
+  Critério de pronto: teste de integração cobrindo criação de cobrança
+  (mock do client Asaas, sem chamada real), processamento idempotente do
+  webhook (mesmo payload duas vezes não duplica status), e RLS de
+  `payment_gateway_charges`.
+
+## Fase 20 — Régua Automática de Cobrança (depende da Fase 19)
+
+Só dispara para parcelas com cobrança gerada via gateway (Fase 19) — sem
+status de pagamento confiável via webhook, não há como saber quando parar
+de cobrar quem já pagou; parcelas sem cobrança via gateway continuam na
+cobrança manual já existente, fora do escopo desta régua.
+
+- [ ] **20.1 — Migration: configuração da régua por escola**
+  Critério de pronto: tabela de configuração (dias antes do vencimento /
+  dias de atraso, canal WhatsApp/e-mail, template de mensagem) por escola,
+  RLS restrita a admin da própria escola.
+
+- [ ] **20.2 — Job de disparo da régua**
+  Critério de pronto: job (mesmo padrão de cron/job dos lembretes de
+  aniversário da Fase 15 e feriados da Fase 16) percorre parcelas com
+  cobrança via gateway pendente, dispara mensagem conforme a régua
+  configurada, registra envio (evita duplicidade no mesmo dia), e não
+  dispara para parcela já paga (confirmado via status do webhook da
+  Fase 19.3).
+
+- [ ] **20.3 — Tela de configuração da régua**
+  Critério de pronto: tela admin para configurar dias/canais/templates da
+  régua.
+
+- [ ] **20.4 — Testes**
+  Critério de pronto: régua dispara nos dias certos, não duplica envio no
+  mesmo dia, não dispara para parcela já paga.
+
+## Fase 21 — Check-in por QR Code
+
+- [ ] **21.1 — Base de dados do check-in**
+  Critério de pronto: nenhuma tabela nova além de `attendances` já
+  existente (Fase 4) — check-in por QR apenas cria um registro de presença
+  com origem diferenciada (`source: 'qr_code'` vs sinalização manual),
+  reaproveitando as mesmas constraints de duplicidade.
+
+- [ ] **21.2 — Tela professor: QR Code da sessão ativa**
+  Critério de pronto: tela de chamada (Fase 4) exibe QR Code (reaproveita
+  lib `qrcode` já no projeto) contendo um token de sessão de curta duração,
+  visível só enquanto a `class_session` está ativa (dentro da janela de
+  horário da aula).
+
+- [ ] **21.3 — Tela aluno: scanner de check-in**
+  Critério de pronto: aluno acessa a câmera do navegador (API
+  MediaDevices), escaneia o QR Code, valida o token contra a sessão ativa e
+  a matrícula do aluno na turma, registra presença.
+
+- [ ] **21.4 — Testes**
+  Critério de pronto: check-in só funciona com token de sessão ativa e
+  dentro da janela de horário permitida, bloqueia duplicidade (mesma regra
+  de `attendances` da Fase 4), rejeita token expirado/de outra sessão.
+
+## Fase 22 — Currículo Técnico por Faixa
+
+- [ ] **22.1 — Migration: catálogo de técnicas**
+  Critério de pronto: tabela de técnicas vinculada a `belt_system`/faixa
+  (nome, categoria, descrição, opcionalmente `video_url`), RLS por escola.
+
+- [ ] **22.2 — Tela admin: CRUD do catálogo**
+  Critério de pronto: admin cadastra/edita/remove técnicas por faixa de
+  cada sistema de graduação da escola.
+
+- [ ] **22.3 — Tela professor: marcar técnicas vistas por aluno**
+  Critério de pronto: professor marca, por aluno, quais técnicas do
+  currículo da faixa atual já foram vistas/dominadas.
+
+- [ ] **22.4 — Tela aluno: progresso no currículo**
+  Critério de pronto: aluno vê, na própria área, quais técnicas da faixa
+  atual já viu/domina e quais faltam.
+
+- [ ] **22.5 — Testes**
+  Critério de pronto: RLS (aluno só vê o próprio progresso; professor só
+  marca alunos da própria turma/escola), CRUD do catálogo restrito a admin.
+
+## Fase 23 — Avaliação Qualitativa do Aluno (depende do currículo técnico, Fase 22)
+
+- [ ] **23.1 — Migration: avaliações**
+  Critério de pronto: tabela de avaliações (professor, aluno, data,
+  comentário livre, nota/conceito por critério configurável, referência
+  opcional a uma técnica do currículo da Fase 22).
+
+- [ ] **23.2 — Tela professor: lançar avaliação**
+  Critério de pronto: professor registra avaliação qualitativa de um
+  aluno.
+
+- [ ] **23.3 — Tela aluno: ver avaliações recebidas**
+  Critério de pronto: aluno vê o histórico de avaliações recebidas no
+  próprio dossiê (reaproveita o padrão de dossiê da Fase 10.7).
+
+- [ ] **23.4 — Testes**
+  Critério de pronto: RLS (aluno só vê as próprias avaliações; professor só
+  lança para alunos da própria escola).
+
+## Fase 24 — Graduações Coletivas + Relatórios Avançados de Evolução (consome dados das Fases 22 e 23)
+
+- [ ] **24.1 — Tela admin: graduação em lote**
+  Critério de pronto: admin seleciona múltiplos alunos + faixa destino e
+  grava graduação em lote, reaproveitando `graduation_history` (Fase 6) —
+  uma linha por aluno graduado, mesmo fluxo de auditoria das graduações
+  individuais.
+
+- [ ] **24.2 — Relatório agregado de evolução técnica**
+  Critério de pronto: relatório (por turma/período) cruzando progresso no
+  currículo técnico (Fase 22), avaliações (Fase 23) e histórico de
+  graduação (Fase 6).
+
+- [ ] **24.3 — Testes**
+  Critério de pronto: graduação em lote grava uma linha por aluno
+  selecionado e reflete no dossiê individual de cada um.
+
+## Fase 25 — Campeonatos, Eventos e Seminários
+
+- [ ] **25.1 — Migration: eventos**
+  Critério de pronto: tabela de eventos (nome, tipo campeonato/seminário/
+  evento, data, local, descrição), distinta do catálogo de eventos de
+  medalhas já existente (Fase 12) — este é sobre o evento em si (agenda/
+  divulgação), não sobre o lançamento de pontuação.
+
+- [ ] **25.2 — Tela admin: CRUD de eventos**
+  Critério de pronto: admin cadastra/edita/remove eventos.
+
+- [ ] **25.3 — Inscrição de alunos**
+  Critério de pronto: aluno pode se inscrever num evento cadastrado; admin
+  vê lista de inscritos.
+
+- [ ] **25.4 — Integração com ranking/medalhas (Fase 12)**
+  Critério de pronto: ao registrar resultado de um evento (ex: campeonato),
+  possível gerar lançamento de medalha já aprovado para o(s) aluno(s)
+  participante(s), sem passar pela fila de aprovação (equivalente ao
+  lançamento direto por professor/admin já existente na Fase 12).
+
+- [ ] **25.5 — Testes**
+  Critério de pronto: CRUD restrito a admin/professor, inscrição restrita
+  ao próprio aluno, integração com medalhas gera lançamento correto.
+
+## Fase 26 — Multiunidade com Telas Próprias
+
+`units` já existe como tabela desde a Fase 1 (FK já presente em
+`students`/`leads`/`classes` conforme migrations), mas hoje toda escola
+opera com 1 unidade só na prática — nenhuma tela tem seletor/filtro de
+unidade (confirmado por auditoria em 2026-08-03). Esta fase é sobretudo
+uma auditoria + retrofit de telas existentes, não uma feature nova
+isolada.
+
+- [ ] **26.1 — Auditoria de telas/queries single-unit**
+  Critério de pronto: levantamento (lista no próprio TASK.md, nesta
+  subtarefa) de todas as telas/queries que hoje ignoram `unit_id` e
+  precisam de filtro por unidade (chamada, turmas, financeiro, dashboards,
+  relatórios).
+
+- [ ] **26.2 — Seletor de unidade global**
+  Critério de pronto: seletor de unidade no layout admin (contexto/estado
+  global), persistido por sessão, escondido automaticamente quando a
+  escola só tem 1 unidade (mesmo padrão de "esconder filtro quando não há
+  o que filtrar" já usado no filtro de professor da Fase 17.3).
+
+- [ ] **26.3 — Retrofit de RLS/queries por unidade**
+  Critério de pronto: telas levantadas na 26.1 passam a filtrar por
+  `unit_id` selecionado, com RLS reforçando `school_id` (já existente) sem
+  quebrar o comportamento de escola com 1 unidade só.
+
+- [ ] **26.4 — Dashboards/relatórios multiunidade**
+  Critério de pronto: dashboards existentes ganham opção de visão agregada
+  (todas as unidades) ou por unidade específica.
+
+- [ ] **26.5 — Testes**
+  Critério de pronto: dados de uma unidade não vazam para outra unidade da
+  mesma escola nas telas retrofitadas.
+
+## Fase 27 — White Label
+
+- [ ] **27.1 — Migration: branding por escola**
+  Critério de pronto: campos de branding em `schools` (logo, cor primária,
+  nome de exibição — confirmar quais já existem antes de duplicar
+  colunas), RLS já coberta pelo padrão existente de `schools`.
+
+- [ ] **27.2 — Tela admin: configurar branding**
+  Critério de pronto: admin configura logo/cor primária da própria escola.
+
+- [ ] **27.3 — Aplicação dinâmica do branding**
+  Critério de pronto: cor primária e logo configurados refletem no layout/
+  tema da aplicação para usuários daquela escola (login, sidebar, landing
+  pública da Fase 11).
+
+- [ ] **27.4 — Domínio customizado (pesquisa de viabilidade)**
+  Critério de pronto: viabilidade técnica de domínio próprio por escola via
+  Vercel registrada em `docs/DECISIONS.md`, com decisão do usuário sobre
+  seguir ou não — não implementar sem essa decisão prévia.
+
+- [ ] **27.5 — Testes**
+  Critério de pronto: branding de uma escola não vaza para outra.
+
+## Fase 28 — Análise de Evasão/Frequência (heurística, sem ML/LLM)
+
+- [ ] **28.1 — Definição das regras de risco**
+  Critério de pronto: regras documentadas (ex: queda de frequência acima de
+  X% em Y semanas comparado à média do aluno; atraso de pagamento acima de
+  N dias) confirmadas com o usuário antes de implementar.
+
+- [ ] **28.2 — Job de cálculo de score de risco**
+  Critério de pronto: job periódico calcula um indicador de risco por
+  aluno com base nas regras da 28.1, salvo para consulta rápida (sem
+  recalcular a cada acesso à tela).
+
+- [ ] **28.3 — Tela admin: alunos em risco**
+  Critério de pronto: lista de alunos sinalizados com o motivo específico
+  (frequência ou pagamento) que disparou o indicador.
+
+- [ ] **28.4 — Testes**
+  Critério de pronto: regras da 28.1 cobertas por teste (aluno que deveria/
+  não deveria ser sinalizado em cada cenário).
+
+## Fase 29 — Marketplace (depende da Fase 19, gateway de pagamento)
+
+- [ ] **29.1 — Migration: catálogo de produtos e pedidos**
+  Critério de pronto: tabelas de produtos (nome, preço, estoque opcional) e
+  pedidos (aluno, itens, status), RLS por escola.
+
+- [ ] **29.2 — Tela: catálogo e carrinho**
+  Critério de pronto: aluno navega pelo catálogo de produtos da própria
+  escola e monta um carrinho.
+
+- [ ] **29.3 — Checkout via gateway (Fase 19)**
+  Critério de pronto: finalização do pedido gera cobrança via Asaas
+  (reaproveita `lib/asaas/client.ts` da Fase 19.2).
+
+- [ ] **29.4 — Testes**
+  Critério de pronto: pedido só é criado após cobrança confirmada (ou com
+  status pendente rastreável), RLS restringe pedidos ao próprio aluno e aos
+  admins da escola.
+
+## Fase 30 — Catraca Física (exploratória, sem fabricante decidido)
+
+- [ ] **30.1 — Decisão de fabricante/protocolo**
+  Critério de pronto: usuário decide fabricante/protocolo de catraca antes
+  de qualquer subtarefa técnica ser adicionada aqui — sem essa decisão, não
+  há como planejar migrations/integração.
+
+## Fase 31 — App Nativo (exploratória, sem abordagem decidida)
+
+- [ ] **31.1 — Decisão de abordagem (PWA empacotado vs nativo de verdade)**
+  Critério de pronto: usuário decide entre empacotar o PWA atual
+  (Capacitor/Expo) ou iniciar um projeto nativo separado (React Native/
+  Flutter) antes de qualquer subtarefa técnica ser adicionada aqui.
