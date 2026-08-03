@@ -3068,13 +3068,38 @@ forte):
   confirmou a constraint e os tipos — removido logo depois, sem dado
   residual.
 
-- [ ] **19.2 — Client Asaas**
+- [x] **19.2 — Client Asaas**
   Critério de pronto: `lib/asaas/client.ts` com funções para criar cliente
   (`createAsaasCustomer`), criar cobrança (`createAsaasCharge`, pix/boleto/
   cartão) e consultar status, seguindo o mesmo padrão de erro-ausência-de-
   config de `lib/evolution/client.ts`/`lib/email/client.ts` (retorno
   gracioso, sem lançar exceção, quando `ASAAS_API_KEY` não está
   configurada).
+  `getAsaasConfig()` (privado) lê `ASAAS_API_KEY`/`ASAAS_ENV`
+  (`sandbox`/`production`, default `sandbox`) e resolve a base URL;
+  `asaasFetch<T>()` (privado, genérico) centraliza o `fetch` com o header
+  `access_token` do Asaas e o parse de erro, evitando repetir a checagem
+  de config e o parsing de erro em cada uma das três funções exportadas.
+  `createAsaasCharge` busca o copia-e-cola do Pix num segundo request
+  (`/payments/{id}/pixQrCode`, endpoint separado do Asaas) só quando
+  `billingType = 'PIX'`; se esse segundo request falhar, não desfaz a
+  cobrança já criada — devolve sem `pixPayload`, com `invoiceUrl` como
+  alternativa. `mapAsaasStatus` (exportada) reduz os vários status brutos
+  do Asaas (`RECEIVED`/`CONFIRMED`/`RECEIVED_IN_CASH`/`OVERDUE`/
+  `REFUNDED`/etc) para o enum `gateway_status` da Fase 19.1
+  (`pending`/`confirmed`/`overdue`/`refunded`) — exportada à parte porque
+  o webhook da Fase 19.3 vai precisar do mesmo mapeamento, sem duplicar a
+  lógica.
+  Verificado com `tsc --noEmit`, `eslint .` e `npm test` (90 testes, sem
+  regressão) limpos, e um script manual (`tsx`, removido depois) chamando
+  as três funções sem `ASAAS_API_KEY` configurada (não há chave real
+  neste ambiente — mesma limitação já registrada para Evolution API/Resend
+  em fases anteriores): todas retornaram `{ error: ... }` graciosamente,
+  sem lançar exceção; `mapAsaasStatus` conferido para os casos
+  confirmado/vencido/estornado/pendente e um status desconhecido (cai em
+  `pending` por padrão). Chamada HTTP real ao Asaas não pôde ser
+  verificada ponta a ponta neste ambiente por falta de credencial —
+  fica para quando houver uma chave de sandbox configurada.
 
 - [ ] **19.3 — Webhook de confirmação de pagamento**
   Critério de pronto: rota de API (`app/api/webhooks/asaas/route.ts`)
